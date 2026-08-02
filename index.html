@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Arabic Font (Cairo & Tajawal) -->
+    <!-- Arabic Font (Cairo) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -37,21 +37,10 @@
             background-color: #120f0e;
             color: #f3f4f6;
         }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #120f0e;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #3a322d;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #d4af37;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #120f0e; }
+        ::-webkit-scrollbar-thumb { background: #3a322d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
         .wood-pattern {
             background-color: #181412;
             background-image: radial-gradient(#261f1c 1px, transparent 0);
@@ -61,10 +50,9 @@
 </head>
 <body class="wood-pattern min-h-screen pb-24 text-gray-100 flex flex-col justify-between select-none">
 
-    <!-- Header & Hero Section -->
+    <!-- Header Section -->
     <header class="relative bg-gradient-to-b from-brandCard via-brandDark to-transparent pt-6 pb-4 px-4 border-b border-gold/20">
         <div class="max-w-4xl mx-auto text-center">
-            <!-- Brand Logo & Title -->
             <div class="inline-flex flex-col items-center justify-center mb-3">
                 <div class="w-20 h-20 rounded-full border-2 border-gold bg-black/60 flex items-center justify-center shadow-lg shadow-gold/10 mb-2 relative">
                     <i class="fa-solid font-sharp fa-fire-burner text-3xl text-gold"></i>
@@ -76,7 +64,6 @@
                 <p class="text-xs text-amber-200/80 font-semibold tracking-wider">ملحمة ومعجنات</p>
             </div>
 
-            <!-- Call Banner -->
             <div class="bg-gradient-to-r from-brandRed via-brandRedDark to-brandRed border border-gold/40 rounded-xl p-3 max-w-md mx-auto shadow-xl flex items-center justify-between px-5 my-3">
                 <div class="text-right">
                     <p class="text-xs text-amber-100/90 font-medium">مستعدون لأي طلبات وحفلات</p>
@@ -90,7 +77,6 @@
                 </a>
             </div>
 
-            <!-- Search Bar -->
             <div class="relative max-w-md mx-auto mt-4">
                 <input type="text" id="searchInput" placeholder="ابحث عن وجبتك المفضلة..." 
                     class="w-full bg-black/50 border border-gold/30 rounded-full py-2.5 px-10 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-gold transition shadow-inner">
@@ -102,7 +88,7 @@
         </div>
     </header>
 
-    <!-- Category Tabs Navigation -->
+    <!-- Navigation Tabs -->
     <nav class="sticky top-0 z-30 bg-brandDark/95 backdrop-blur border-y border-gold/20 py-2.5 px-3 shadow-md">
         <div class="max-w-4xl mx-auto flex items-center justify-start md:justify-center gap-2 overflow-x-auto no-scrollbar scroll-smooth px-1" id="categoryTabs">
             <button onclick="filterCategory('all')" class="cat-btn active bg-gold text-brandDark font-bold px-4 py-1.5 rounded-full text-xs whitespace-nowrap transition shadow">
@@ -120,7 +106,7 @@
         </div>
     </nav>
 
-    <!-- Main Content Menu Items -->
+    <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
         <!-- Section: Pizza -->
         <section id="sec-pizza" class="menu-section mb-10">
@@ -129,7 +115,7 @@
                     <i class="fa-solid fa-pizza-slice"></i>
                 </div>
                 <h2 class="text-xl font-extrabold text-gold tracking-wide">قسم البيتزا</h2>
-                <span class="text-xs text-gray-400 font-normal">عجينة هشّة مع أغنى المكونات</span>
+                <span class="text-xs text-gray-400 font-normal">متوفرة بثلاثة أحجام (صغير - وسط - كبير)</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="pizza-container"></div>
         </section>
@@ -158,7 +144,6 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="fatayer-container"></div>
         </section>
 
-        <!-- No Results Message -->
         <div id="noResults" class="hidden text-center py-12">
             <i class="fa-solid fa-cookie-bite text-4xl text-gray-600 mb-3"></i>
             <p class="text-lg text-gray-400 font-bold">عذراً، لم نجد أي وجبة تطابق بحثك</p>
@@ -166,8 +151,8 @@
         </div>
     </main>
 
-    <!-- Bottom Floating Cart Bar -->
-    <div id="cartBar" class="fixed bottom-0 left-0 right-0 z-40 bg-brandCard/95 border-t border-gold/40 p-3 shadow-2xl backdrop-blur transform transition-transform duration-300">
+    <!-- Bottom Cart Bar -->
+    <div id="cartBar" class="fixed bottom-0 left-0 right-0 z-40 bg-brandCard/95 border-t border-gold/40 p-3 shadow-2xl backdrop-blur">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="relative">
@@ -197,7 +182,6 @@
     <!-- Cart Modal -->
     <div id="cartModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
         <div class="bg-brandCard border border-gold/40 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
-            <!-- Modal Header -->
             <div class="bg-gradient-to-r from-brandRedDark to-brandCard p-4 border-b border-gold/30 flex justify-between items-center">
                 <div class="flex items-center gap-2 text-gold">
                     <i class="fa-solid fa-receipt text-lg"></i>
@@ -208,27 +192,22 @@
                 </button>
             </div>
 
-            <!-- Modal Content (Items List) -->
-            <div id="cartItemsList" class="p-4 overflow-y-auto flex-grow divide-y divide-gray-800">
-                <!-- Cart items inserted dynamically -->
-            </div>
+            <div id="cartItemsList" class="p-4 overflow-y-auto flex-grow divide-y divide-gray-800"></div>
 
-            <!-- Empty Cart State in Modal -->
             <div id="emptyCartView" class="py-12 text-center">
                 <i class="fa-solid fa-cart-flatbed text-4xl text-gray-600 mb-3"></i>
                 <p class="text-gray-400 text-sm">سلتك فارغة حالياً. قم بطلب بعض الأصناف اللذيذة!</p>
             </div>
 
-            <!-- Modal Footer & Actions -->
             <div class="p-4 border-t border-gold/20 bg-black/40 space-y-3">
                 <div class="flex justify-between items-center text-sm">
-                    <span class="text-gray-400">إجمالي عدد القطع:</span>
+                    <span class="text-gray-400">إجمالي الطلب:</span>
                     <span id="modalTotalItems" class="font-bold text-gold">0 قطعة</span>
                 </div>
                 
                 <div>
                     <label class="text-xs text-gray-400 block mb-1">ملاحظات الإضافة (اختياري):</label>
-                    <input type="text" id="orderNotes" placeholder="مثال: بدون بصل / استواء زائد / زيادة كاتشب..." class="w-full bg-black/60 border border-gray-700 rounded-lg p-2 text-xs text-gray-200 focus:outline-none focus:border-gold">
+                    <input type="text" id="orderNotes" placeholder="مثال: بدون بصل / استواء زائد..." class="w-full bg-black/60 border border-gray-700 rounded-lg p-2 text-xs text-gray-200 focus:outline-none focus:border-gold">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 pt-1">
@@ -245,83 +224,87 @@
         </div>
     </div>
 
-    <!-- Footer Information -->
     <footer class="text-center py-6 px-4 border-t border-gold/10 text-xs text-gray-500">
         <p class="mb-1">العسسي - ملحمة ومعجنات طازجة يومياً</p>
         <p class="text-gray-600">للتواصـل والطلبات: <span class="text-gold dir-ltr inline-block font-mono">0942568502</span></p>
     </footer>
 
-    <!-- JavaScript Data & Functionality -->
     <script>
-        // Menu Items Data directly extracted from the menu image
+        // أسعار الأحجام الموحدة للبيتزا العادية
+        const DEFAULT_PIZZA_SIZES = {
+            small: { label: 'صغير', price: 30000 },
+            medium: { label: 'وسط', price: 60000 },
+            large: { label: 'كبير', price: 120000 }
+        };
+
         const menuData = [
             // Pizza Section
-            { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'خلطة العسسي الفاخرة المبتكرة', icon: 'fa-pizza-slice' },
-            { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice' },
-            { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة', icon: 'fa-pizza-slice' },
-            { id: 'p4', name: 'بيتزا جبنة مكس', category: 'pizza', desc: 'مزيج فاخر من أجود أنواع الأجبان', icon: 'fa-pizza-slice' },
-            { id: 'p5', name: 'بيتزا دجاج', category: 'pizza', desc: 'قطع دجاج متبلة ومحمّرة مع الفلفل والجبن', icon: 'fa-pizza-slice' },
-            { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice' },
-            { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice' },
+            { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'خلطة العسسي الفاخرة المبتكرة', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p4', name: 'بيتزا جبنة مكس', category: 'pizza', desc: 'مزيج فاخر من أجود أنواع الأجبان', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p5', name: 'بيتزا دجاج', category: 'pizza', desc: 'قطع دجاج متبلة ومحمّرة مع الفلفل والجبن', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p8', name: 'بيتزا محشية الأطراف', category: 'pizza', desc: 'أطراف محشوة بالجبنة الفاخرة والغنية', icon: 'fa-pizza-slice', hasSizes: true, customSizes: { small: 50000, medium: 80000, large: 150000 } },
 
             // Meat Section
-            { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire' },
-            { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات', icon: 'fa-fire' },
-            { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية', icon: 'fa-fire' },
-            { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية بعناية', icon: 'fa-fire' },
-            { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire' },
-            { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire' },
+            { id: 'm1', name: 'كباب فروج', price: 50000, category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire' },
+            { id: 'm2', name: 'كباب لحم', price: 70000, category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات', icon: 'fa-fire' },
+            { id: 'm3', name: 'شيش طاووق', price: 55000, category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية', icon: 'fa-fire' },
+            { id: 'm4', name: 'كستا', price: 65000, category: 'meat', desc: 'كستا طازجة ومشوية بعناية', icon: 'fa-fire' },
+            { id: 'm5', name: 'شقف لحم', price: 75000, category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire' },
+            { id: 'm6', name: 'كباب بقشقوان', price: 75000, category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire' },
 
-            // Fatayer Section (Standard)
-            { id: 'f1', name: 'فطيرة جبنة', category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice' },
-            { id: 'f2', name: 'فطيرة محمرة', category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice' },
-            { id: 'f3', name: 'مناقيش زعتر', category: 'fatayer', desc: 'زعتر زيتي بلدي فاخر', icon: 'fa-bread-slice' },
-            { id: 'f4', name: 'فطيرة زيتون', category: 'fatayer', desc: 'شرائح الزيتون الأسود والأخضر', icon: 'fa-bread-slice' },
-            { id: 'f5', name: 'فطيرة كيري', category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice' },
-            { id: 'f6', name: 'فطيرة شوكلا', category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie' },
-            { id: 'f7', name: 'صفيحة شاميّة', category: 'fatayer', desc: 'صفيحة لحم بلدي بالفرن', icon: 'fa-bread-slice' },
-            { id: 'f8', name: 'بيتزا سواريه', category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice' },
-            { id: 'f9', name: 'فطيرة سجق', category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice' },
-            { id: 'f10', name: 'فطيرة شيش', category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice' },
-            { id: 'f11', name: 'فطيرة مرتديلا', category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice' },
-            { id: 'f12', name: 'فطيرة سنفورة', category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice' },
+            // Fatayer Section
+            { id: 'f1', name: 'فطيرة جبنة', price: 1500, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice' },
+            { id: 'f2', name: 'فطيرة محمرة', price: 1500, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice' },
+            { id: 'f3', name: 'مناقيش زعتر', price: 1500, category: 'fatayer', desc: 'زعتر زيتي بلدي فاخر', icon: 'fa-bread-slice' },
+            { id: 'f4', name: 'فطيرة زيتون', price: 3500, category: 'fatayer', desc: 'شرائح الزيتون الأسود والأخضر', icon: 'fa-bread-slice' },
+            { id: 'f5', name: 'فطيرة كيري', price: 4000, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice' },
+            { id: 'f6', name: 'فطيرة شوكلا', price: 4000, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie' },
+            { id: 'f7', name: 'صفيحة شاميّة', price: 7000, category: 'fatayer', desc: 'صفيحة لحم بلدي بالفرن', icon: 'fa-bread-slice' },
+            { id: 'f8', name: 'بيتزا سواريه', price: 4000, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice' },
+            { id: 'f9', name: 'فطيرة سجق', price: 4000, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice' },
+            { id: 'f10', name: 'فطيرة شيش', price: 7000, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice' },
+            { id: 'f11', name: 'فطيرة مرتديلا', price: 3000, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice' },
+            { id: 'f12', name: 'فطيرة سنفورة', price: 4000, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice' },
 
-            // Fatayer Section (With Kashkaval Cheese)
-            { id: 'f13', name: 'فطيرة قشقوان', category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese' },
-            { id: 'f14', name: 'محمرة قشقوان', category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese' },
-            { id: 'f15', name: 'سجق قشقوان', category: 'fatayer', desc: 'سجق طازج مع قشقوان ذائب', icon: 'fa-cheese' },
-            { id: 'f16', name: 'شيش قشقوان', category: 'fatayer', desc: 'شيش دجاج محمر مع القشقوان', icon: 'fa-cheese' },
-            { id: 'f17', name: 'مرتديلا قشقوان', category: 'fatayer', desc: 'مرتديلا غنية بجبنة القشقوان', icon: 'fa-cheese' },
-            { id: 'f18', name: 'زعتر قشقوان', category: 'fatayer', desc: 'زعتر بلدي مع جبن قشقوان', icon: 'fa-cheese' },
-            { id: 'f19', name: 'زيتون قشقوان', category: 'fatayer', desc: 'زيتون بلدي مع القشقوان', icon: 'fa-cheese' },
+            // Fatayer Section (With Kashkaval)
+            { id: 'f13', name: 'فطيرة قشقوان', price: 4000, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese' },
+            { id: 'f14', name: 'محمرة قشقوان', price: 4000, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese' },
+            { id: 'f15', name: 'سجق قشقوان', price: 9000, category: 'fatayer', desc: 'سجق طازج مع قشقوان ذائب', icon: 'fa-cheese' },
+            { id: 'f16', name: 'شيش قشقوان', price: 7000, category: 'fatayer', desc: 'شيش دجاج محمر مع القشقوان', icon: 'fa-cheese' },
+            { id: 'f17', name: 'مرتديلا قشقوان', price: 6000, category: 'fatayer', desc: 'مرتديلا غنية بجبنة القشقوان', icon: 'fa-cheese' },
+            { id: 'f18', name: 'زعتر قشقوان', price: 4000, category: 'fatayer', desc: 'زعتر بلدي مع جبن قشقوان', icon: 'fa-cheese' },
+            { id: 'f19', name: 'زيتون قشقوان', price: 5000, category: 'fatayer', desc: 'زيتون بلدي مع القشقوان', icon: 'fa-cheese' },
         ];
 
-        // State Management
-        let cart = {};
+        let cart = {}; 
+        let pizzaSelectedSizes = {}; 
         let currentCategory = 'all';
 
-        // Initialize Render
         document.addEventListener('DOMContentLoaded', () => {
             renderMenu();
 
-            // Search Filter Listener
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase();
                 const clearBtn = document.getElementById('clearSearch');
-                
-                if (query.length > 0) {
-                    clearBtn.classList.remove('hidden');
-                } else {
-                    clearBtn.classList.add('hidden');
-                }
-                
+                if (query.length > 0) clearBtn.classList.remove('hidden');
+                else clearBtn.classList.add('hidden');
                 filterMenuItems(query);
             });
 
             document.getElementById('clearSearch').addEventListener('click', resetSearch);
         });
 
-        // Reset Search Input
+        function getPizzaPrice(item, sizeKey) {
+            if (item.customSizes && item.customSizes[sizeKey]) {
+                return item.customSizes[sizeKey];
+            }
+            return DEFAULT_PIZZA_SIZES[sizeKey].price;
+        }
+
         function resetSearch() {
             const input = document.getElementById('searchInput');
             input.value = '';
@@ -329,7 +312,6 @@
             filterMenuItems('');
         }
 
-        // Render Menu Items into Containers
         function renderMenu() {
             const pizzaContainer = document.getElementById('pizza-container');
             const meatContainer = document.getElementById('meat-container');
@@ -347,13 +329,55 @@
             });
         }
 
-        // Create HTML for a Single Food Item Card
         function createCardHTML(item) {
+            if (item.hasSizes) {
+                const currentSizeKey = pizzaSelectedSizes[item.id] || 'medium';
+                const price = getPizzaPrice(item, currentSizeKey);
+                const cartKey = `${item.id}_${currentSizeKey}`;
+                const qty = cart[cartKey] || 0;
+
+                const pSmall = getPizzaPrice(item, 'small').toLocaleString();
+                const pMed = getPizzaPrice(item, 'medium').toLocaleString();
+                const pLrg = getPizzaPrice(item, 'large').toLocaleString();
+
+                return `
+                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-xl p-3.5 flex flex-col justify-between transition shadow-md" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brandRedDark to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0 mt-1">
+                                <i class="fa-solid ${item.icon} text-xl"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-extrabold text-base text-amber-100 mb-0.5">${item.name}</h3>
+                                <p class="text-xs text-gray-400 mb-2 leading-relaxed">${item.desc}</p>
+                                
+                                <div class="flex flex-wrap items-center gap-1 mb-2 bg-black/40 p-1 rounded-lg border border-gold/20 max-w-fit">
+                                    <button onclick="selectPizzaSize('${item.id}', 'small')" class="size-btn-${item.id} text-[11px] font-bold px-2 py-0.5 rounded transition ${currentSizeKey === 'small' ? 'bg-gold text-brandDark' : 'text-gray-400 hover:text-white'}">
+                                        صغير (${pSmall} ل.س)
+                                    </button>
+                                    <button onclick="selectPizzaSize('${item.id}', 'medium')" class="size-btn-${item.id} text-[11px] font-bold px-2 py-0.5 rounded transition ${currentSizeKey === 'medium' ? 'bg-gold text-brandDark' : 'text-gray-400 hover:text-white'}">
+                                        وسط (${pMed} ل.س)
+                                    </button>
+                                    <button onclick="selectPizzaSize('${item.id}', 'large')" class="size-btn-${item.id} text-[11px] font-bold px-2 py-0.5 rounded transition ${currentSizeKey === 'large' ? 'bg-gold text-brandDark' : 'text-gray-400 hover:text-white'}">
+                                        كبير (${pLrg} ل.س)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-800 mt-1">
+                            <span id="price-display-${item.id}" class="text-xs text-gold font-bold">${price.toLocaleString()} ل.س</span>
+                            <div id="controls-${item.id}">
+                                ${renderQuantityControls(cartKey, qty, item.id)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
             const qty = cart[item.id] || 0;
             const isFatayer = item.category === 'fatayer';
 
             if (isFatayer) {
-                // Compact Card for Fatayer
                 return `
                     <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-xl p-3 flex flex-col justify-between transition shadow-md relative group" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                         <div>
@@ -364,7 +388,7 @@
                             <p class="text-[11px] text-gray-400 line-clamp-1">${item.desc}</p>
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-800 flex items-center justify-between">
-                            <span class="text-[10px] text-gold/80 font-medium">حسب الطلب</span>
+                            <span class="text-xs text-gold font-bold">${item.price.toLocaleString()} ل.س</span>
                             <div class="flex items-center gap-1.5" id="controls-${item.id}">
                                 ${renderQuantityControls(item.id, qty)}
                             </div>
@@ -373,7 +397,6 @@
                 `;
             }
 
-            // Larger Card for Pizza & Meat
             return `
                 <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-xl p-3.5 flex items-center justify-between transition shadow-md" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                     <div class="flex items-center gap-3">
@@ -382,6 +405,7 @@
                         </div>
                         <div>
                             <h3 class="font-extrabold text-base text-amber-100 mb-0.5">${item.name}</h3>
+                            <span class="text-xs text-gold font-bold block mb-1">${item.price.toLocaleString()} ل.س</span>
                             <p class="text-xs text-gray-400 leading-relaxed">${item.desc}</p>
                         </div>
                     </div>
@@ -392,71 +416,117 @@
             `;
         }
 
-        // Generate Item Quantity Controls (+ / - or Add Button)
-        function renderQuantityControls(id, qty) {
+        function selectPizzaSize(itemId, sizeKey) {
+            pizzaSelectedSizes[itemId] = sizeKey;
+            
+            const item = menuData.find(i => i.id === itemId);
+            const priceDisplay = document.getElementById(`price-display-${itemId}`);
+            const controlsContainer = document.getElementById(`controls-${itemId}`);
+            
+            const currentPrice = getPizzaPrice(item, sizeKey);
+
+            if (priceDisplay) {
+                priceDisplay.innerText = `${currentPrice.toLocaleString()} ل.س`;
+            }
+
+            const cartKey = `${itemId}_${sizeKey}`;
+            const qty = cart[cartKey] || 0;
+            if (controlsContainer) {
+                controlsContainer.innerHTML = renderQuantityControls(cartKey, qty, itemId);
+            }
+
+            const buttons = document.querySelectorAll(`.size-btn-${itemId}`);
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-gold', 'text-brandDark');
+                btn.classList.add('text-gray-400');
+            });
+            event.currentTarget.classList.remove('text-gray-400');
+            event.currentTarget.classList.add('bg-gold', 'text-brandDark');
+        }
+
+        function renderQuantityControls(cartKey, qty, itemId = null) {
+            const targetId = itemId ? itemId : cartKey;
             if (qty > 0) {
                 return `
                     <div class="flex items-center bg-black/60 border border-gold/40 rounded-lg p-0.5 shadow">
-                        <button onclick="updateQty('${id}', -1)" class="w-7 h-7 bg-brandRed hover:bg-brandRedDark text-white rounded flex items-center justify-center font-bold text-xs transition active:scale-90">
+                        <button onclick="updateQty('${cartKey}', -1, '${targetId}')" class="w-7 h-7 bg-brandRed hover:bg-brandRedDark text-white rounded flex items-center justify-center font-bold text-xs transition active:scale-90">
                             <i class="fa-solid fa-minus"></i>
                         </button>
                         <span class="w-7 text-center text-xs font-black text-gold">${qty}</span>
-                        <button onclick="updateQty('${id}', 1)" class="w-7 h-7 bg-gold hover:bg-goldHover text-brandDark rounded flex items-center justify-center font-bold text-xs transition active:scale-90">
+                        <button onclick="updateQty('${cartKey}', 1, '${targetId}')" class="w-7 h-7 bg-gold hover:bg-goldHover text-brandDark rounded flex items-center justify-center font-bold text-xs transition active:scale-90">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
                 `;
             }
             return `
-                <button onclick="updateQty('${id}', 1)" class="bg-gradient-to-r from-gold to-amber-500 hover:from-amber-500 hover:to-gold text-brandDark font-extrabold text-xs px-3 py-1.5 rounded-lg border border-gold/50 shadow transition-transform active:scale-95 flex items-center gap-1">
+                <button onclick="updateQty('${cartKey}', 1, '${targetId}')" class="bg-gradient-to-r from-gold to-amber-500 hover:from-amber-500 hover:to-gold text-brandDark font-extrabold text-xs px-3 py-1.5 rounded-lg border border-gold/50 shadow transition-transform active:scale-95 flex items-center gap-1">
                     <i class="fa-solid fa-plus text-[10px]"></i>
                     <span>أضف</span>
                 </button>
             `;
         }
 
-        // Update Item Quantity in Cart
-        function updateQty(id, change) {
-            const current = cart[id] || 0;
+        function updateQty(cartKey, change, itemId) {
+            const current = cart[cartKey] || 0;
             const updated = current + change;
 
             if (updated <= 0) {
-                delete cart[id];
+                delete cart[cartKey];
             } else {
-                cart[id] = updated;
+                cart[cartKey] = updated;
             }
 
-            // Update DOM control for specific item
-            const container = document.getElementById(`controls-${id}`);
+            const container = document.getElementById(`controls-${itemId}`);
             if (container) {
-                container.innerHTML = renderQuantityControls(id, cart[id] || 0);
+                container.innerHTML = renderQuantityControls(cartKey, cart[cartKey] || 0, itemId);
             }
 
             updateCartSummary();
             renderCartModalList();
         }
 
-        // Update Bottom Floating Cart UI
-        function updateCartSummary() {
-            let totalItems = 0;
-            for (let id in cart) {
-                totalItems += cart[id];
+        function getItemDetailsFromCartKey(cartKey) {
+            if (cartKey.includes('_')) {
+                const [id, sizeKey] = cartKey.split('_');
+                const item = menuData.find(i => i.id === id);
+                const price = getPizzaPrice(item, sizeKey);
+                const sizeLabel = DEFAULT_PIZZA_SIZES[sizeKey].label;
+                return {
+                    name: `${item.name} (${sizeLabel})`,
+                    price: price,
+                    category: item.category
+                };
+            } else {
+                const item = menuData.find(i => i.id === cartKey);
+                return {
+                    name: item.name,
+                    price: item.price,
+                    category: item.category
+                };
             }
-
-            const cartBadge = document.getElementById('cartBadge');
-            const cartCountText = document.getElementById('cartCountText');
-            const modalTotalItems = document.getElementById('modalTotalItems');
-
-            cartBadge.innerText = totalItems;
-            cartCountText.innerText = `${totalItems} صنف (قطع)`;
-            modalTotalItems.innerText = `${totalItems} قطعة`;
         }
 
-        // Category Filter Function
+        function updateCartSummary() {
+            let totalItems = 0;
+            let totalPrice = 0;
+
+            for (let cartKey in cart) {
+                const details = getItemDetailsFromCartKey(cartKey);
+                if (details) {
+                    totalItems += cart[cartKey];
+                    totalPrice += details.price * cart[cartKey];
+                }
+            }
+
+            document.getElementById('cartBadge').innerText = totalItems;
+            document.getElementById('cartCountText').innerText = `${totalItems} صنف (${totalPrice.toLocaleString()} ل.س)`;
+            document.getElementById('modalTotalItems').innerText = `${totalItems} قطعة - الإجمالي: ${totalPrice.toLocaleString()} ل.س`;
+        }
+
         function filterCategory(cat) {
             currentCategory = cat;
 
-            // Update Tab Active Styles
             document.querySelectorAll('#categoryTabs .cat-btn').forEach(btn => {
                 btn.classList.remove('active', 'bg-gold', 'text-brandDark', 'font-bold');
                 btn.classList.add('bg-brandCard', 'text-gray-300', 'font-semibold');
@@ -465,7 +535,6 @@
             event.currentTarget.classList.remove('bg-brandCard', 'text-gray-300');
             event.currentTarget.classList.add('active', 'bg-gold', 'text-brandDark', 'font-bold');
 
-            // Show/Hide Sections
             const secPizza = document.getElementById('sec-pizza');
             const secMeat = document.getElementById('sec-meat');
             const secFatayer = document.getElementById('sec-fatayer');
@@ -488,13 +557,11 @@
                 secFatayer.classList.remove('hidden');
             }
 
-            // Reset Search Input on category change
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearch').classList.add('hidden');
             document.getElementById('noResults').classList.add('hidden');
         }
 
-        // Search Items by Query Text
         function filterMenuItems(query) {
             const cards = document.querySelectorAll('.menu-card');
             let visibleCount = 0;
@@ -522,7 +589,6 @@
             }
         }
 
-        // Toggle Cart Modal
         function toggleCartModal() {
             const modal = document.getElementById('cartModal');
             if (modal.classList.contains('hidden')) {
@@ -535,15 +601,14 @@
             }
         }
 
-        // Render Cart Items List inside Modal
         function renderCartModalList() {
             const container = document.getElementById('cartItemsList');
             const emptyView = document.getElementById('emptyCartView');
 
             container.innerHTML = '';
 
-            const itemIds = Object.keys(cart);
-            if (itemIds.length === 0) {
+            const cartKeys = Object.keys(cart);
+            if (cartKeys.length === 0) {
                 emptyView.classList.remove('hidden');
                 container.classList.add('hidden');
                 return;
@@ -552,24 +617,27 @@
             emptyView.classList.add('hidden');
             container.classList.remove('hidden');
 
-            itemIds.forEach(id => {
-                const item = menuData.find(i => i.id === id);
-                if (!item) return;
+            cartKeys.forEach(cartKey => {
+                const details = getItemDetailsFromCartKey(cartKey);
+                if (!details) return;
 
-                const qty = cart[id];
+                const qty = cart[cartKey];
+                const itemTotal = details.price * qty;
+                const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+
                 const row = document.createElement('div');
                 row.className = 'py-3 flex items-center justify-between gap-2';
                 row.innerHTML = `
                     <div>
-                        <h4 class="font-bold text-sm text-amber-100">${item.name}</h4>
-                        <span class="text-[11px] text-gray-400">${item.category === 'pizza' ? 'قسم البيتزا' : item.category === 'meat' ? 'قسم اللحوم' : 'قسم الفطائر'}</span>
+                        <h4 class="font-bold text-sm text-amber-100">${details.name}</h4>
+                        <span class="text-[11px] text-gold font-semibold">${details.price.toLocaleString()} ل.س × ${qty} = ${itemTotal.toLocaleString()} ل.س</span>
                     </div>
                     <div class="flex items-center gap-1.5 bg-black/50 border border-gray-700 rounded-lg p-1">
-                        <button onclick="updateQty('${item.id}', -1)" class="w-6 h-6 bg-brandRed text-white rounded flex items-center justify-center font-bold text-xs">
+                        <button onclick="updateQty('${cartKey}', -1, '${itemId}')" class="w-6 h-6 bg-brandRed text-white rounded flex items-center justify-center font-bold text-xs">
                             <i class="fa-solid fa-minus"></i>
                         </button>
                         <span class="w-6 text-center text-xs font-bold text-gold">${qty}</span>
-                        <button onclick="updateQty('${item.id}', 1)" class="w-6 h-6 bg-gold text-brandDark rounded flex items-center justify-center font-bold text-xs">
+                        <button onclick="updateQty('${cartKey}', 1, '${itemId}')" class="w-6 h-6 bg-gold text-brandDark rounded flex items-center justify-center font-bold text-xs">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -578,24 +646,28 @@
             });
         }
 
-        // Format and Send Order to WhatsApp
         function sendOrderWhatsApp() {
-            const itemIds = Object.keys(cart);
-            if (itemIds.length === 0) {
+            const cartKeys = Object.keys(cart);
+            if (cartKeys.length === 0) {
                 alert('سلتك فارغة! يرجى اختيار بعض الوجبات أولاً قبل إرسال الطلب.');
                 return;
             }
 
             let message = `*طلب جديد من منيو العسسي الإلكتروني:*%0A%0A`;
             let counter = 1;
+            let totalPrice = 0;
 
-            itemIds.forEach(id => {
-                const item = menuData.find(i => i.id === id);
-                if (item) {
-                    message += `${counter}. *${item.name}* × (${cart[id]})%0A`;
+            cartKeys.forEach(cartKey => {
+                const details = getItemDetailsFromCartKey(cartKey);
+                if (details) {
+                    const itemTotal = details.price * cart[cartKey];
+                    totalPrice += itemTotal;
+                    message += `${counter}. *${details.name}* × (${cart[cartKey]}) = ${itemTotal.toLocaleString()} ل.س%0A`;
                     counter++;
                 }
             });
+
+            message += `%0A*المجموع الكلي:* ${totalPrice.toLocaleString()} ل.س%0A`;
 
             const notes = document.getElementById('orderNotes').value.trim();
             if (notes) {
@@ -604,7 +676,7 @@
 
             message += `%0A*يرجى تأكيد الطلب والتجهيز. شكراً لكم!*`;
 
-            const phone = "963942568502"; // WhatsApp international format for Syria (+963)
+            const phone = "963942568502";
             const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
 
             window.open(whatsappUrl, '_blank');
