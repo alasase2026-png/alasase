@@ -65,16 +65,8 @@
 </head>
 <body class="min-h-screen pb-28 text-gray-100 flex flex-col justify-between select-none">
 
-    <!-- زر خاص لك لإظهار لوحة التحكم السريعة -->
-    <div class="bg-gold/10 border-b border-gold/30 py-2 px-4 text-center">
-        <button onclick="requestAdminAccess()" class="text-xs text-gold font-bold hover:underline flex items-center justify-center gap-1.5 mx-auto">
-            <i class="fa-solid fa-sliders"></i>
-            <span>لوحة التحكم السريعة (إدارة توفر الوجبات)</span>
-        </button>
-    </div>
-
     <!-- Header Section -->
-    <header class="relative bg-brandCard pt-6 pb-6 px-4 border-b border-gold/20 shadow-2xl">
+    <header class="relative bg-brandCard pt-8 pb-6 px-4 border-b border-gold/20 shadow-2xl">
         <div class="max-w-4xl mx-auto text-center">
             
             <!-- الشعار -->
@@ -141,8 +133,8 @@
             <!-- ShamCash Card Section -->
             <div class="bg-black/70 border border-gold/30 rounded-2xl p-3.5 max-w-md mx-auto my-3 shadow-xl">
                 <div class="flex items-center justify-center gap-2 text-gold font-bold text-xs mb-2 border-b border-gold/20 pb-2">
-                    <i class="fa-solid fa-wallet text-sm"></i>
-                    <span>يتوفر الدفع النقدي او عن طريق شام كاش.</span>
+                    <i class="fa-solid fa-qrcode text-sm"></i>
+                    <span>الدفع الإلكتروني عبر شام كاش (ShamCash)</span>
                 </div>
                 <div class="flex items-center gap-3">
                     <div onclick="openImageModal('IMG-20260729-WA0025.jpg')" class="bg-white p-1 rounded-xl border border-gold/50 shrink-0 cursor-pointer hover:scale-105 transition shadow" title="انقر لتكبير باركود شام كاش">
@@ -259,36 +251,6 @@
         </div>
     </div>
 
-    <!-- نافذة لوحة التحكم السريعة -->
-    <div id="adminModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="bg-brandCard border border-gold/50 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
-            <div class="bg-gradient-to-r from-red-950 to-brandCard p-4 border-b border-gold/30 flex justify-between items-center">
-                <div class="flex items-center gap-2 text-gold">
-                    <i class="fa-solid fa-sliders text-lg"></i>
-                    <h3 class="font-black text-base text-white">لوحة التحكم السريعة بالوجبات</h3>
-                </div>
-                <button onclick="toggleAdminModal()" class="text-gray-400 hover:text-white p-1.5">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-            
-            <div class="p-3 bg-black/40 border-b border-gold/20 text-center">
-                <p class="text-xs text-amber-200">اضغط على حالة الوجبة لتبديلها بين (متاح 🟢) و (نفدت 🔴) وسيتم حفظها فوراً:</p>
-            </div>
-
-            <div id="adminItemsList" class="p-4 overflow-y-auto flex-grow divide-y divide-gray-800 space-y-2"></div>
-
-            <div class="p-4 border-t border-gold/20 bg-black/60 text-center flex items-center justify-between gap-3">
-                <button onclick="resetAllAvailability()" class="bg-red-900/60 hover:bg-red-900 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition">
-                    إعادة إتاحة الكل 🔄
-                </button>
-                <button onclick="toggleAdminModal()" class="bg-gold hover:bg-goldHover text-brandDark font-black py-2.5 px-6 rounded-xl text-xs shadow transition">
-                    إغلاق لوحة التحكم
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Cart Modal -->
     <div id="cartModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="bg-brandCard border border-gold/40 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
@@ -375,7 +337,7 @@
         </div>
 
         <p class="text-gold text-xs font-bold"><i class="fa-solid fa-motorcycle ml-1"></i> يوجد خدمة توصيل الطلبات</p>
-        <p class="text-amber-200/90 text-xs font-semibold"><i class="fa-solid fa-wallet text-gold ml-1"></i> يتوفر الدفع النقدي او عن طريق شام كاش.</p>
+        <p class="text-amber-200/90 text-xs font-semibold"><i class="fa-solid fa-wallet text-gold ml-1"></i> نقبل الدفع عبر شام كاش</p>
         
         <!-- Social Media Footer Buttons -->
         <div class="flex items-center justify-center gap-2.5 pt-1">
@@ -400,7 +362,6 @@
 
     <script>
         const OLD_CURRENCY_MULTIPLIER = 100;
-        const ADMIN_PASSWORD = "123";
 
         const ASASI_PIZZA_SIZES = {
             small: { label: 'صغير', price: 500 },
@@ -414,8 +375,7 @@
             large: { label: 'كبير', price: 1200 }
         };
 
-        // قائمة الوجبات الأساسية
-        const rawMenuData = [
+        const menuData = [
             // Pizza Section
             { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك', icon: 'fa-pizza-slice', image: 'IMG_20260725_145819.jpg', hasSizes: true, customSizes: ASASI_PIZZA_SIZES },
             { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true },
@@ -457,42 +417,12 @@
             { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese' },
         ];
 
-        let menuData = [];
         let cart = {}; 
         let pizzaSelectedSizes = {}; 
         let currentCategory = 'all';
 
-        // تحميل حالة التوفر المحفوظة من متصفحك
-        function loadMenuWithAvailability() {
-            const savedAvailability = localStorage.getItem('asasi_menu_availability');
-            let availabilityMap = {};
-            if (savedAvailability) {
-                try {
-                    availabilityMap = JSON.parse(savedAvailability);
-                } catch(e) {}
-            }
-
-            menuData = rawMenuData.map(item => {
-                return {
-                    ...item,
-                    available: availabilityMap[item.id] !== undefined ? availabilityMap[item.id] : true
-                };
-            });
-        }
-
-        // حفظ حالة التوفر في المتصفح بشكل دائم
-        function saveAvailabilityToStorage() {
-            let availabilityMap = {};
-            menuData.forEach(item => {
-                availabilityMap[item.id] = item.available;
-            });
-            localStorage.setItem('asasi_menu_availability', JSON.stringify(availabilityMap));
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
-            loadMenuWithAvailability();
             renderMenu();
-            renderAdminList();
 
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase();
@@ -537,27 +467,6 @@
         }
 
         function createCardHTML(item) {
-            if (item.available === false) {
-                return `
-                    <div class="menu-card bg-brandCard/60 border border-red-900/30 rounded-2xl p-4 flex flex-col justify-between opacity-60 relative overflow-hidden" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
-                        <div class="absolute top-2 left-2 bg-brandRed text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow z-10">غير متوفر حالياً</div>
-                        <div class="flex items-start gap-3.5">
-                            <div class="w-14 h-14 rounded-2xl bg-black/40 border border-gray-800 flex items-center justify-center text-gray-500 shrink-0">
-                                <i class="fa-solid ${item.icon} text-xl"></i>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-black text-base text-gray-400 mb-1">${item.name}</h3>
-                                <p class="text-xs text-gray-500 font-medium leading-relaxed">${item.desc}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between pt-3 border-t border-gray-800/80 mt-2">
-                            <span class="text-xs text-gray-500 font-black">نفدت الكمية</span>
-                            <span class="bg-gray-800 text-gray-500 font-bold text-xs px-3.5 py-1.5 rounded-xl cursor-not-allowed">غير متاح</span>
-                        </div>
-                    </div>
-                `;
-            }
-
             if (item.hasSizes) {
                 const currentSizeKey = pizzaSelectedSizes[item.id] || 'medium';
                 const price = getPizzaPrice(item, currentSizeKey);
@@ -645,68 +554,6 @@
                     </div>
                 </div>
             `;
-        }
-
-        function requestAdminAccess() {
-            const enteredPass = prompt("أدخل كلمة مرور لوحة التحكم الخاصة بك:");
-            if (enteredPass === ADMIN_PASSWORD) {
-                toggleAdminModal();
-            } else if (enteredPass !== null) {
-                alert("كلمة المرور غير صحيحة!");
-            }
-        }
-
-        function toggleAdminModal() {
-            const modal = document.getElementById('adminModal');
-            if (modal.classList.contains('hidden')) {
-                renderAdminList();
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            } else {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                renderMenu(); 
-            }
-        }
-
-        function renderAdminList() {
-            const container = document.getElementById('adminItemsList');
-            container.innerHTML = '';
-
-            menuData.forEach(item => {
-                const isAvailable = item.available !== false;
-                const row = document.createElement('div');
-                row.className = 'py-2.5 flex items-center justify-between gap-3';
-                row.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-black text-amber-100">${item.name}</span>
-                        <span class="text-[10px] text-gray-400">(${item.category})</span>
-                    </div>
-                    <button onclick="toggleItemAvailability('${item.id}')" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition ${isAvailable ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow' : 'bg-red-800 hover:bg-red-900 text-white shadow'}">
-                        ${isAvailable ? 'متاح 🟢' : 'نفد 🔴'}
-                    </button>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        function toggleItemAvailability(itemId) {
-            const item = menuData.find(i => i.id === itemId);
-            if (item) {
-                item.available = (item.available === false) ? true : false;
-                saveAvailabilityToStorage(); // حفظ التغيير فوراً في ذاكرة المتصفح
-                renderAdminList();
-            }
-        }
-
-        function resetAllAvailability() {
-            if (confirm("هل تريد إعادة إتاحة جميع الوجبات؟")) {
-                menuData.forEach(item => {
-                    item.available = true;
-                });
-                saveAvailabilityToStorage();
-                renderAdminList();
-            }
         }
 
         function selectPizzaSize(itemId, sizeKey) {
@@ -977,7 +824,7 @@
             let hasPrice = false;
 
             cartKeys.forEach(cartKey => {
-                const details = getItemDetailsFromCardKey(cartKey);
+                const details = getItemDetailsFromCartKey(cartKey);
                 if (details) {
                     if (details.price) {
                         const itemTotal = details.price * cart[cartKey];
@@ -1004,7 +851,7 @@
                 message += `%0A*طريقة الدفع المطلوبة:* 📱 شام كاش%0A`;
                 message += `*معرّف الحساب:* \`99d44072c6a3c3b1f926e0571e9c416c\`%0A`;
             } else {
-                message += `%0A*طريقة الدفع المطلوبة:* 📱 نقداً عند الاستلام%0A`;
+                message += `%0A*طريقة الدفع المطلوبة:* 💵 نقداً عند الاستلام%0A`;
             }
 
             const notes = document.getElementById('orderNotes').value.trim();
