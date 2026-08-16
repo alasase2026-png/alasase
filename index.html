@@ -43,7 +43,7 @@
         .lux-bg {
             background: linear-gradient(135deg, #181311 0%, #0d0a09 100%);
         }
-        #imageModal, #adminModal {
+        #imageModal {
             display: none;
             position: fixed;
             z-index: 100;
@@ -61,6 +61,17 @@
             border: 2px solid #e6c567;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
+        #adminModal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-28 text-gray-100 flex flex-col justify-between select-none">
@@ -77,7 +88,7 @@
                 <h1 class="text-4xl font-black text-gold tracking-wider drop-shadow-lg">العسسي</h1>
                 <p class="text-xs text-amber-200/80 font-bold tracking-widest mt-1 uppercase">ملحمة ومعجنات طازجة</p>
                 
-                <!-- قسم الإدارة بتصميم فاخر ومرتب -->
+                <!-- قسم الإدارة -->
                 <div class="mt-4 w-full max-w-sm bg-black/50 border border-gold/30 rounded-2xl p-3 shadow-inner flex flex-col items-center text-center">
                     <div class="mb-2 flex items-center justify-center gap-2">
                         <div class="h-[1px] w-12 bg-gold/30"></div>
@@ -98,7 +109,7 @@
                 </div>
 
                 <!-- زر فتح لوحة التحكم -->
-                <button onclick="toggleAdminPanel()" class="mt-3 bg-gold/20 hover:bg-gold text-gold hover:text-brandDark border border-gold/40 text-xs font-black py-2 px-4 rounded-xl transition flex items-center gap-1.5 shadow">
+                <button type="button" onclick="openAdminModal()" class="mt-3 bg-gold/20 hover:bg-gold text-gold hover:text-brandDark border border-gold/40 text-xs font-black py-2 px-5 rounded-xl transition flex items-center gap-1.5 shadow cursor-pointer">
                     <i class="fa-solid fa-sliders"></i>
                     <span>لوحة التحكم (الأسعار والحالة)</span>
                 </button>
@@ -322,14 +333,14 @@
     </div>
 
     <!-- Admin Control Panel Modal -->
-    <div id="adminModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div id="adminModal">
         <div class="bg-brandCard border border-gold/40 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div class="bg-gradient-to-r from-red-950 to-brandCard p-4.5 border-b border-gold/30 flex justify-between items-center">
                 <div class="flex items-center gap-2.5 text-gold">
                     <i class="fa-solid fa-sliders text-xl"></i>
                     <h3 class="font-black text-lg text-white">لوحة تحكم الأصناف والأسعار</h3>
                 </div>
-                <button onclick="toggleAdminPanel()" class="text-gray-400 hover:text-white p-1.5">
+                <button type="button" onclick="closeAdminModal()" class="text-gray-400 hover:text-white p-1.5 cursor-pointer">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
@@ -340,12 +351,12 @@
             </div>
 
             <div class="p-4 border-t border-gold/20 bg-black/55 flex justify-between items-center">
-                <span class="text-xs text-gray-400">التعديلات تُحفظ فوراً وتظهر للزبائن عند تحديث الصفحة</span>
+                <span class="text-xs text-gray-400">التعديلات تُحفظ وتظهر فوراً للزبائن</span>
                 <div class="flex gap-2">
-                    <button onclick="resetMenuDefaults()" class="bg-red-900/60 hover:bg-red-900 text-white font-bold py-2 px-3 rounded-xl text-xs transition">
+                    <button type="button" onclick="resetMenuDefaults()" class="bg-red-900/60 hover:bg-red-900 text-white font-bold py-2 px-3 rounded-xl text-xs transition cursor-pointer">
                         استعادة الافتراضي
                     </button>
-                    <button onclick="toggleAdminPanel()" class="bg-gold hover:bg-goldHover text-brandDark font-black py-2.5 px-6 rounded-xl text-xs shadow-lg transition">
+                    <button type="button" onclick="closeAdminModal()" class="bg-gold hover:bg-goldHover text-brandDark font-black py-2.5 px-6 rounded-xl text-xs shadow-lg transition cursor-pointer">
                         إغلاق وحفظ
                     </button>
                 </div>
@@ -365,7 +376,7 @@
     <footer class="text-center py-8 px-4 border-t border-gold/20 text-xs text-gray-400 space-y-4 bg-brandCard/60">
         <p class="font-bold text-amber-100 text-sm">العسسي - ملحمة ومعجنات طازجة يومياً</p>
         
-        <!-- قسم الإدارة في الفوتر بتصميم راقي -->
+        <!-- قسم الإدارة في الفوتر -->
         <div class="max-w-xs mx-auto bg-black/40 border border-gold/20 rounded-2xl p-2.5 flex flex-col items-center text-center shadow-inner">
             <span class="text-gold font-bold text-xs tracking-wider px-2 py-0.5 bg-gold/10 rounded-full border border-gold/25 mb-1.5">إدارة</span>
             <div class="flex items-center justify-between w-full px-2">
@@ -455,9 +466,7 @@
             { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese', available: true },
         ];
 
-        // جلب البيانات المخزنة أو استخدام الافتراضية
         let menuData = JSON.parse(localStorage.getItem('alasasi_menu_data')) || defaultMenuData;
-
         let cart = {}; 
         let pizzaSelectedSizes = {}; 
         let currentCategory = 'all';
@@ -884,19 +893,18 @@
             });
         }
 
-        // دوال لوحة التحكم ودعم التخزين المحلي
-        function toggleAdminPanel() {
+        // دوال لوحة التحكم الآمنة
+        function openAdminModal() {
+            renderAdminPanelList();
             const modal = document.getElementById('adminModal');
-            if (modal.classList.contains('hidden')) {
-                renderAdminPanelList();
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            } else {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                saveMenuToStorage(); // حفظ التعديلات نهائياً
-                renderMenu(); // إعادة رسم القائمة الرئيسية لتطبيق التعديلات الحالية
-            }
+            modal.style.display = 'flex';
+        }
+
+        function closeAdminModal() {
+            const modal = document.getElementById('adminModal');
+            modal.style.display = 'none';
+            saveMenuToStorage();
+            renderMenu();
         }
 
         function renderAdminPanelList() {
@@ -934,7 +942,7 @@
                     </div>
                     <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                         ${priceControlHtml}
-                        <button onclick="toggleItemAvailability('${item.id}')" class="px-3 py-1.5 rounded-xl text-xs font-black transition shadow ${item.available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-brandRed hover:bg-red-900 text-white'}">
+                        <button type="button" onclick="toggleItemAvailability('${item.id}')" class="px-3 py-1.5 rounded-xl text-xs font-black transition shadow cursor-pointer ${item.available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-brandRed hover:bg-red-900 text-white'}">
                             ${item.available ? '<i class="fa-solid fa-check ml-1"></i> متوفر' : '<i class="fa-solid fa-xmark ml-1"></i> نفذ'}
                         </button>
                     </div>
