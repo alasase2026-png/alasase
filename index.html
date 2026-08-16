@@ -43,7 +43,7 @@
         .lux-bg {
             background: linear-gradient(135deg, #181311 0%, #0d0a09 100%);
         }
-        #imageModal {
+        #imageModal, #adminModal {
             display: none;
             position: fixed;
             z-index: 100;
@@ -60,17 +60,6 @@
             border-radius: 16px;
             border: 2px solid #e6c567;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        }
-        .unavailable-item {
-            opacity: 0.5;
-            filter: grayscale(40%);
-            pointer-events: none;
-        }
-        .unavailable-badge {
-            display: none;
-        }
-        .unavailable-item .unavailable-badge {
-            display: inline-block;
         }
     </style>
 </head>
@@ -107,6 +96,12 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- زر فتح لوحة التحكم -->
+                <button onclick="toggleAdminPanel()" class="mt-3 bg-gold/20 hover:bg-gold text-gold hover:text-brandDark border border-gold/40 text-xs font-black py-2 px-4 rounded-xl transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>لوحة التحكم (الأسعار والحالة)</span>
+                </button>
             </div>
 
             <!-- Social Media Quick Links -->
@@ -326,6 +321,38 @@
         </div>
     </div>
 
+    <!-- Admin Control Panel Modal -->
+    <div id="adminModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-brandCard border border-gold/40 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="bg-gradient-to-r from-red-950 to-brandCard p-4.5 border-b border-gold/30 flex justify-between items-center">
+                <div class="flex items-center gap-2.5 text-gold">
+                    <i class="fa-solid fa-sliders text-xl"></i>
+                    <h3 class="font-black text-lg text-white">لوحة تحكم الأصناف والأسعار</h3>
+                </div>
+                <button onclick="toggleAdminPanel()" class="text-gray-400 hover:text-white p-1.5">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- قائمة الأصناف للتحكم -->
+            <div id="adminItemsList" class="p-4 overflow-y-auto flex-grow divide-y divide-gray-800 space-y-3">
+                <!-- سيتم تعبئتها ديناميكياً -->
+            </div>
+
+            <div class="p-4 border-t border-gold/20 bg-black/55 flex justify-between items-center">
+                <span class="text-xs text-gray-400">التعديلات تُحفظ فوراً وتظهر للزبائن عند تحديث الصفحة</span>
+                <div class="flex gap-2">
+                    <button onclick="resetMenuDefaults()" class="bg-red-900/60 hover:bg-red-900 text-white font-bold py-2 px-3 rounded-xl text-xs transition">
+                        استعادة الافتراضي
+                    </button>
+                    <button onclick="toggleAdminPanel()" class="bg-gold hover:bg-goldHover text-brandDark font-black py-2.5 px-6 rounded-xl text-xs shadow-lg transition">
+                        إغلاق وحفظ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- نافذة تكبير الصور -->
     <div id="imageModal" onclick="closeImageModal()">
         <button class="absolute top-6 left-6 text-gold text-2xl bg-black/70 w-11 h-11 rounded-full border border-gold/40 flex items-center justify-center shadow-lg">
@@ -386,7 +413,7 @@
             large: { label: 'كبير', price: 1200 }
         };
 
-        let menuData = [
+        const defaultMenuData = [
             // Pizza Section
             { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك', icon: 'fa-pizza-slice', image: 'IMG_20260725_145819.jpg', hasSizes: true, customSizes: ASASI_PIZZA_SIZES, available: true },
             { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true, available: true },
@@ -397,12 +424,12 @@
             { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true, available: true },
 
             // Meat Section
-            { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire', price: 0, available: true },
-            { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات الشرقية', icon: 'fa-fire', price: 0, available: true },
-            { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية بعناية', icon: 'fa-fire', price: 0, available: true },
-            { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية على الفحم', icon: 'fa-fire', price: 0, available: true },
-            { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire', price: 0, available: true },
-            { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire', price: 0, available: true },
+            { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire', available: true },
+            { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات الشرقية', icon: 'fa-fire', available: true },
+            { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية بعناية', icon: 'fa-fire', available: true },
+            { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية على الفحم', icon: 'fa-fire', available: true },
+            { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire', available: true },
+            { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire', available: true },
 
             // Fatayer Section
             { id: 'f1', name: 'فطيرة جبنة', price: 15, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice', available: true },
@@ -417,6 +444,8 @@
             { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice', available: true },
             { id: 'f11', name: 'فطيرة مرتديلا', price: 30, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice', available: true },
             { id: 'f12', name: 'فطيرة سنفورة', price: 40, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice', available: true },
+
+            // Fatayer Section (With Kashkaval)
             { id: 'f13', name: 'فطيرة قشقوان', price: 40, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', image: 'IMG_20260709_095128.jpg', available: true },
             { id: 'f14', name: 'محمرة قشقوان', price: 40, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese', available: true },
             { id: 'f15', name: 'توشكا', price: 70, category: 'fatayer', desc: 'توشكا غنية بالجبن واللحم المتبل', icon: 'fa-cheese', available: true },
@@ -426,15 +455,14 @@
             { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese', available: true },
         ];
 
-        // ضع رابط الـ CSV المأخوذ من Google Sheets هنا بين علامتي التنصيص:
-        const SHEET_CSV_URL = 'رابط_الـ_CSV_هنا';
+        // جلب البيانات المخزنة أو استخدام الافتراضية
+        let menuData = JSON.parse(localStorage.getItem('alasasi_menu_data')) || defaultMenuData;
 
         let cart = {}; 
         let pizzaSelectedSizes = {}; 
         let currentCategory = 'all';
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            await fetchSheetData();
+        document.addEventListener('DOMContentLoaded', () => {
             renderMenu();
 
             document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -448,37 +476,16 @@
             document.getElementById('clearSearch').addEventListener('click', resetSearch);
         });
 
-        // دالة جلب البيانات من Google Sheets وتحديث القائمة فوراً
-        async function fetchSheetData() {
-            if (!SHEET_CSV_URL || SHEET_CSV_URL.includes('رابط_الـ_CSV_هنا')) return;
-            try {
-                const response = await fetch(SHEET_CSV_URL);
-                const data = await response.text();
-                const rows = data.split('\n').map(row => row.split(','));
+        function saveMenuToStorage() {
+            localStorage.setItem('alasasi_menu_data', JSON.stringify(menuData));
+        }
 
-                // تخطي رأس السطر الأول والبدء من الصف الثاني
-                for (let i = 1; i < rows.length; i++) {
-                    const cols = rows[i];
-                    if (cols.length < 3) continue;
-                    const id = cols[0].trim();
-                    const newPrice = parseFloat(cols[1]);
-                    const status = cols[2] ? cols[2].trim().toLowerCase() : 'available';
-
-                    const item = menuData.find(i => i.id === id);
-                    if (item) {
-                        if (!isNaN(newPrice)) {
-                            if (item.hasSizes) {
-                                // تعديل سعر الوسط للبيتزا كنموذج أو السعر الأساسي
-                                item.customSizes.medium.price = newPrice;
-                            } else {
-                                item.price = newPrice;
-                            }
-                        }
-                        item.available = (status !== 'unavailable' && status !== '0' && status !== 'غير متاحف' && status !== 'غير متاح');
-                    }
-                }
-            } catch (error) {
-                console.log('تعذر جلب التحديثات من جدول البيانات، سيتم استخدام القائمة الافتراضية', error);
+        function resetMenuDefaults() {
+            if (confirm('هل تريد حقاً استعادة الأسعار والحالة الافتراضية؟')) {
+                localStorage.removeItem('alasasi_menu_data');
+                menuData = JSON.parse(JSON.stringify(defaultMenuData));
+                renderAdminPanelList();
+                renderMenu();
             }
         }
 
@@ -514,8 +521,24 @@
         }
 
         function createCardHTML(item) {
-            const unavailClass = item.available === false ? 'unavailable-item' : '';
-            const unavailBadgeHtml = `<span class="unavailable-badge absolute top-3 left-3 bg-red-800 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">غير متاح حالياً</span>`;
+            if (item.available === false) {
+                return `
+                    <div class="menu-card bg-brandCard/60 border border-red-900/40 rounded-2xl p-4 flex flex-col justify-between opacity-60 relative overflow-hidden shadow-lg" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                            <span class="bg-brandRed text-white text-xs font-black px-4 py-1.5 rounded-full border border-white/20 shadow-xl tracking-wider">نفذ حالياً</span>
+                        </div>
+                        <div class="flex items-start gap-3.5">
+                            <div class="w-14 h-14 rounded-2xl bg-black/40 border border-gold/20 flex items-center justify-center text-gray-500 shrink-0">
+                                <i class="fa-solid ${item.icon} text-xl"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-black text-base text-gray-300 mb-1">${item.name}</h3>
+                                <p class="text-xs text-gray-500 font-medium mb-2">${item.desc}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
 
             if (item.hasSizes) {
                 const currentSizeKey = pizzaSelectedSizes[item.id] || 'medium';
@@ -532,8 +555,7 @@
                     : `<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-950 to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0"><i class="fa-solid ${item.icon} text-2xl"></i></div>`;
 
                 return `
-                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex flex-col justify-between transition shadow-xl relative ${unavailClass}" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
-                        ${unavailBadgeHtml}
+                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex flex-col justify-between transition shadow-xl" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                         <div class="flex items-start gap-3.5">
                             ${imageHtml}
                             <div class="flex-grow">
@@ -573,15 +595,14 @@
                     : `<div class="w-9 h-9 rounded-xl bg-gold/10 text-gold flex items-center justify-center mb-2.5 border border-gold/20"><i class="fa-solid ${item.icon} text-base"></i></div>`;
 
                 return `
-                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-3.5 flex flex-col justify-between transition shadow-xl relative ${unavailClass}" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
-                        ${unavailBadgeHtml}
+                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-3.5 flex flex-col justify-between transition shadow-xl relative group" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                         <div>
                             ${imageHtml}
                             <h3 class="font-black text-sm text-amber-100 mb-1 leading-tight">${item.name}</h3>
                             <p class="text-[11px] text-gray-400 line-clamp-2">${item.desc}</p>
                         </div>
                         <div class="mt-4 pt-2.5 border-t border-gray-800/80 flex items-center justify-between">
-                            <span class="text-xs text-gold font-black">${item.price ? item.price.toLocaleString() + ' ل.س' : ''}</span>
+                            <span class="text-xs text-gold font-black">${item.price !== undefined ? item.price.toLocaleString() + ' ل.س' : ''}</span>
                             <div class="flex items-center gap-1.5" id="controls-${item.id}">
                                 ${renderQuantityControls(item.id, qty)}
                             </div>
@@ -591,8 +612,7 @@
             }
 
             return `
-                <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex items-center justify-between transition shadow-xl relative ${unavailClass}" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
-                    ${unavailBadgeHtml}
+                <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex items-center justify-between transition shadow-xl" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                     <div class="flex items-center gap-3.5">
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-950 to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0">
                             <i class="fa-solid ${item.icon} text-xl"></i>
@@ -706,7 +726,7 @@
                 const item = menuData.find(i => i.id === cartKey);
                 return {
                     name: item.name,
-                    price: item.price || null,
+                    price: item.price !== undefined ? item.price : null,
                     category: item.category
                 };
             }
@@ -720,7 +740,7 @@
                 const details = getItemDetailsFromCartKey(cartKey);
                 if (details) {
                     totalItems += cart[cartKey];
-                    if (details.price) {
+                    if (details.price !== null) {
                         totalPriceNew += details.price * cart[cartKey];
                     }
                 }
@@ -836,10 +856,10 @@
                 if (!details) return;
 
                 const qty = cart[cartKey];
-                const itemTotalNew = details.price ? details.price * qty : null;
+                const itemTotalNew = details.price !== null ? details.price * qty : null;
                 const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
 
-                const priceSubText = details.price 
+                const priceSubText = details.price !== null 
                     ? `${details.price.toLocaleString()} ل.س × ${qty} = ${itemTotalNew.toLocaleString()} ل.س`
                     : `العدد: ${qty}`;
 
@@ -864,6 +884,82 @@
             });
         }
 
+        // دوال لوحة التحكم ودعم التخزين المحلي
+        function toggleAdminPanel() {
+            const modal = document.getElementById('adminModal');
+            if (modal.classList.contains('hidden')) {
+                renderAdminPanelList();
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                saveMenuToStorage(); // حفظ التعديلات نهائياً
+                renderMenu(); // إعادة رسم القائمة الرئيسية لتطبيق التعديلات الحالية
+            }
+        }
+
+        function renderAdminPanelList() {
+            const container = document.getElementById('adminItemsList');
+            container.innerHTML = '';
+
+            menuData.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3';
+                
+                let priceControlHtml = '';
+                if (item.hasSizes) {
+                    priceControlHtml = `<span class="text-[11px] text-gray-400">أصناف ذات أحجام</span>`;
+                } else if (item.price !== undefined) {
+                    priceControlHtml = `
+                        <div class="flex items-center gap-1">
+                            <input type="number" value="${item.price}" onchange="updateItemPrice('${item.id}', this.value)" 
+                                class="w-24 bg-black/70 border border-gold/30 rounded-lg p-1.5 text-xs text-gold font-bold text-center focus:outline-none focus:border-gold">
+                            <span class="text-[10px] text-gray-400">ل.س</span>
+                        </div>
+                    `;
+                } else {
+                    priceControlHtml = `<span class="text-[11px] text-gray-400">مشاوي</span>`;
+                }
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-gold/10 text-gold flex items-center justify-center shrink-0 border border-gold/20">
+                            <i class="fa-solid ${item.icon} text-xs"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-amber-100">${item.name}</h4>
+                            <span class="text-[10px] text-gray-400">${item.category}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                        ${priceControlHtml}
+                        <button onclick="toggleItemAvailability('${item.id}')" class="px-3 py-1.5 rounded-xl text-xs font-black transition shadow ${item.available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-brandRed hover:bg-red-900 text-white'}">
+                            ${item.available ? '<i class="fa-solid fa-check ml-1"></i> متوفر' : '<i class="fa-solid fa-xmark ml-1"></i> نفذ'}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function updateItemPrice(itemId, newPrice) {
+            const item = menuData.find(i => i.id === itemId);
+            if (item && !isNaN(newPrice)) {
+                item.price = Number(newPrice);
+                saveMenuToStorage();
+            }
+        }
+
+        function toggleItemAvailability(itemId) {
+            const item = menuData.find(i => i.id === itemId);
+            if (item) {
+                item.available = !item.available;
+                saveMenuToStorage();
+                renderAdminPanelList();
+            }
+        }
+
         function sendOrderWhatsApp() {
             const cartKeys = Object.keys(cart);
             if (cartKeys.length === 0) {
@@ -879,7 +975,7 @@
             cartKeys.forEach(cartKey => {
                 const details = getItemDetailsFromCartKey(cartKey);
                 if (details) {
-                    if (details.price) {
+                    if (details.price !== null) {
                         const itemTotal = details.price * cart[cartKey];
                         totalPriceNew += itemTotal;
                         hasPrice = true;
@@ -902,6 +998,7 @@
             
             if (selectedPayMethod === 'shamcash') {
                 message += `%0A*طريقة الدفع المطلوبة:* 📱 شام كاش%0A`;
+                message += `*معرّف الحساب:* \`99d44072c6a3c3b1f926e0571e9c416c\`%0A`;
             } else {
                 message += `%0A*طريقة الدفع المطلوبة:* 💵 نقداً عند الاستلام%0A`;
             }
