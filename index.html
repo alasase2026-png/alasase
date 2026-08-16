@@ -61,6 +61,17 @@
             border: 2px solid #e6c567;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
+        .unavailable-item {
+            opacity: 0.5;
+            filter: grayscale(40%);
+            pointer-events: none;
+        }
+        .unavailable-badge {
+            display: none;
+        }
+        .unavailable-item .unavailable-badge {
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-28 text-gray-100 flex flex-col justify-between select-none">
@@ -375,53 +386,55 @@
             large: { label: 'كبير', price: 1200 }
         };
 
-        const menuData = [
+        let menuData = [
             // Pizza Section
-            { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك', icon: 'fa-pizza-slice', image: 'IMG_20260725_145819.jpg', hasSizes: true, customSizes: ASASI_PIZZA_SIZES },
-            { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true },
-            { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة ومميزة', icon: 'fa-pizza-slice', image: 'IMG_20260715_150444.jpg', hasSizes: true },
-            { id: 'p4', name: 'بيتزا جبنة مكس', category: 'pizza', desc: 'مزيج فاخر من أجود أنواع الأجبان', icon: 'fa-pizza-slice', hasSizes: true },
-            { id: 'p5', name: 'بيتزا دجاج', category: 'pizza', desc: 'قطع دجاج متبلة ومحمّرة مع الفلفل والجبن', icon: 'fa-pizza-slice', hasSizes: true },
-            { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice', hasSizes: true },
-            { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك', icon: 'fa-pizza-slice', image: 'IMG_20260725_145819.jpg', hasSizes: true, customSizes: ASASI_PIZZA_SIZES, available: true },
+            { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true, available: true },
+            { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة ومميزة', icon: 'fa-pizza-slice', image: 'IMG_20260715_150444.jpg', hasSizes: true, available: true },
+            { id: 'p4', name: 'بيتزا جبنة مكس', category: 'pizza', desc: 'مزيج فاخر من أجود أنواع الأجبان', icon: 'fa-pizza-slice', hasSizes: true, available: true },
+            { id: 'p5', name: 'بيتزا دجاج', category: 'pizza', desc: 'قطع دجاج متبلة ومحمّرة مع الفلفل والجبن', icon: 'fa-pizza-slice', hasSizes: true, available: true },
+            { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice', hasSizes: true, available: true },
+            { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true, available: true },
 
             // Meat Section
-            { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire' },
-            { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات الشرقية', icon: 'fa-fire' },
-            { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية بعناية', icon: 'fa-fire' },
-            { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية على الفحم', icon: 'fa-fire' },
-            { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire' },
-            { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire' },
+            { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire', price: 0, available: true },
+            { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات الشرقية', icon: 'fa-fire', price: 0, available: true },
+            { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية بعناية', icon: 'fa-fire', price: 0, available: true },
+            { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية على الفحم', icon: 'fa-fire', price: 0, available: true },
+            { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire', price: 0, available: true },
+            { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire', price: 0, available: true },
 
             // Fatayer Section
-            { id: 'f1', name: 'فطيرة جبنة', price: 15, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice' },
-            { id: 'f2', name: 'فطيرة محمرة', price: 15, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice', image: 'IMG_20260712_084748.jpg' },
-            { id: 'f3', name: 'مناقيش زعتر', price: 15, category: 'fatayer', desc: 'زعتر فاخر وزيت زيتون', icon: 'fa-bread-slice' },
-            { id: 'f4', name: 'فطيرة زيتون أخضر', price: 30, category: 'fatayer', desc: 'شرائح الزيتون الأخضر الشهي', icon: 'fa-bread-slice' },
-            { id: 'f5', name: 'فطيرة كيري', price: 40, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice' },
-            { id: 'f6', name: 'فطيرة شوكلا', price: 40, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie' },
-            { id: 'f7', name: 'صفيحة شاميّة', price: 20, category: 'fatayer', desc: 'صفيحة لحم دجاج بالفرن', icon: 'fa-bread-slice' },
-            { id: 'f8', name: 'بيتزا سواريه', price: 40, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice', image: 'IMG_20260705_104255.jpg' },
-            { id: 'f9', name: 'فطيرة سجق', price: 40, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice', image: 'IMG_20260705_100723.jpg' },
-            { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice' },
-            { id: 'f11', name: 'فطيرة مرتديلا', price: 30, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice' },
-            { id: 'f12', name: 'فطيرة سنفورة', price: 40, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice' },
-
-            // Fatayer Section (With Kashkaval)
-            { id: 'f13', name: 'فطيرة قشقوان', price: 40, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', image: 'IMG_20260709_095128.jpg' },
-            { id: 'f14', name: 'محمرة قشقوان', price: 40, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese' },
-            { id: 'f15', name: 'توشكا', price: 70, category: 'fatayer', desc: 'توشكا غنية بالجبن واللحم المتبل', icon: 'fa-cheese' },
-            { id: 'f16', name: 'شيش قشقوان', price: 70, category: 'fatayer', desc: 'شيش دجاج محمر مع القشقوان', icon: 'fa-cheese' },
-            { id: 'f17', name: 'مرتديلا قشقوان', price: 70, category: 'fatayer', desc: 'مرتديلا غنية بجبنة القشقوان', icon: 'fa-cheese' },
-            { id: 'f18', name: 'زعتر قشقوان', price: 40, category: 'fatayer', desc: 'زعتر فاخر مع جبن قشقوان', icon: 'fa-cheese' },
-            { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese' },
+            { id: 'f1', name: 'فطيرة جبنة', price: 15, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice', available: true },
+            { id: 'f2', name: 'فطيرة محمرة', price: 15, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice', image: 'IMG_20260712_084748.jpg', available: true },
+            { id: 'f3', name: 'مناقيش زعتر', price: 15, category: 'fatayer', desc: 'زعتر فاخر وزيت زيتون', icon: 'fa-bread-slice', available: true },
+            { id: 'f4', name: 'فطيرة زيتون أخضر', price: 30, category: 'fatayer', desc: 'شرائح الزيتون الأخضر الشهي', icon: 'fa-bread-slice', available: true },
+            { id: 'f5', name: 'فطيرة كيري', price: 40, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice', available: true },
+            { id: 'f6', name: 'فطيرة شوكلا', price: 40, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie', available: true },
+            { id: 'f7', name: 'صفيحة شاميّة', price: 20, category: 'fatayer', desc: 'صفيحة لحم دجاج بالفرن', icon: 'fa-bread-slice', available: true },
+            { id: 'f8', name: 'بيتزا سواريه', price: 40, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice', image: 'IMG_20260705_104255.jpg', available: true },
+            { id: 'f9', name: 'فطيرة سجق', price: 40, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice', image: 'IMG_20260705_100723.jpg', available: true },
+            { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice', available: true },
+            { id: 'f11', name: 'فطيرة مرتديلا', price: 30, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice', available: true },
+            { id: 'f12', name: 'فطيرة سنفورة', price: 40, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice', available: true },
+            { id: 'f13', name: 'فطيرة قشقوان', price: 40, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', image: 'IMG_20260709_095128.jpg', available: true },
+            { id: 'f14', name: 'محمرة قشقوان', price: 40, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese', available: true },
+            { id: 'f15', name: 'توشكا', price: 70, category: 'fatayer', desc: 'توشكا غنية بالجبن واللحم المتبل', icon: 'fa-cheese', available: true },
+            { id: 'f16', name: 'شيش قشقوان', price: 70, category: 'fatayer', desc: 'شيش دجاج محمر مع القشقوان', icon: 'fa-cheese', available: true },
+            { id: 'f17', name: 'مرتديلا قشقوان', price: 70, category: 'fatayer', desc: 'مرتديلا غنية بجبنة القشقوان', icon: 'fa-cheese', available: true },
+            { id: 'f18', name: 'زعتر قشقوان', price: 40, category: 'fatayer', desc: 'زعتر فاخر مع جبن قشقوان', icon: 'fa-cheese', available: true },
+            { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese', available: true },
         ];
+
+        // ضع رابط الـ CSV المأخوذ من Google Sheets هنا بين علامتي التنصيص:
+        const SHEET_CSV_URL = 'رابط_الـ_CSV_هنا';
 
         let cart = {}; 
         let pizzaSelectedSizes = {}; 
         let currentCategory = 'all';
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchSheetData();
             renderMenu();
 
             document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -434,6 +447,40 @@
 
             document.getElementById('clearSearch').addEventListener('click', resetSearch);
         });
+
+        // دالة جلب البيانات من Google Sheets وتحديث القائمة فوراً
+        async function fetchSheetData() {
+            if (!SHEET_CSV_URL || SHEET_CSV_URL.includes('رابط_الـ_CSV_هنا')) return;
+            try {
+                const response = await fetch(SHEET_CSV_URL);
+                const data = await response.text();
+                const rows = data.split('\n').map(row => row.split(','));
+
+                // تخطي رأس السطر الأول والبدء من الصف الثاني
+                for (let i = 1; i < rows.length; i++) {
+                    const cols = rows[i];
+                    if (cols.length < 3) continue;
+                    const id = cols[0].trim();
+                    const newPrice = parseFloat(cols[1]);
+                    const status = cols[2] ? cols[2].trim().toLowerCase() : 'available';
+
+                    const item = menuData.find(i => i.id === id);
+                    if (item) {
+                        if (!isNaN(newPrice)) {
+                            if (item.hasSizes) {
+                                // تعديل سعر الوسط للبيتزا كنموذج أو السعر الأساسي
+                                item.customSizes.medium.price = newPrice;
+                            } else {
+                                item.price = newPrice;
+                            }
+                        }
+                        item.available = (status !== 'unavailable' && status !== '0' && status !== 'غير متاحف' && status !== 'غير متاح');
+                    }
+                }
+            } catch (error) {
+                console.log('تعذر جلب التحديثات من جدول البيانات، سيتم استخدام القائمة الافتراضية', error);
+            }
+        }
 
         function getPizzaPrice(item, sizeKey) {
             if (item.customSizes && item.customSizes[sizeKey]) {
@@ -467,6 +514,9 @@
         }
 
         function createCardHTML(item) {
+            const unavailClass = item.available === false ? 'unavailable-item' : '';
+            const unavailBadgeHtml = `<span class="unavailable-badge absolute top-3 left-3 bg-red-800 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">غير متاح حالياً</span>`;
+
             if (item.hasSizes) {
                 const currentSizeKey = pizzaSelectedSizes[item.id] || 'medium';
                 const price = getPizzaPrice(item, currentSizeKey);
@@ -482,7 +532,8 @@
                     : `<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-950 to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0"><i class="fa-solid ${item.icon} text-2xl"></i></div>`;
 
                 return `
-                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex flex-col justify-between transition shadow-xl" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex flex-col justify-between transition shadow-xl relative ${unavailClass}" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                        ${unavailBadgeHtml}
                         <div class="flex items-start gap-3.5">
                             ${imageHtml}
                             <div class="flex-grow">
@@ -522,7 +573,8 @@
                     : `<div class="w-9 h-9 rounded-xl bg-gold/10 text-gold flex items-center justify-center mb-2.5 border border-gold/20"><i class="fa-solid ${item.icon} text-base"></i></div>`;
 
                 return `
-                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-3.5 flex flex-col justify-between transition shadow-xl relative group" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-3.5 flex flex-col justify-between transition shadow-xl relative ${unavailClass}" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                        ${unavailBadgeHtml}
                         <div>
                             ${imageHtml}
                             <h3 class="font-black text-sm text-amber-100 mb-1 leading-tight">${item.name}</h3>
@@ -539,7 +591,8 @@
             }
 
             return `
-                <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex items-center justify-between transition shadow-xl" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex items-center justify-between transition shadow-xl relative ${unavailClass}" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                    ${unavailBadgeHtml}
                     <div class="flex items-center gap-3.5">
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-950 to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0">
                             <i class="fa-solid ${item.icon} text-xl"></i>
@@ -849,7 +902,6 @@
             
             if (selectedPayMethod === 'shamcash') {
                 message += `%0A*طريقة الدفع المطلوبة:* 📱 شام كاش%0A`;
-                message += `*معرّف الحساب:* \`99d44072c6a3c3b1f926e0571e9c416c\`%0A`;
             } else {
                 message += `%0A*طريقة الدفع المطلوبة:* 💵 نقداً عند الاستلام%0A`;
             }
