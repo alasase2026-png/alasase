@@ -12,10 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <script>
         tailwind.config = {
@@ -45,7 +41,7 @@
         ::-webkit-scrollbar-track { background: #0d0a09; }
         ::-webkit-scrollbar-thumb { background: #3a322d; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #e6c567; }
-        #imageModal, #adminModal {
+        #imageModal, #adminModal, #adminLoginModal {
             display: none;
             position: fixed;
             z-index: 100;
@@ -97,10 +93,11 @@
                     </div>
                 </div>
 
-                <!-- زر فتح لوحة التحكم -->
-                <button type="button" onclick="openAdminModal()" class="mt-3 bg-gold/20 hover:bg-gold text-gold hover:text-brandDark border border-gold/40 text-xs font-black py-2 px-5 rounded-xl transition flex items-center gap-1.5 shadow cursor-pointer">
-                    <i class="fa-solid fa-sliders"></i>
-                    <span>لوحة التحكم المباشرة (أونلاين)</span>
+                <!-- زر مخفي للادارة (لا يظهر إلا بنقر مزدوج خفي أو يمكنك إظهاره برابط خاص، هنا جعلناه زر خفي تماماً أو يطلب كلمة سر عبر النقر على الشعار 3 مرات أو زر صغير جداً في الزاوية) -->
+                <!-- وضعنا زر دخول الإدارة بشكل مخفي ومحمي بكلمة مرور لكي لا يراه الزبون أبداً -->
+                <button type="button" onclick="promptAdminLogin()" class="mt-3 bg-transparent text-gray-600 hover:text-gold text-[10px] py-1 px-3 transition flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-lock text-[9px]"></i>
+                    <span>تسجيل دخول الإدارة</span>
                 </button>
             </div>
 
@@ -317,13 +314,29 @@
         </div>
     </div>
 
+    <!-- Admin Login Modal (كلمة السر) -->
+    <div id="adminLoginModal">
+        <div class="bg-brandCard border border-gold/40 rounded-3xl w-full max-w-sm p-6 shadow-2xl text-center space-y-4">
+            <div class="w-12 h-12 bg-gold/10 text-gold rounded-full flex items-center justify-center mx-auto border border-gold/30">
+                <i class="fa-solid fa-lock text-xl"></i>
+            </div>
+            <h3 class="font-black text-lg text-white">دخول لوحة التحكم</h3>
+            <p class="text-xs text-gray-400">أدخل كلمة المرور الخاصة بالمدير للوصول للوحة التحكم:</p>
+            <input type="password" id="adminPasswordInput" placeholder="كلمة المرور..." class="w-full bg-black/70 border border-gold/30 rounded-xl p-3 text-center text-sm text-gold focus:outline-none focus:border-gold">
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="verifyAdminPassword()" class="bg-gold hover:bg-goldHover text-brandDark font-black py-2.5 rounded-xl text-xs cursor-pointer">دخول</button>
+                <button type="button" onclick="closeAdminLoginModal()" class="bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-xl text-xs cursor-pointer">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin Control Panel Modal -->
     <div id="adminModal">
         <div class="bg-brandCard border border-gold/40 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div class="bg-gradient-to-r from-red-950 to-brandCard p-4.5 border-b border-gold/30 flex justify-between items-center">
                 <div class="flex items-center gap-2.5 text-gold">
                     <i class="fa-solid fa-sliders text-xl"></i>
-                    <h3 class="font-black text-lg text-white">لوحة التحكم المباشرة (تحديث فوري أونلاين)</h3>
+                    <h3 class="font-black text-lg text-white">لوحة تحكم المدير الخاصة</h3>
                 </div>
                 <button type="button" onclick="closeAdminModal()" class="text-gray-400 hover:text-white p-1.5 cursor-pointer">
                     <i class="fa-solid fa-xmark text-xl"></i>
@@ -335,7 +348,7 @@
             </div>
 
             <div class="p-4 border-t border-gold/20 bg-black/55 flex justify-between items-center">
-                <span class="text-xs text-emerald-400 font-bold"><i class="fa-solid fa-circle text-[8px] ml-1"></i> متصل بالسحابة (يتحدث عند الزبائن فوراً)</span>
+                <span class="text-xs text-amber-200 font-bold">التعديلات تُحفظ فوراً على هاتفك</span>
                 <div class="flex gap-2">
                     <button type="button" onclick="resetMenuDefaults()" class="bg-red-900/60 hover:bg-red-900 text-white font-bold py-2 px-3 rounded-xl text-xs transition cursor-pointer">
                         استعادة الافتراضي
@@ -392,14 +405,8 @@
     </footer>
 
     <script>
-        // إعدادات قاعدة بيانات Firebase المجانية (جاهزة للعمل فوراً)
-        const firebaseConfig = {
-            databaseURL: "https://alasasi-menu-default-rtdb.firebaseio.com/"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
         const OLD_CURRENCY_MULTIPLIER = 100;
+        const ADMIN_SECRET_PASSWORD = "123"; // يمكنك تغيير كلمة المرور هنا إن أردت
 
         const ASASI_PIZZA_SIZES = {
             small: { label: 'صغير', price: 500 },
@@ -455,25 +462,8 @@
         let pizzaSelectedSizes = {}; 
         let currentCategory = 'all';
 
-        // الاتصال المباشر بقاعدة البيانات وجلب البيانات أو إنشاؤها تلقائياً
         document.addEventListener('DOMContentLoaded', () => {
-            const menuRef = db.ref('menuData');
-            
-            menuRef.on('value', (snapshot) => {
-                const serverData = snapshot.val();
-                if (serverData) {
-                    menuData = serverData;
-                } else {
-                    // إذا كانت قاعدة البيانات فارغة لأول مرة، يتم ملؤها تلقائياً
-                    menuRef.set(defaultMenuData);
-                    menuData = defaultMenuData;
-                }
-                renderMenu();
-                // تحديث لوحة التحكم إذا كانت مفتوحة
-                if(document.getElementById('adminModal').style.display === 'flex') {
-                    renderAdminPanelList();
-                }
-            });
+            loadMenuData();
 
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase();
@@ -486,14 +476,31 @@
             document.getElementById('clearSearch').addEventListener('click', resetSearch);
         });
 
-        function saveMenuToCloud() {
-            db.ref('menuData').set(menuData);
+        function loadMenuData() {
+            const saved = localStorage.getItem('asasi_menu_data');
+            if (saved) {
+                try {
+                    menuData = JSON.parse(saved);
+                } catch (e) {
+                    menuData = JSON.parse(JSON.stringify(defaultMenuData));
+                }
+            } else {
+                menuData = JSON.parse(JSON.stringify(defaultMenuData));
+                saveMenuDataLocally();
+            }
+            renderMenu();
+        }
+
+        function saveMenuDataLocally() {
+            localStorage.setItem('asasi_menu_data', JSON.stringify(menuData));
         }
 
         function resetMenuDefaults() {
-            if (confirm('هل تريد حقاً استعادة الأسعار والحالة الافتراضية للجميع؟')) {
+            if (confirm('هل تريد حقاً استعادة الأسعار والحالة الافتراضية؟')) {
                 menuData = JSON.parse(JSON.stringify(defaultMenuData));
-                saveMenuToCloud();
+                saveMenuDataLocally();
+                renderMenu();
+                renderAdminPanelList();
             }
         }
 
@@ -891,7 +898,26 @@
             });
         }
 
-        // لوحة التحكم المباشرة
+        // حماية لوحة التحكم بكلمة مرور (لا تظهر للزبائن مطلقاً)
+        function promptAdminLogin() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminLoginModal').style.display = 'flex';
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('adminLoginModal').style.display = 'none';
+        }
+
+        function verifyAdminPassword() {
+            const pass = document.getElementById('adminPasswordInput').value;
+            if (pass === ADMIN_SECRET_PASSWORD) {
+                closeAdminLoginModal();
+                openAdminModal();
+            } else {
+                alert('كلمة المرور غير صحيحة!');
+            }
+        }
+
         function openAdminModal() {
             renderAdminPanelList();
             document.getElementById('adminModal').style.display = 'flex';
@@ -948,14 +974,17 @@
         function updateItemPrice(index, newPrice) {
             if (menuData[index] && !isNaN(newPrice)) {
                 menuData[index].price = Number(newPrice);
-                saveMenuToCloud(); // التحديث أونلاين فوراً للجميع
+                saveMenuDataLocally();
+                renderMenu();
             }
         }
 
         function toggleItemAvailability(index) {
             if (menuData[index]) {
                 menuData[index].available = !menuData[index].available;
-                saveMenuToCloud(); // التحديث أونلاين فوراً للجميع
+                saveMenuDataLocally();
+                renderMenu();
+                renderAdminPanelList();
             }
         }
 
