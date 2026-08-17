@@ -61,6 +61,26 @@
             border: 2px solid #e6c567;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
+        /* تنسيقات مؤشر حالة المطعم التلقائي */
+        .store-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+        .store-status.open {
+            background-color: rgba(212, 237, 218, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        .store-status.closed {
+            background-color: rgba(248, 215, 218, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
     </style>
 </head>
 <body class="min-h-screen pb-28 text-gray-100 flex flex-col justify-between select-none">
@@ -77,8 +97,13 @@
                 <h1 class="text-4xl font-black text-gold tracking-wider drop-shadow-lg">العسسي</h1>
                 <p class="text-xs text-amber-200/80 font-bold tracking-widest mt-1 uppercase">ملحمة ومعجنات طازجة</p>
                 
+                <!-- مؤشر أوقات العمل التلقائي -->
+                <div>
+                    <div id="store-status-badge" class="store-status">جاري التحقق من حالة المطعم...</div>
+                </div>
+
                 <!-- قسم الإدارة بتصميم فاخر ومرتب -->
-                <div class="mt-4 w-full max-w-sm bg-black/50 border border-gold/30 rounded-2xl p-3 shadow-inner flex flex-col items-center text-center">
+                <div class="mt-3 w-full max-w-sm bg-black/50 border border-gold/30 rounded-2xl p-3 shadow-inner flex flex-col items-center text-center">
                     <div class="mb-2 flex items-center justify-center gap-2">
                         <div class="h-[1px] w-12 bg-gold/30"></div>
                         <span class="text-gold font-bold text-xs tracking-wider px-2 py-0.5 bg-gold/10 rounded-full border border-gold/25">إدارة</span>
@@ -361,6 +386,32 @@
     </footer>
 
     <script>
+        // دالة التحقق من أوقات العمل تلقائياً (من 7 صباحاً حتى 10 مساءً)
+        function checkStoreStatus() {
+            const now = new Date();
+            const hour = now.getHours();
+            const minute = now.getMinutes();
+            const currentTime = hour * 60 + minute;
+
+            const openingTime = 7 * 60;  // 7:00 AM
+            const closingTime = 22 * 60; // 10:00 PM
+
+            const statusElement = document.getElementById('store-status-badge');
+            if (!statusElement) return;
+
+            if (currentTime >= openingTime && currentTime < closingTime) {
+                statusElement.className = 'store-status open';
+                statusElement.innerHTML = '<i class="fa-solid fa-circle-check ml-1"></i> مفتوح الآن - نستقبل طلباتكم';
+            } else {
+                statusElement.className = 'store-status closed';
+                statusElement.innerHTML = '<i class="fa-solid fa-circle-xmark ml-1"></i> مغلق حالياً - نراكم قريباً';
+            }
+        }
+
+        // تشغيل فحص حالة المطعم عند التحميل وكل دقيقة
+        setInterval(checkStoreStatus, 60000);
+        window.addEventListener('DOMContentLoaded', checkStoreStatus);
+
         const OLD_CURRENCY_MULTIPLIER = 100;
 
         const ASASI_PIZZA_SIZES = {
@@ -400,7 +451,7 @@
             { id: 'f4', name: 'فطيرة زيتون أخضر', price: 30, category: 'fatayer', desc: 'شرائح الزيتون الأخضر الشهي', icon: 'fa-bread-slice' },
             { id: 'f5', name: 'فطيرة كيري', price: 40, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice' },
             { id: 'f6', name: 'فطيرة شوكلا', price: 40, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie' },
-            { id: 'f7', name: 'صفيحة شاميّة', price: 20, category: 'fatayer', desc: 'صفيحة لحم دجاج بالفرن', icon: 'fa-bread-slice' },
+            { id: 'f7', name: 'صفيحة شاميّة', price: 20, category: 'fatayer', desc: 'صفيحة دجاج بالفرن', icon: 'fa-bread-slice' },
             { id: 'f8', name: 'بيتزا سواريه', price: 40, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice', image: 'IMG_20260705_104255.jpg' },
             { id: 'f9', name: 'فطيرة سجق', price: 40, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice', image: 'IMG_20260705_100723.jpg' },
             { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice' },
