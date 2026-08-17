@@ -5,7 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>العسسي - ملحمة ومعجنات</title>
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+// ===== لوحة الإدارة السريعة =====
+function openAdmin(){
+    const pass = prompt("ادخل كلمة سر الإدارة");
+    if(pass === "Yaser1738"){
+        alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
+    } else if(pass !== null){
+        alert("كلمة السر غير صحيحة");
+    }
+}
+
+</script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Arabic Font (Cairo) -->
@@ -29,7 +40,18 @@
                 }
             }
         }
-    </script>
+    
+// ===== لوحة الإدارة السريعة =====
+function openAdmin(){
+    const pass = prompt("ادخل كلمة سر الإدارة");
+    if(pass === "Yaser1738"){
+        alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
+    } else if(pass !== null){
+        alert("كلمة السر غير صحيحة");
+    }
+}
+
+</script>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -926,18 +948,17 @@
 
             window.open(whatsappUrl, '_blank');
         }
-    </script>
+    
+// ===== لوحة الإدارة السريعة =====
+function openAdmin(){
+    const pass = prompt("ادخل كلمة سر الإدارة");
+    if(pass === "Yaser1738"){
+        alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
+    } else if(pass !== null){
+        alert("كلمة السر غير صحيحة");
+    }
+}
 
-<!-- لوحة تحكم العسسي -->
-<button onclick="openAdmin()" id="adminBtn" style="position:fixed;top:10px;left:10px;z-index:99;background:#e6c567;color:#111;border:0;border-radius:10px;padding:8px;font-weight:bold;">إدارة</button>
-<div id="adminPanel" style="display:none;position:fixed;inset:0;background:#000d;z-index:100;padding:20px;overflow:auto;">
- <div style="background:#181311;color:white;max-width:500px;margin:auto;padding:20px;border-radius:20px;border:1px solid #e6c567">
-  <h2 style="color:#e6c567">لوحة تحكم المنيو</h2>
-  <input id="adminPass" placeholder="كلمة السر" type="password" style="width:100%;padding:10px;margin:8px 0;border-radius:8px">
-  <button onclick="loginAdmin()" style="padding:10px;width:100%">دخول</button>
-  <div id="adminList" style="display:none"></div>
-  <button onclick="closeAdmin()" style="margin-top:15px;padding:10px;width:100%">إغلاق</button>
- </div>
-</div>
+</script>
 </body>
 </html>
