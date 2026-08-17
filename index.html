@@ -5,7 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>العسسي - ملحمة ومعجنات</title>
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+// ===== لوحة الإدارة السريعة =====
+function openAdmin(){
+    const pass = prompt("ادخل كلمة سر الإدارة");
+    if(pass === "Yaser1738"){
+        alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
+    } else if(pass !== null){
+        alert("كلمة السر غير صحيحة");
+    }
+}
+
+</script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Arabic Font (Cairo) -->
@@ -29,7 +40,18 @@
                 }
             }
         }
-    </script>
+    
+// ===== لوحة الإدارة السريعة =====
+function openAdmin(){
+    const pass = prompt("ادخل كلمة سر الإدارة");
+    if(pass === "Yaser1738"){
+        alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
+    } else if(pass !== null){
+        alert("كلمة السر غير صحيحة");
+    }
+}
+
+</script>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -89,14 +111,6 @@
     <header class="relative bg-brandCard pt-8 pb-6 px-4 border-b border-gold/20 shadow-2xl">
         <div class="max-w-4xl mx-auto text-center">
             
-            <!-- زر دخول الإدارة السريعة أعلى الصفحة -->
-            <div class="absolute top-4 left-4">
-                <button onclick="openAdmin()" class="bg-black/60 hover:bg-gold hover:text-brandDark text-gold border border-gold/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-lg" title="لوحة الإدارة">
-                    <i class="fa-solid fa-lock text-[10px]"></i>
-                    <span>الإدارة</span>
-                </button>
-            </div>
-
             <!-- الشعار -->
             <div class="flex flex-col items-center justify-center mb-4">
                 <div onclick="openImageModal('IMG-20260617-WA0083_٠٥٢١٠٢.jpg')" class="w-28 h-28 rounded-full border-2 border-gold p-1 bg-black/60 shadow-xl shadow-gold/10 mb-3 relative cursor-pointer hover:scale-105 transition overflow-hidden" title="انقر لتكبير الشعار">
@@ -401,16 +415,6 @@
     </footer>
 
     <script>
-        // ===== لوحة الإدارة السريعة =====
-        function openAdmin(){
-            const pass = prompt("ادخل كلمة سر الإدارة");
-            if(pass === "Yaser1738"){
-                alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
-            } else if(pass !== null){
-                alert("كلمة السر غير صحيحة");
-            }
-        }
-
         // دالة التحقق من أوقات العمل تلقائياً (من 7 صباحاً حتى 10 مساءً)
         function checkStoreStatus() {
             const now = new Date();
@@ -933,17 +937,28 @@
             }
 
             const notes = document.getElementById('orderNotes').value.trim();
-            If (notes) {
+            if (notes) {
                 message += `%0A*ملاحظات/عنوان التوصيل:*%0A${encodeURIComponent(notes)}%0A`;
             }
 
             message += `%0A*يرجى تأكيد الطلب والتجهيز. شكراً لكم!*`;
 
             const phone = "963942568502";
-            Const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+            const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
 
-            Window.open(whatsappUrl, '_blank');
+            window.open(whatsappUrl, '_blank');
         }
-    </script>
+    
+// ===== لوحة الإدارة السريعة =====
+function openAdmin(){
+    const pass = prompt("ادخل كلمة سر الإدارة");
+    if(pass === "Yaser1738"){
+        alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
+    } else if(pass !== null){
+        alert("كلمة السر غير صحيحة");
+    }
+}
+
+</script>
 </body>
 </html>
