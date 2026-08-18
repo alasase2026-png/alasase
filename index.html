@@ -1,97 +1,1564 @@
-tailwind.config = { theme: { extend: { colors: { gold: '#e6c567', goldHover: '#f3d57d', brandDark: '#0d0a09', brandCard: '#181311', brandRed: '#7f1d1d', }, fontFamily: { cairo: ['Cairo', 'sans-serif'], } } } } body { font-family: 'Cairo', sans-serif; background-color: #0d0a09; color: #f3f4f6; } ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: #0d0a09; } ::-webkit-scrollbar-thumb { background: #3a322d; border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: #e6c567; } .lux-bg { background: linear-gradient(135deg, #181311 0%, #0d0a09 100%); } #imageModal { display: none; position: fixed; z-index: 100; inset: 0; background-color: rgba(0, 0, 0, 0.92); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem; } #imageModal img { max-width: 90%; max-height: 90vh; border-radius: 16px; border: 2px solid #e6c567; box-shadow: 0 20px 40px rgba(0,0,0,0.6); } /* تنسيقات مؤشر حالة المطعم التلقائي */ .store-status { padding: 6px 14px; border-radius: 20px; font-weight: bold; text-align: center; display: inline-block; margin: 8px 0; font-size: 13px; } .store-status.open { background-color: rgba(212, 237, 218, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); } .store-status.closed { background-color: rgba(248, 215, 218, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); } const firebaseConfig = { apiKey: "AIzaSyCvAHQ8XLb3uITpRNrgtMnO3WT1VMZsRe0", authDomain: "alasase-618a4.firebaseapp.com", projectId: "alasase-618a4", storageBucket: "alasase-618a4.firebasestorage.app", messagingSenderId: "176334223452", appId: "1:176334223452:web:887e25146046f94f1cce99" }; firebase.initializeApp(firebaseConfig); const db = firebase.database(); function loadFirebaseMenu(){ db.ref('menu').on('value', snap => { const data = snap.val() || {}; Object.keys(data).forEach(id => applyMenuUpdate(id,data[id])); renderMenu(); }); } function saveFirebaseItem(id,data){ return db.ref('menu/'+id).set(data); } window.addEventListener('DOMContentLoaded', loadFirebaseMenu); 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق ومنيو العسسي - ملحمة ومعجنات</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Arabic Font (Cairo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: '#d4af37',
+                        goldHover: '#b89528',
+                        brandDark: '#120f0e',
+                        brandCard: '#1e1917',
+                        brandRed: '#8b1d1d',
+                        brandRedDark: '#671212',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #120f0e;
+            color: #f3f4f6;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #120f0e; }
+        ::-webkit-scrollbar-thumb { background: #3a322d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+        .wood-pattern {
+            background-color: #181412;
+            background-image: radial-gradient(#261f1c 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .pulse-badge {
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.85; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="wood-pattern min-h-screen pb-24 text-gray-100 flex flex-col justify-between select-none">
 
-￼ 
+    <!-- Top Mode Switcher Bar -->
+    <div class="bg-black/80 border-b border-gold/30 px-4 py-2 flex items-center justify-between text-xs sticky top-0 z-50 backdrop-blur">
+        <div class="flex items-center gap-2 text-gold font-bold">
+            <i class="fa-solid fa-fire-burner text-sm"></i>
+            <span>مطعم وملحمة العسسي</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="viewCustomerBtn" onclick="switchView('customer')" class="px-3 py-1 rounded-full bg-gold text-brandDark font-bold transition shadow">
+                <i class="fa-solid fa-utensils ml-1"></i> واجهة المنيو
+            </button>
+            <button id="viewAdminBtn" onclick="openAdminAuthModal()" class="px-3 py-1 rounded-full bg-brandCard border border-gold/40 text-gray-300 hover:text-gold transition">
+                <i class="fa-solid fa-user-shield ml-1"></i> لوحة التحكم
+            </button>
+        </div>
+    </div>
 
-العسسي
+    <!-- ================= CUSTOMER VIEW ================= -->
+    <div id="customerApp" class="flex-grow flex flex-col">
+        <!-- Header Section -->
+        <header class="relative bg-gradient-to-b from-brandCard via-brandDark to-transparent pt-6 pb-4 px-4 border-b border-gold/20">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="inline-flex flex-col items-center justify-center mb-3">
+                    <div class="w-20 h-20 rounded-full border-2 border-gold bg-black/60 flex items-center justify-center shadow-lg shadow-gold/10 mb-2 relative">
+                        <i class="fa-solid fa-fire-burner text-3xl text-gold"></i>
+                        <div class="absolute -bottom-1 bg-brandRed text-[10px] px-2 py-0.5 rounded-full border border-gold text-gold font-bold">
+                            طازج ولذيذ
+                        </div>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-gold tracking-wide drop-shadow-md">العسسي</h1>
+                    <p class="text-xs text-amber-200/80 font-semibold tracking-wider">ملحمة ومعجنات</p>
+                </div>
 
-ملحمة ومعجنات طازجة
+                <!-- Social Media Quick Links -->
+                <div class="flex items-center justify-center gap-3 mb-3">
+                    <a href="https://www.facebook.com/share/1BH1MgjREy/" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-black/60 border border-gold/40 text-gold hover:bg-gold hover:text-brandDark flex items-center justify-center transition shadow">
+                        <i class="fa-brands fa-facebook-f text-sm"></i>
+                    </a>
+                    <a href="https://www.instagram.com/alasase2026?igsh=MTFiMHg2YWQxdmh3Yw==" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-black/60 border border-gold/40 text-gold hover:bg-gold hover:text-brandDark flex items-center justify-center transition shadow">
+                        <i class="fa-brands fa-instagram text-base"></i>
+                    </a>
+                    <a href="https://whatsapp.com/channel/0029Vb7toa9BfxoEo0VI9i3C" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-black/60 border border-gold/40 text-gold hover:bg-gold hover:text-brandDark flex items-center justify-center transition shadow">
+                        <i class="fa-solid fa-bullhorn text-sm"></i>
+                    </a>
+                </div>
 
-جاري التحقق من حالة المطعم...
+                <!-- Contact Box -->
+                <div class="bg-gradient-to-r from-brandRed via-brandRedDark to-brandRed border border-gold/40 rounded-xl p-3 max-w-md mx-auto shadow-xl flex items-center justify-between px-5 my-3">
+                    <div class="text-right">
+                        <p class="text-xs text-amber-100/90 font-medium mb-0.5">مستعدون لأي طلبات وحفلات</p>
+                        <p class="text-[11px] text-gold font-bold flex items-center gap-1 mb-1">
+                            <i class="fa-solid fa-motorcycle text-xs"></i>
+                            <span>يوجد توصيل طلبات</span>
+                        </p>
+                        <a id="displayPhoneLink" href="tel:0942568502" class="text-lg font-black text-white hover:text-gold transition font-mono flex items-center gap-2" dir="ltr">
+                            <i class="fa-solid fa-phone-flip text-gold text-sm"></i>
+                            <span id="displayPhoneNumber">&lrm;0942 568 502</span>
+                        </a>
+                    </div>
+                    <a id="callActionBtn" href="tel:0942568502" class="bg-gold hover:bg-goldHover text-brandDark font-bold py-2 px-4 rounded-lg text-xs shadow transition-transform active:scale-95 flex items-center gap-1.5">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>اتصال</span>
+                    </a>
+                </div>
 
-إدارة 
+                <!-- Search Input -->
+                <div class="relative max-w-md mx-auto mt-4">
+                    <input type="text" id="searchInput" placeholder="ابحث عن وجبتك المفضلة..." 
+                        class="w-full bg-black/50 border border-gold/30 rounded-full py-2.5 px-10 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-gold transition shadow-inner">
+                    <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3.5 text-gold/60 text-sm"></i>
+                    <button id="clearSearch" onclick="resetSearch()" class="hidden absolute left-3 top-2.5 text-gray-400 hover:text-white text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
 
-أبو أيمن الفران 
+        <!-- Navigation Tabs -->
+        <nav class="sticky top-[41px] z-30 bg-brandDark/95 backdrop-blur border-y border-gold/20 py-2.5 px-3 shadow-md">
+            <div class="max-w-4xl mx-auto flex items-center justify-start md:justify-center gap-2 overflow-x-auto no-scrollbar scroll-smooth px-1" id="categoryTabs">
+                <button onclick="filterCategory('all')" class="cat-btn active bg-gold text-brandDark font-bold px-4 py-1.5 rounded-full text-xs whitespace-nowrap transition shadow">
+                    <i class="fa-solid fa-utensils ml-1"></i> الكل
+                </button>
+                <button onclick="filterCategory('pizza')" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-semibold border border-gold/30 px-4 py-1.5 rounded-full text-xs whitespace-nowrap transition">
+                    <i class="fa-solid fa-pizza-slice text-gold ml-1"></i> قسم البيتزا
+                </button>
+                <button onclick="filterCategory('meat')" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-semibold border border-gold/30 px-4 py-1.5 rounded-full text-xs whitespace-nowrap transition">
+                    <i class="fa-solid fa-drumstick-bite text-gold ml-1"></i> قسم اللحمة المشوية
+                </button>
+                <button onclick="filterCategory('fatayer')" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-semibold border border-gold/30 px-4 py-1.5 rounded-full text-xs whitespace-nowrap transition">
+                    <i class="fa-solid fa-bread-slice text-gold ml-1"></i> قسم الفطائر
+                </button>
+            </div>
+        </nav>
 
-أبو النور الحام 
+        <!-- Main Customer Content -->
+        <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
+            <!-- Section: Pizza -->
+            <section id="sec-pizza" class="menu-section mb-10">
+                <div class="flex items-center gap-3 mb-4 border-b border-gold/30 pb-2">
+                    <div class="w-8 h-8 rounded-lg bg-brandRed/80 border border-gold flex items-center justify-center text-gold">
+                        <i class="fa-solid fa-pizza-slice"></i>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-gold tracking-wide">قسم البيتزا</h2>
+                    <span class="text-xs text-gray-400 font-normal">متوفرة بثلاثة أحجام (صغير - وسط - كبير)</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="pizza-container"></div>
+            </section>
 
-جاهزون لتلبية طلباتكم والحفلات
+            <!-- Section: Meat / Grills -->
+            <section id="sec-meat" class="menu-section mb-10">
+                <div class="flex items-center gap-3 mb-4 border-b border-gold/30 pb-2">
+                    <div class="w-8 h-8 rounded-lg bg-brandRed/80 border border-gold flex items-center justify-center text-gold">
+                        <i class="fa-solid fa-fire text-lg"></i>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-gold tracking-wide">قسم اللحمة (المشاوي)</h2>
+                    <span class="text-xs text-gray-400 font-normal">لحوم طازجة مشوية على الفحم</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="meat-container"></div>
+            </section>
 
-يوجد توصيل طلبات 
+            <!-- Section: Fatayer -->
+            <section id="sec-fatayer" class="menu-section mb-10">
+                <div class="flex items-center gap-3 mb-4 border-b border-gold/30 pb-2">
+                    <div class="w-8 h-8 rounded-lg bg-brandRed/80 border border-gold flex items-center justify-center text-gold">
+                        <i class="fa-solid fa-bread-slice"></i>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-gold tracking-wide">قسم الفطائر والمعجنات</h2>
+                    <span class="text-xs text-gray-400 font-normal">فطائر الفرن الساخنة والمميزة</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="fatayer-container"></div>
+            </section>
 
-‎0942 568 502 
+            <div id="noResults" class="hidden text-center py-12">
+                <i class="fa-solid fa-cookie-bite text-4xl text-gray-600 mb-3"></i>
+                <p class="text-lg text-gray-400 font-bold">عذراً، لم نجد أي وجبة تطابق بحثك</p>
+                <button onclick="resetSearch()" class="mt-3 text-xs text-gold underline hover:text-amber-200">عرض جميع الوجبات</button>
+            </div>
+        </main>
 
-اتصال 
+        <!-- Bottom Cart Bar -->
+        <div id="cartBar" class="fixed bottom-0 left-0 right-0 z-40 bg-brandCard/95 border-t border-gold/40 p-3 shadow-2xl backdrop-blur">
+            <div class="max-w-4xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <button onclick="toggleCartModal()" class="w-11 h-11 bg-gold hover:bg-goldHover text-brandDark rounded-full flex items-center justify-center shadow-lg transition">
+                            <i class="fa-solid fa-basket-shopping text-lg"></i>
+                        </button>
+                        <span id="cartBadge" class="absolute -top-1 -right-1 bg-brandRed text-white text-[10px] font-black w-5 h-5 rounded-full border border-white flex items-center justify-center">0</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 block">إجمالي عناصر الطلب:</span>
+                        <span id="cartCountText" class="text-sm font-extrabold text-gold">0 صنف</span>
+                    </div>
+                </div>
 
-يتوفر الدفع النقدي او عن طريق شام كاش. 
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleCartModal()" class="bg-black/60 hover:bg-black text-gray-200 text-xs px-3 py-2.5 rounded-lg border border-gold/30 font-semibold transition">
+                        عرض السلة
+                    </button>
+                    <button onclick="sendOrderWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow flex items-center gap-1.5 transition active:scale-95">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span>إرسال الطلب</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-￼ 
+    <!-- ================= ADMIN CONTROL PANEL VIEW ================= -->
+    <div id="adminApp" class="hidden flex-grow flex flex-col max-w-6xl mx-auto w-full px-4 py-6">
+        <!-- Admin Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-brandCard border border-gold/40 p-5 rounded-2xl shadow-xl">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-gold/10 border border-gold text-gold flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-black text-gold">لوحة تحكم إدارة المطعم</h2>
+                    <p class="text-xs text-gray-400">إدارة الوجبات والأسعار ومتابعة الطلبات المباشرة</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="openAddItemModal()" class="bg-gold hover:bg-goldHover text-brandDark font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>إضافة وجبة جديدة</span>
+                </button>
+                <button onclick="switchView('customer')" class="bg-black/50 hover:bg-black text-gray-300 font-semibold px-4 py-2 rounded-xl text-xs border border-gray-700 transition">
+                    <i class="fa-solid fa-arrow-right-from-bracket ml-1"></i> خروج
+                </button>
+            </div>
+        </div>
 
-حساب شام كاش:
+        <!-- Admin Stats Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-brandCard border border-gold/20 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-gray-400 block mb-1">الطلبات الجديدة</span>
+                    <span id="statNewOrders" class="text-2xl font-black text-amber-400">0</span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+            </div>
+            <div class="bg-brandCard border border-gold/20 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-gray-400 block mb-1">إجمالي المبيعات</span>
+                    <span id="statTotalSales" class="text-xl font-black text-emerald-400">0 ل.س</span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+            </div>
+            <div class="bg-brandCard border border-gold/20 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-gray-400 block mb-1">عدد وجبات المنيو</span>
+                    <span id="statTotalItems" class="text-2xl font-black text-gold">0</span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-gold/10 text-gold flex items-center justify-center">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+            </div>
+            <div class="bg-brandCard border border-gold/20 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-gray-400 block mb-1">طلبات مكتملة</span>
+                    <span id="statCompletedOrders" class="text-2xl font-black text-blue-400">0</span>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+            </div>
+        </div>
 
-99d44072c6a3c3b1f926e0571e9c416c 
+        <!-- Admin Tabs -->
+        <div class="flex items-center gap-2 border-b border-gold/20 pb-3 mb-6">
+            <button onclick="switchAdminTab('orders')" id="tabBtnOrders" class="admin-tab active bg-gold text-brandDark font-extrabold px-4 py-2 rounded-xl text-xs transition">
+                <i class="fa-solid fa-receipt ml-1"></i> إدارة الطلبات المباشرة
+            </button>
+            <button onclick="switchAdminTab('menu')" id="tabBtnMenu" class="admin-tab bg-brandCard text-gray-300 font-semibold border border-gold/20 px-4 py-2 rounded-xl text-xs transition">
+                <i class="fa-solid fa-list-check ml-1"></i> إدارة الوجبات والأسعار
+            </button>
+            <button onclick="switchAdminTab('settings')" id="tabBtnSettings" class="admin-tab bg-brandCard text-gray-300 font-semibold border border-gold/20 px-4 py-2 rounded-xl text-xs transition">
+                <i class="fa-solid fa-sliders ml-1"></i> إعدادات المحل
+            </button>
+        </div>
 
-الكل قسم البيتزا قسم اللحمة المشوية قسم الفطائر 
+        <!-- Tab 1: Live Orders -->
+        <div id="adminTabOrders" class="admin-tab-content space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-extrabold text-lg text-gold flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>الطلبات الواردة حديثاً</span>
+                </h3>
+                <button onclick="clearAllOrders()" class="text-xs text-red-400 hover:text-red-300 font-semibold border border-red-500/30 px-3 py-1 rounded-lg">
+                    حذف سجل الطلبات المكتملة
+                </button>
+            </div>
+            <div id="adminOrdersContainer" class="space-y-3">
+                <!-- Orders dynamically rendered here -->
+            </div>
+        </div>
 
-قسم البيتزا
+        <!-- Tab 2: Menu Items Management -->
+        <div id="adminTabMenu" class="admin-tab-content hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-extrabold text-lg text-gold flex items-center gap-2">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                    <span>قائمة أصناف المنيو</span>
+                </h3>
+                <button onclick="restoreDefaultMenu()" class="text-xs text-amber-300 hover:text-amber-200 border border-gold/30 px-3 py-1 rounded-lg">
+                    إعادة ضبط المنيو للوضع الافتراضي
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="adminMenuContainer">
+                <!-- Admin menu items dynamically rendered here -->
+            </div>
+        </div>
 
-متوفرة بثلاثة أحجام 
+        <!-- Tab 3: Restaurant Settings -->
+        <div id="adminTabSettings" class="admin-tab-content hidden space-y-4">
+            <div class="bg-brandCard border border-gold/30 rounded-2xl p-5 max-w-xl space-y-4">
+                <h3 class="font-extrabold text-base text-gold mb-3 border-b border-gold/20 pb-2">بيانات الاتصال والتسعير</h3>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">رقم هاتف الاتصال المباشر:</label>
+                    <input type="text" id="settingPhone" class="w-full bg-black/60 border border-gray-700 rounded-lg p-2.5 text-xs text-gray-200 focus:border-gold focus:outline-none" value="0942568502">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">رقم الواتساب (شاملاً المفتاح الدولي بدون +):</label>
+                    <input type="text" id="settingWhatsApp" class="w-full bg-black/60 border border-gray-700 rounded-lg p-2.5 text-xs text-gray-200 focus:border-gold focus:outline-none" value="963942568502">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">معامل تحويل العملة القديمة (مثال: 100):</label>
+                    <input type="number" id="settingCurrencyMultiplier" class="w-full bg-black/60 border border-gray-700 rounded-lg p-2.5 text-xs text-gray-200 focus:border-gold focus:outline-none" value="100">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">رمز المرور الخاص بدخول لوحة التحكم:</label>
+                    <input type="password" id="settingAdminPin" class="w-full bg-black/60 border border-gray-700 rounded-lg p-2.5 text-xs text-gray-200 focus:border-gold focus:outline-none" value="1234">
+                </div>
+                <button onclick="saveSettings()" class="bg-gold hover:bg-goldHover text-brandDark font-bold py-2.5 px-5 rounded-xl text-xs transition shadow">
+                    حفظ التغييرات
+                </button>
+            </div>
+        </div>
+    </div>
 
-قسم اللحمة (المشاوي)
+    <!-- ================= MODALS ================= -->
 
-لحوم طازجة مشوية عالفحم 
+    <!-- Cart Modal -->
+    <div id="cartModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-brandCard border border-gold/40 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="bg-gradient-to-r from-brandRedDark to-brandCard p-4 border-b border-gold/30 flex justify-between items-center">
+                <div class="flex items-center gap-2 text-gold">
+                    <i class="fa-solid fa-receipt text-lg"></i>
+                    <h3 class="font-extrabold text-lg text-white">تفاصيل الطلب الخاص بك</h3>
+                </div>
+                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
 
-قسم الفطائر والمعجنات
+            <div id="cartItemsList" class="p-4 overflow-y-auto flex-grow divide-y divide-gray-800"></div>
 
-فطائر الفرن الساخنة 
+            <div id="emptyCartView" class="py-12 text-center">
+                <i class="fa-solid fa-cart-flatbed text-4xl text-gray-600 mb-3"></i>
+                <p class="text-gray-400 text-sm">سلتك فارغة حالياً. قم بطلب بعض الأصناف اللذيذة!</p>
+            </div>
 
-عذراً، لم نجد أي وجبة تطابق بحثك
+            <div class="p-4 border-t border-gold/20 bg-black/40 space-y-3">
+                <div class="bg-black/60 p-3 rounded-xl border border-gold/30 space-y-2">
+                    <div class="flex justify-between items-center text-xs text-gray-300">
+                        <span>عدد القطع:</span>
+                        <span id="modalTotalItemsCount" class="font-bold text-white">0 قطعة</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm border-t border-gray-800 pt-1.5">
+                        <span class="text-gold font-bold">الجديدة (ل.س):</span>
+                        <span id="modalTotalNewCurrency" class="font-black text-gold">0 ل.س</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-amber-200/80">
+                        <span>القديمة (ليرة):</span>
+                        <span id="modalTotalOldCurrency" class="font-bold">0 ليرة قديمة</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">ملاحظات الإضافة وعنوان التوصيل:</label>
+                    <input type="text" id="orderNotes" placeholder="مثال: بدون بصل / الحي والشارع للتوصيل..." class="w-full bg-black/60 border border-gray-700 rounded-lg p-2 text-xs text-gray-200 focus:outline-none focus:border-gold">
+                </div>
 
-عرض جميع الوجبات 
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="sendOrderWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span>طلب عبر الواتساب</span>
+                    </button>
+                    <button onclick="submitDirectOrder()" class="bg-gold hover:bg-goldHover text-brandDark font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
+                        <span>إرسال مباشر للنظام</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-0 
+    <!-- Admin Auth Modal -->
+    <div id="adminAuthModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-brandCard border border-gold/40 rounded-2xl w-full max-w-sm p-5 shadow-2xl space-y-4">
+            <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-gold/10 border border-gold text-gold flex items-center justify-center mx-auto mb-2 text-xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="font-black text-lg text-gold">تسجيل الدخول للإدارة</h3>
+                <p class="text-xs text-gray-400">أدخل رمز المرور للوصول إلى لوحة التحكم</p>
+            </div>
+            <div>
+                <input type="password" id="adminPinInput" placeholder="أدخل رمز المرور (الافتراضي 1234)" class="w-full bg-black/60 border border-gray-700 rounded-xl p-3 text-center text-lg font-mono text-gold focus:border-gold focus:outline-none">
+                <p id="pinErrorMsg" class="text-xs text-red-400 hidden text-center mt-1">رمز المرور غير صحيح!</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="verifyAdminPin()" class="flex-grow bg-gold hover:bg-goldHover text-brandDark font-bold py-2.5 rounded-xl text-xs transition">
+                    دخول
+                </button>
+                <button onclick="closeAdminAuthModal()" class="bg-black/50 hover:bg-black text-gray-300 px-4 py-2.5 rounded-xl text-xs border border-gray-700 transition">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
 
-إجمالي عناصر السلة: 0 صنف 
+    <!-- Add/Edit Menu Item Modal -->
+    <div id="itemModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-brandCard border border-gold/40 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="bg-gradient-to-r from-brandRedDark to-brandCard p-4 border-b border-gold/30 flex justify-between items-center">
+                <h3 id="itemModalTitle" class="font-extrabold text-base text-gold">إضافة وجبة جديدة</h3>
+                <button onclick="closeItemModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto space-y-3 flex-grow text-xs">
+                <input type="hidden" id="editItemId">
+                <div>
+                    <label class="block text-gray-400 mb-1">اسم الوجبة:</label>
+                    <input type="text" id="itemFormName" placeholder="مثال: بيتزا مشكل أجبان" class="w-full bg-black/60 border border-gray-700 rounded-lg p-2 text-gray-200 focus:border-gold focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">القسم:</label>
+                    <select id="itemFormCategory" class="w-full bg-black/60 border border-gray-700 rounded-lg p-2 text-gray-200 focus:border-gold focus:outline-none" onchange="toggleSizeFields()">
+                        <option value="pizza">قسم البيتزا</option>
+                        <option value="meat">قسم اللحمة (المشاوي)</option>
+                        <option value="fatayer">قسم الفطائر والمعجنات</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">الوصف:</label>
+                    <textarea id="itemFormDesc" placeholder="مكونات الوجبة أو التفاصيل..." class="w-full bg-black/60 border border-gray-700 rounded-lg p-2 text-gray-200 focus:border-gold focus:outline-none h-16"></textarea>
+                </div>
 
-عرض السلة إرسال الطلب 
+                <!-- Sizes vs Single Price -->
+                <div id="hasSizesToggleBox" class="flex items-center gap-2 py-1">
+                    <input type="checkbox" id="itemFormHasSizes" onchange="toggleSizeFields()" class="accent-gold w-4 h-4">
+                    <label for="itemFormHasSizes" class="text-amber-200 font-bold">تحتوي على أحجام متعددة (صغير/وسط/كبير)</label>
+                </div>
 
-تفاصيل سلة الطلبات
+                <div id="singlePriceBox">
+                    <label class="block text-gray-400 mb-1">السعر (ل.س):</label>
+                    <input type="number" id="itemFormPrice" placeholder="مثال: 40" class="w-full bg-black/60 border border-gray-700 rounded-lg p-2 text-gray-200 focus:border-gold focus:outline-none">
+                </div>
 
-سلتك فارغة حالياً. قم بإضافة بعض الأصناف الشهية!
+                <div id="sizesPriceBox" class="hidden space-y-2 bg-black/30 p-3 rounded-xl border border-gold/20">
+                    <span class="block text-gold font-bold mb-1">أسعار الأحجام الثلاثة:</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-gray-400 text-[10px]">صغير:</label>
+                            <input type="number" id="itemPriceSmall" placeholder="300" class="w-full bg-black/60 border border-gray-700 rounded p-1.5 text-gray-200 focus:border-gold focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-[10px]">وسط:</label>
+                            <input type="number" id="itemPriceMedium" placeholder="600" class="w-full bg-black/60 border border-gray-700 rounded p-1.5 text-gray-200 focus:border-gold focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-[10px]">كبير:</label>
+                            <input type="number" id="itemPriceLarge" placeholder="1200" class="w-full bg-black/60 border border-gray-700 rounded p-1.5 text-gray-200 focus:border-gold focus:outline-none">
+                        </div>
+                    </div>
+                </div>
 
-إجمالي القطع: 0 قطعة 
+                <div>
+                    <label class="block text-gray-400 mb-1">أيقونة الوجبة (FontAwesome):</label>
+                    <select id="itemFormIcon" class="w-full bg-black/60 border border-gray-700 rounded-lg p-2 text-gray-200 focus:border-gold focus:outline-none">
+                        <option value="fa-pizza-slice">بيتزا (fa-pizza-slice)</option>
+                        <option value="fa-fire">مشاوي/فحم (fa-fire)</option>
+                        <option value="fa-bread-slice">فطائر (fa-bread-slice)</option>
+                        <option value="fa-cheese">جبن (fa-cheese)</option>
+                        <option value="fa-cookie">حلويات/شوكلا (fa-cookie)</option>
+                        <option value="fa-drumstick-bite">دجاج/لحم (fa-drumstick-bite)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gold/20 bg-black/40 flex justify-end gap-2">
+                <button onclick="saveMenuItem()" class="bg-gold hover:bg-goldHover text-brandDark font-bold py-2 px-4 rounded-lg text-xs transition">
+                    حفظ الوجبة
+                </button>
+                <button onclick="closeItemModal()" class="bg-black/50 hover:bg-black text-gray-300 py-2 px-4 rounded-lg text-xs border border-gray-700 transition">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
 
-المجموع (ل.س): 0 ل.س 
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-gold text-brandDark font-bold px-4 py-2 rounded-xl shadow-2xl hidden transition-all duration-300 text-xs flex items-center gap-2">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">تم الإجراء بنجاح</span>
+    </div>
 
-المجموع (ليرة قديمة): 0 ليرة قديمة 
+    <!-- Footer Section -->
+    <footer class="text-center py-6 px-4 border-t border-gold/10 text-xs text-gray-400 space-y-3">
+        <p class="font-semibold text-amber-100">العسسي - ملحمة ومعجنات طازجة يومياً</p>
+        <p class="text-gold text-[11px] font-bold"><i class="fa-solid fa-motorcycle"></i> يوجد خدمة توصيل الطلبات</p>
+        
+        <!-- Social Media Footer Buttons -->
+        <div class="flex items-center justify-center gap-2 pt-1">
+            <a href="https://www.facebook.com/share/1BH1MgjREy/" target="_blank" rel="noopener noreferrer" class="bg-black/50 hover:bg-blue-600 hover:text-white border border-gold/30 text-gold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition">
+                <i class="fa-brands fa-facebook-f"></i>
+                <span>فيسبوك</span>
+            </a>
+            <a href="https://www.instagram.com/alasase2026?igsh=MTFiMHg2YWQxdmh3Yw==" target="_blank" rel="noopener noreferrer" class="bg-black/50 hover:bg-pink-600 hover:text-white border border-gold/30 text-gold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition">
+                <i class="fa-brands fa-instagram"></i>
+                <span>إنستغرام</span>
+            </a>
+            <a href="https://whatsapp.com/channel/0029Vb7toa9BfxoEo0VI9i3C" target="_blank" rel="noopener noreferrer" class="bg-black/50 hover:bg-emerald-600 hover:text-white border border-gold/30 text-gold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span>قناة الواتساب</span>
+            </a>
+        </div>
 
-طريقة الدفع المفضلة: 💵 نقداً عند الاستلام📱 شام كاش 
+        <p class="text-gray-500 pt-1">للتواصـل والطلبات: 
+            <a id="footerPhoneLink" href="tel:0942568502" class="text-gold font-mono font-bold hover:underline inline-block" dir="ltr">&lrm;0942 568 502</a>
+        </p>
+    </footer>
 
-ملاحظات أو تفاصيل التوصيل (اختياري): 
+    <!-- App Logic & Scripts -->
+    <script>
+        // Initial Default Menu Items Data
+        const DEFAULT_ASASI_PIZZA_SIZES = {
+            small: { label: 'صغير', price: 500 },
+            medium: { label: 'وسط', price: 800 },
+            large: { label: 'كبير', price: 1500 }
+        };
 
-إرسال الطلب للواتساب اتصال بالهاتف 
+        const DEFAULT_REGULAR_PIZZA_SIZES = {
+            small: { label: 'صغير', price: 300 },
+            medium: { label: 'وسط', price: 600 },
+            large: { label: 'كبير', price: 1200 }
+        };
 
-￼ 
+        const INITIAL_MENU_DATA = [
+            // Pizza Section
+            { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك ورغبتك', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_ASASI_PIZZA_SIZES, available: true },
+            { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
+            { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
+            { id: 'p4', name: 'بيتزا جبنة مكس', category: 'pizza', desc: 'مزيج فاخر من أجود أنواع الأجبان', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
+            { id: 'p5', name: 'بيتزا دجاج', category: 'pizza', desc: 'قطع دجاج متبلة ومحمّرة مع الفلفل والجبن', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
+            { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
+            { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
 
-العسسي - ملحمة ومعجنات طازجة يومياً
+            // Meat Section
+            { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire', available: true },
+            { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات', icon: 'fa-fire', available: true },
+            { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية', icon: 'fa-fire', available: true },
+            { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية بعناية', icon: 'fa-fire', available: true },
+            { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire', available: true },
+            { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire', available: true },
 
-إدارة 
+            // Fatayer Section
+            { id: 'f1', name: 'فطيرة جبنة', price: 15, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice', available: true },
+            { id: 'f2', name: 'فطيرة محمرة', price: 15, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice', available: true },
+            { id: 'f3', name: 'مناقيش زعتر', price: 15, category: 'fatayer', desc: 'زعتر فاخر', icon: 'fa-bread-slice', available: true },
+            { id: 'f4', name: 'فطيرة زيتون أخضر', price: 30, category: 'fatayer', desc: 'شرائح الزيتون الأخضر الشهي', icon: 'fa-bread-slice', available: true },
+            { id: 'f5', name: 'فطيرة كيري', price: 40, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice', available: true },
+            { id: 'f6', name: 'فطيرة شوكلا', price: 40, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie', available: true },
+            { id: 'f7', name: 'صفيحة شاميّة', price: 20, category: 'fatayer', desc: 'صفيحة لحم دجاج بالفرن', icon: 'fa-bread-slice', available: true },
+            { id: 'f8', name: 'بيتزا سواريه', price: 40, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice', available: true },
+            { id: 'f9', name: 'فطيرة سجق', price: 40, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice', available: true },
+            { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice', available: true },
+            { id: 'f11', name: 'فطيرة مرتديلا', price: 30, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice', available: true },
+            { id: 'f12', name: 'فطيرة سنفورة', price: 40, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice', available: true },
 
-أبو أيمن الفران أبو النور الحام 
+            // Fatayer Section (With Kashkaval)
+            { id: 'f13', name: 'فطيرة قشقوان', price: 40, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', available: true },
+            { id: 'f14', name: 'محمرة قشقوان', price: 40, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese', available: true },
+            { id: 'f15', name: 'توشكا', price: 70, category: 'fatayer', desc: 'توشكا غنية بالجبن واللحم المتبل', icon: 'fa-cheese', available: true },
+            { id: 'f16', name: 'شيش قشقوان', price: 70, category: 'fatayer', desc: 'شيش دجاج محمر مع القشقوان', icon: 'fa-cheese', available: true },
+            { id: 'f17', name: 'مرتديلا قشقوان', price: 70, category: 'fatayer', desc: 'مرتديلا غنية بجبنة القشقوان', icon: 'fa-cheese', available: true },
+            { id: 'f18', name: 'زعتر قشقوان', price: 40, category: 'fatayer', desc: 'زعتر فاخر مع جبن قشقوان', icon: 'fa-cheese', available: true },
+            { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese', available: true }
+        ];
 
-يوجد خدمة توصيل الطلبات
+        // State variables
+        let menuData = [];
+        let liveOrders = [];
+        let appSettings = {
+            phone: '0942568502',
+            whatsapp: '963942568502',
+            multiplier: 100,
+            adminPin: '1234'
+        };
 
-يتوفر الدفع النقدي او عن طريق شام كاش.
+        let cart = {}; 
+        let pizzaSelectedSizes = {}; 
+        let currentCategory = 'all';
+        let isAdminLoggedIn = false;
 
-فيسبوك إنستغرام قناة الواتساب قيمنا على الخرائط 
+        // Initialize Local Storage
+        function initStorage() {
+            const storedMenu = localStorage.getItem('asasi_menu');
+            if (storedMenu) {
+                menuData = JSON.parse(storedMenu);
+            } else {
+                menuData = [...INITIAL_MENU_DATA];
+                saveMenuToStorage();
+            }
 
-للتواصل والطلبات المباشرة: ‎0942 568 502 
+            const storedSettings = localStorage.getItem('asasi_settings');
+            if (storedSettings) {
+                appSettings = JSON.parse(storedSettings);
+            } else {
+                saveSettingsToStorage();
+            }
 
-// دالة التحقق من أوقات العمل تلقائياً (من 7 صباحاً حتى 10 مساءً) function checkStoreStatus() { const now = new Date(); const hour = now.getHours(); const minute = now.getMinutes(); const currentTime = hour * 60 + minute; const openingTime = 7 * 60; // 7:00 AM const closingTime = 22 * 60; // 10:00 PM const statusElement = document.getElementById('store-status-badge'); if (!statusElement) return; if (currentTime >= openingTime && currentTime < closingTime) { statusElement.className = 'store-status open'; statusElement.innerHTML = '<i class="fa-solid fa-circle-check ml-1"></i> مفتوح الآن - نستقبل طلباتكم'; } else { statusElement.className = 'store-status closed'; statusElement.innerHTML = '<i class="fa-solid fa-circle-xmark ml-1"></i> مغلق حالياً - نراكم قريباً'; } } // تشغيل فحص حالة المطعم عند التحميل وكل دقيقة setInterval(checkStoreStatus, 60000); window.addEventListener('DOMContentLoaded', checkStoreStatus); const OLD_CURRENCY_MULTIPLIER = 100; const ASASI_PIZZA_SIZES = { small: { label: 'صغير', price: 500 }, medium: { label: 'وسط', price: 800 }, large: { label: 'كبير', price: 1500 } }; const REGULAR_PIZZA_SIZES = { small: { label: 'صغير', price: 300 }, medium: { label: 'وسط', price: 600 }, large: { label: 'كبير', price: 1200 } }; const menuData = [ // Pizza Section { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك', icon: 'fa-pizza-slice', image: 'IMG_20260725_145819.jpg', hasSizes: true, customSizes: ASASI_PIZZA_SIZES }, { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true }, { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة ومميزة', icon: 'fa-pizza-slice', image: 'IMG_20260715_150444.jpg', hasSizes: true }, { id: 'p4', name: 'بيتزا جبنة مكس', category: 'pizza', desc: 'مزيج فاخر من أجود أنواع الأجبان', icon: 'fa-pizza-slice', hasSizes: true }, { id: 'p5', name: 'بيتزا دجاج', category: 'pizza', desc: 'قطع دجاج متبلة ومحمّرة مع الفلفل والجبن', icon: 'fa-pizza-slice', hasSizes: true }, { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice', hasSizes: true }, { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true }, // Meat Section { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire', image: 'IMG_20260425_161550_١٢٠٥٣٨.jpg' }, { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات الشرقية', icon: 'fa-fire' }, { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية بعناية', icon: 'fa-fire', image: 'IMG_20260629_215310.jpg' }, { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية على الفحم', icon: 'fa-fire' }, { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire' }, { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire' }, // Fatayer Section { id: 'f1', name: 'فطيرة جبنة', price: 15, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice' }, { id: 'f2', name: 'فطيرة محمرة', price: 15, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice', image: 'IMG_20260712_084748.jpg' }, { id: 'f3', name: 'مناقيش زعتر', price: 15, category: 'fatayer', desc: 'زعتر فاخر وزيت زيتون', icon: 'fa-bread-slice' }, { id: 'f4', name: 'فطيرة زيتون أخضر', price: 30, category: 'fatayer', desc: 'شرائح الزيتون الأخضر الشهي', icon: 'fa-bread-slice' }, { id: 'f5', name: 'فطيرة كيري', price: 40, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice' }, { id: 'f6', name: 'فطيرة شوكلا', price: 40, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie' }, { id: 'f7', name: 'صفيحة شاميّة', price: 20, category: 'fatayer', desc: 'صفيحة دجاج بالفرن', icon: 'fa-bread-slice' }, { id: 'f8', name: 'بيتزا سواريه', price: 40, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice', image: 'IMG_20260705_104255.jpg' }, { id: 'f9', name: 'فطيرة سجق', price: 40, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice', image: 'IMG_20260705_100723.jpg' }, { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice' }, { id: 'f11', name: 'فطيرة مرتديلا', price: 30, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice' }, { id: 'f12', name: 'فطيرة سنفورة', price: 40, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice' }, // Fatayer Section (With Kashkaval) { id: 'f13', name: 'فطيرة قشقوان', price: 40, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', image: 'IMG_20260709_095128.jpg' }, { id: 'f14', name: 'محمرة قشقوان', price: 40, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese' }, { id: 'f15', name: 'توشكا', price: 70, category: 'fatayer', desc: 'توشكا غنية بالجبن واللحم المتبل', icon: 'fa-cheese' }, { id: 'f16', name: 'شيش قشقوان', price: 70, category: 'fatayer', desc: 'شيش دجاج محمر مع القشقوان', icon: 'fa-cheese' }, { id: 'f17', name: 'مرتديلا قشقوان', price: 70, category: 'fatayer', desc: 'مرتديلا غنية بجبنة القشقوان', icon: 'fa-cheese' }, { id: 'f18', name: 'زعتر قشقوان', price: 40, category: 'fatayer', desc: 'زعتر فاخر مع جبن قشقوان', icon: 'fa-cheese' }, { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese' }, ]; let cart = {}; let pizzaSelectedSizes = {}; let currentCategory = 'all'; document.addEventListener('DOMContentLoaded', () => { renderMenu(); document.getElementById('searchInput').addEventListener('input', (e) => { const query = e.target.value.trim().toLowerCase(); const clearBtn = document.getElementById('clearSearch'); if (query.length > 0) clearBtn.classList.remove('hidden'); else clearBtn.classList.add('hidden'); filterMenuItems(query); }); document.getElementById('clearSearch').addEventListener('click', resetSearch); }); function getPizzaPrice(item, sizeKey) { if (item.customSizes && item.customSizes[sizeKey]) { return item.customSizes[sizeKey].price; } return REGULAR_PIZZA_SIZES[sizeKey].price; } function resetSearch() { const input = document.getElementById('searchInput'); input.value = ''; document.getElementById('clearSearch').classList.add('hidden'); filterMenuItems(''); } function renderMenu() { const pizzaContainer = document.getElementById('pizza-container'); const meatContainer = document.getElementById('meat-container'); const fatayerContainer = document.getElementById('fatayer-container'); pizzaContainer.innerHTML = ''; meatContainer.innerHTML = ''; fatayerContainer.innerHTML = ''; menuData.forEach(item => { const cardHtml = createCardHTML(item); if (item.category === 'pizza') pizzaContainer.innerHTML += cardHtml; else if (item.category === 'meat') meatContainer.innerHTML += cardHtml; else if (item.category === 'fatayer') fatayerContainer.innerHTML += cardHtml; }); } function createCardHTML(item) { if (item.hasSizes) { const currentSizeKey = pizzaSelectedSizes[item.id] || 'medium'; const price = getPizzaPrice(item, currentSizeKey); const cartKey = `${item.id}_${currentSizeKey}`; const qty = cart[cartKey] || 0; const pSmall = getPizzaPrice(item, 'small').toLocaleString(); const pMed = getPizzaPrice(item, 'medium').toLocaleString(); const pLrg = getPizzaPrice(item, 'large').toLocaleString(); const imageHtml = item.image ? `<div onclick="openImageModal('${item.image}')" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-gold/40 shadow-inner shrink-0 cursor-pointer hover:opacity-95 transition transform hover:scale-105" title="انقر لتكبير الصورة"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover"></div>` : `<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-950 to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0"><i class="fa-solid ${item.icon} text-2xl"></i></div>`; return ` <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex flex-col justify-between transition shadow-xl" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}"> <div class="flex items-start gap-3.5"> ${imageHtml} <div class="flex-grow"> <h3 class="font-black text-base text-amber-100 mb-1">${item.name}</h3> <p class="text-xs text-amber-200/90 font-medium mb-3 leading-relaxed bg-black/30 p-2 rounded-xl border border-gold/10">${item.desc}</p> <div class="flex flex-wrap items-center gap-1.5 mb-2 bg-black/50 p-1.5 rounded-xl border border-gold/20 max-w-fit"> <button onclick="selectPizzaSize('${item.id}', 'small')" class="size-btn-${item.id} text-[11px] font-bold px-2.5 py-1 rounded-lg transition ${currentSizeKey === 'small' ? 'bg-gold text-brandDark shadow' : 'text-gray-400 hover:text-white'}"> صغير (${pSmall}) </button> <button onclick="selectPizzaSize('${item.id}', 'medium')" class="size-btn-${item.id} text-[11px] font-bold px-2.5 py-1 rounded-lg transition ${currentSizeKey === 'medium' ? 'bg-gold text-brandDark shadow' : 'text-gray-400 hover:text-white'}"> وسط (${pMed}) </button> <button onclick="selectPizzaSize('${item.id}', 'large')" class="size-btn-${item.id} text-[11px] font-bold px-2.5 py-1 rounded-lg transition ${currentSizeKey === 'large' ? 'bg-gold text-brandDark shadow' : 'text-gray-400 hover:text-white'}"> كبير (${pLrg}) </button> </div> </div> </div> <div class="flex items-center justify-between pt-3 border-t border-gray-800/80 mt-2"> <span id="price-display-${item.id}" class="text-xs text-gold font-black">${price.toLocaleString()} ل.س</span> <div id="controls-${item.id}"> ${renderQuantityControls(cartKey, qty, item.id)} </div> </div> </div> `; } const qty = cart[item.id] || 0; const isFatayer = item.category === 'fatayer'; if (isFatayer) { const imageHtml = item.image ? `<div onclick="openImageModal('${item.image}')" class="w-full h-28 rounded-xl overflow-hidden border border-gold/40 shadow-inner mb-2.5 cursor-pointer hover:opacity-95 transition transform hover:scale-105" title="انقر لتكبير الصورة"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover"></div>` : `<div class="w-9 h-9 rounded-xl bg-gold/10 text-gold flex items-center justify-center mb-2.5 border border-gold/20"><i class="fa-solid ${item.icon} text-base"></i></div>`; return ` <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-3.5 flex flex-col justify-between transition shadow-xl relative group" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}"> <div> ${imageHtml} <h3 class="font-black text-sm text-amber-100 mb-1 leading-tight">${item.name}</h3> <p class="text-[11px] text-gray-400 line-clamp-2">${item.desc}</p> </div> <div class="mt-4 pt-2.5 border-t border-gray-800/80 flex items-center justify-between"> <span class="text-xs text-gold font-black">${item.price ? item.price.toLocaleString() + ' ل.س' : ''}</span> <div class="flex items-center gap-1.5" id="controls-${item.id}"> ${renderQuantityControls(item.id, qty)} </div> </div> </div> `; } const imageHtml = item.image ? `<div onclick="openImageModal('${item.image}')" class="w-12 h-12 rounded-xl overflow-hidden border border-gold/40 shadow-inner shrink-0 cursor-pointer hover:opacity-95 transition transform hover:scale-105" title="انقر لتكبير الصورة"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover"></div>` : `<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-950 to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0"><i class="fa-solid ${item.icon} text-xl"></i></div>`; return ` <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex items-center justify-between transition shadow-xl" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}"> <div class="flex items-center gap-3.5"> ${imageHtml} <div> <h3 class="font-black text-base text-amber-100 mb-0.5">${item.name}</h3> <p class="text-xs text-gray-400 leading-relaxed">${item.desc}</p> </div> </div> <div class="shrink-0 mr-2" id="controls-${item.id}"> ${renderQuantityControls(item.id, qty)} </div> </div> `; } function selectPizzaSize(itemId, sizeKey) { pizzaSelectedSizes[itemId] = sizeKey; const item = menuData.find(i => i.id === itemId); const priceDisplay = document.getElementById(`price-display-${itemId}`); const controlsContainer = document.getElementById(`controls-${itemId}`); const currentPrice = getPizzaPrice(item, sizeKey); if (priceDisplay) { priceDisplay.innerText = `${currentPrice.toLocaleString()} ل.س`; } const cartKey = `${itemId}_${sizeKey}`; const qty = cart[cartKey] || 0; if (controlsContainer) { controlsContainer.innerHTML = renderQuantityControls(cartKey, qty, itemId); } const buttons = document.querySelectorAll(`.size-btn-${itemId}`); buttons.forEach(btn => { btn.classList.remove('bg-gold', 'text-brandDark', 'shadow'); btn.classList.add('text-gray-400'); }); event.currentTarget.classList.remove('text-gray-400'); event.currentTarget.classList.add('bg-gold', 'text-brandDark', 'shadow'); } function openImageModal(imgSrc) { const modal = document.getElementById('imageModal'); const modalImg = document.getElementById('modalImageSrc'); modalImg.src = imgSrc; modal.style.display = 'flex'; } function closeImageModal() { const modal = document.getElementById('imageModal'); modal.style.display = 'none'; } function renderQuantityControls(cartKey, qty, itemId = null) { const targetId = itemId ? itemId : cartKey; if (qty > 0) { return ` <div class="flex items-center bg-black/70 border border-gold/40 rounded-xl p-1 shadow-md"> <button onclick="updateQty('${cartKey}', -1, '${targetId}')" class="w-7 h-7 bg-brandRed hover:bg-red-900 text-white rounded-lg flex items-center justify-center font-black text-xs transition active:scale-90 shadow"> <i class="fa-solid fa-minus"></i> </button> <span class="w-7 text-center text-xs font-black text-gold">${qty}</span> <button onclick="updateQty('${cartKey}', 1, '${targetId}')" class="w-7 h-7 bg-gold hover:bg-goldHover text-brandDark rounded-lg flex items-center justify-center font-black text-xs transition active:scale-90 shadow"> <i class="fa-solid fa-plus"></i> </button> </div> `; } return ` <button onclick="updateQty('${cartKey}', 1, '${targetId}')" class="bg-gradient-to-r from-gold to-amber-500 hover:from-amber-500 hover:to-gold text-brandDark font-black text-xs px-3.5 py-2 rounded-xl border border-gold/50 shadow-lg transition-transform active:scale-95 flex items-center gap-1.5"> <i class="fa-solid fa-plus text-[10px]"></i> <span>أضف</span> </button> `; } function updateQty(cartKey, change, itemId) { const current = cart[cartKey] || 0; const updated = current + change; if (updated <= 0) { delete cart[cartKey]; } else { cart[cartKey] = updated; } const container = document.getElementById(`controls-${itemId}`); if (container) { container.innerHTML = renderQuantityControls(cartKey, cart[cartKey] || 0, itemId); } updateCartSummary(); renderCartModalList(); } function getItemDetailsFromCartKey(cartKey) { if (cartKey.includes('_')) { const [id, sizeKey] = cartKey.split('_'); const item = menuData.find(i => i.id === id); const price = getPizzaPrice(item, sizeKey); const sizeLabel = REGULAR_PIZZA_SIZES[sizeKey].label; return { name: `${item.name} (${sizeLabel})`, price: price, category: item.category }; } else { const item = menuData.find(i => i.id === cartKey); return { name: item.name, price: item.price || null, category: item.category }; } } function updateCartSummary() { let totalItems = 0; let totalPriceNew = 0; for (let cartKey in cart) { const details = getItemDetailsFromCartKey(cartKey); if (details) { totalItems += cart[cartKey]; if (details.price) { totalPriceNew += details.price * cart[cartKey]; } } } const totalPriceOld = totalPriceNew * OLD_CURRENCY_MULTIPLIER; document.getElementById('cartBadge').innerText = totalItems; const priceText = totalPriceNew > 0 ? ` (${totalPriceNew.toLocaleString()} ل.س)` : ''; document.getElementById('cartCountText').innerText = `${totalItems} صنف${priceText}`; document.getElementById('modalTotalItemsCount').innerText = `${totalItems} قطعة`; document.getElementById('modalTotalNewCurrency').innerText = `${totalPriceNew.toLocaleString()} ل.س`; document.getElementById('modalTotalOldCurrency').innerText = `${totalPriceOld.toLocaleString()} ليرة قديمة`; } function filterCategory(cat) { currentCategory = cat; document.querySelectorAll('#categoryTabs .cat-btn').forEach(btn => { btn.classList.remove('active', 'bg-gold', 'text-brandDark', 'font-black', 'shadow-md'); btn.classList.add('bg-brandCard', 'text-gray-300', 'font-bold'); }); event.currentTarget.classList.remove('bg-brandCard', 'text-gray-300'); event.currentTarget.classList.add('active', 'bg-gold', 'text-brandDark', 'font-black', 'shadow-md'); const secPizza = document.getElementById('sec-pizza'); const secMeat = document.getElementById('sec-meat'); const secFatayer = document.getElementById('sec-fatayer'); if (cat === 'all') { secPizza.classList.remove('hidden'); secMeat.classList.remove('hidden'); secFatayer.classList.remove('hidden'); } else if (cat === 'pizza') { secPizza.classList.remove('hidden'); secMeat.classList.add('hidden'); secFatayer.classList.add('hidden'); } else if (cat === 'meat') { secPizza.classList.add('hidden'); secMeat.classList.remove('hidden'); secFatayer.classList.add('hidden'); } else if (cat === 'fatayer') { secPizza.classList.add('hidden'); secMeat.classList.add('hidden'); secFatayer.classList.remove('hidden'); } document.getElementById('searchInput').value = ''; document.getElementById('clearSearch').classList.add('hidden'); document.getElementById('noResults').classList.add('hidden'); } function filterMenuItems(query) { const cards = document.querySelectorAll('.menu-card'); let visibleCount = 0; cards.forEach(card => { const name = card.getAttribute('data-name').toLowerCase(); const category = card.getAttribute('data-category'); const matchesQuery = name.includes(query); const matchesCat = (currentCategory === 'all' || currentCategory === category); if (matchesQuery && matchesCat) { card.classList.remove('hidden'); visibleCount++; } else { card.classList.add('hidden'); } }); const noResults = document.getElementById('noResults'); if (visibleCount === 0) { noResults.classList.remove('hidden'); } else { noResults.classList.add('hidden'); } } function toggleCartModal() { const modal = document.getElementById('cartModal'); if (modal.classList.contains('hidden')) { renderCartModalList(); modal.classList.remove('hidden'); modal.classList.add('flex'); } else { modal.classList.add('hidden'); modal.classList.remove('flex'); } } function renderCartModalList() { const container = document.getElementById('cartItemsList'); const emptyView = document.getElementById('emptyCartView'); container.innerHTML = ''; const cartKeys = Object.keys(cart); if (cartKeys.length === 0) { emptyView.classList.remove('hidden'); container.classList.add('hidden'); return; } emptyView.classList.add('hidden'); container.classList.remove('hidden'); cartKeys.forEach(cartKey => { const details = getItemDetailsFromCartKey(cartKey); if (!details) return; const qty = cart[cartKey]; const itemTotalNew = details.price ? details.price * qty : null; const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey; const priceSubText = details.price ? `${details.price.toLocaleString()} ل.س × ${qty} = ${itemTotalNew.toLocaleString()} ل.س` : `العدد: ${qty}`; const row = document.createElement('div'); row.className = 'py-3.5 flex items-center justify-between gap-3'; row.innerHTML = ` <div> <h4 class="font-black text-sm text-amber-100">${details.name}</h4> <span class="text-[11px] text-gold font-bold">${priceSubText}</span> </div> <div class="flex items-center gap-1.5 bg-black/60 border border-gray-700 rounded-xl p-1"> <button onclick="updateQty('${cartKey}', -1, '${itemId}')" class="w-6.5 h-6.5 bg-brandRed text-white rounded-lg flex items-center justify-center font-black text-xs shadow"> <i class="fa-solid fa-minus"></i> </button> <span class="w-6.5 text-center text-xs font-black text-gold">${qty}</span> <button onclick="updateQty('${cartKey}', 1, '${itemId}')" class="w-6.5 h-6.5 bg-gold text-brandDark rounded-lg flex items-center justify-center font-black text-xs shadow"> <i class="fa-solid fa-plus"></i> </button> </div> `; container.appendChild(row); }); } function sendOrderWhatsApp() { const cartKeys = Object.keys(cart); if (cartKeys.length === 0) { alert('سلتك فارغة! يرجى اختيار بعض الوجبات أولاً قبل إرسال الطلب.'); return; } let message = `*طلب جديد من منيو العسسي الإلكتروني:*%0A%0A`; let counter = 1; let totalPriceNew = 0; let hasPrice = false; cartKeys.forEach(cartKey => { const details = getItemDetailsFromCartKey(cartKey); if (details) { if (details.price) { const itemTotal = details.price * cart[cartKey]; totalPriceNew += itemTotal; hasPrice = true; message += `${counter}. *${details.name}* × (${cart[cartKey]}) = ${itemTotal.toLocaleString()} ل.س%0A`; } else { message += `${counter}. *${details.name}* × (${cart[cartKey]})%0A`; } counter++; } }); if (hasPrice) { const totalPriceOld = totalPriceNew * OLD_CURRENCY_MULTIPLIER; message += `%0A*المجموع (بالعملة الجديدة):* ${totalPriceNew.toLocaleString()} ل.س`; message += `%0A*المجموع (بالعملة القديمة):* ${totalPriceOld.toLocaleString()} ليرة قديمة%0A`; } const payMethodSelect = document.getElementById('paymentMethod'); const selectedPayMethod = payMethodSelect ? payMethodSelect.value : 'cash'; if (selectedPayMethod === 'shamcash') { message += `%0A*طريقة الدفع المطلوبة:* 📱 شام كاش%0A`; message += `*معرّف الحساب:* \`99d44072c6a3c3b1f926e0571e9c416c\`%0A`; } else { message += `%0A*طريقة الدفع المطلوبة:* 💵 نقداً عند الاستلام%0A`; } const notes = document.getElementById('orderNotes').value.trim(); if (notes) { message += `%0A*ملاحظات/عنوان التوصيل:*%0A${encodeURIComponent(notes)}%0A`; } message += `%0A*يرجى تأكيد الطلب والتجهيز. شكراً لكم!*`; const phone = "963942568502"; const whatsappUrl = `https://wa.me/${phone}?text=${message}`; window.open(whatsappUrl, '_blank'); } ⚙️ الإدارة 
+            const storedOrders = localStorage.getItem('asasi_orders');
+            if (storedOrders) {
+                liveOrders = JSON.parse(storedOrders);
+            }
 
-لوحة التحكم - العسسي
+            updateUIFromSettings();
+        }
 
-تعديل السعر أو حالة الصنف وتظهر التعديلات لجميع الزبائن.
+        function saveMenuToStorage() {
+            localStorage.setItem('asasi_menu', JSON.stringify(menuData));
+        }
 
-إغلاق 
+        function saveSettingsToStorage() {
+            localStorage.setItem('asasi_settings', JSON.stringify(appSettings));
+        }
 
-let adminUnlocked=false; // مزامنة عامة عبر قاعدة البيانات (Firebase Realtime Database) // ضع إعدادات Firebase الخاصة بك هنا const firebaseConfig = { apiKey: "ضع_api_key", authDomain: "ضع_auth_domain", databaseURL: "https://alasase2026-690e4-default-rtdb.firebaseio.com", projectId: "ضع_project_id" }; function openAdmin(){ const pass=prompt("ادخل كلمة سر الإدارة"); if(pass==="Yaser1738"){ adminUnlocked=true; document.getElementById("adminPanel").classList.remove("hidden"); renderAdminPanel(); }else if(pass!==null){ alert("كلمة السر غير صحيحة"); } } function closeAdmin(){ document.getElementById("adminPanel").classList.add("hidden"); } function applyMenuUpdate(id,data){ const item=menuData.find(x=>x.id===id); if(item){ if(data.price!==undefined) item.price=Number(data.price); if(data.hidden!==undefined) item.hidden=data.hidden; } } function renderAdminPanel(){ const box=document.getElementById("adminItems"); box.innerHTML=""; menuData.forEach(item=>{ box.innerHTML+=` <div class="bg-black/50 rounded-xl p-3 border border-gold/20"> <b class="text-amber-100">${item.name}</b> <input id="price_${item.id}" type="number" value="${item.price||0}" class="w-full mt-2 bg-black border rounded p-2 text-white"> <label class="text-xs block mt-2"><input id="hide_${item.id}" type="checkbox" ${item.hidden?'checked':''}> غير متوفر</label> <button onclick="saveAdminItem('${item.id}')" class="w-full mt-2 bg-gold text-black rounded p-1 font-bold">حفظ</button> </div>`; }); } function saveAdminItem(id){ const data={ price:Number(document.getElementById("price_"+id).value), hidden:document.getElementById("hide_"+id).checked }; applyMenuUpdate(id,data); // حفظ محلي مؤقت saveFirebaseItem(id,data); renderMenu(); alert("تم الحفظ وسيظهر التعديل للجميع بعد تفعيل قاعدة البيانات."); }
+        function saveOrdersToStorage() {
+            localStorage.setItem('asasi_orders', JSON.stringify(liveOrders));
+        }
+
+        function updateUIFromSettings() {
+            document.getElementById('displayPhoneNumber').innerText = appSettings.phone;
+            document.getElementById('displayPhoneLink').href = `tel:${appSettings.phone}`;
+            document.getElementById('footerPhoneLink').href = `tel:${appSettings.phone}`;
+            document.getElementById('footerPhoneLink').innerText = appSettings.phone;
+            document.getElementById('callActionBtn').href = `tel:${appSettings.phone}`;
+
+            document.getElementById('settingPhone').value = appSettings.phone;
+            document.getElementById('settingWhatsApp').value = appSettings.whatsapp;
+            document.getElementById('settingCurrencyMultiplier').value = appSettings.multiplier;
+            document.getElementById('settingAdminPin').value = appSettings.adminPin;
+        }
+
+        // App Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            initStorage();
+            renderMenu();
+
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const query = e.target.value.trim().toLowerCase();
+                const clearBtn = document.getElementById('clearSearch');
+                if (query.length > 0) clearBtn.classList.remove('hidden');
+                else clearBtn.classList.add('hidden');
+                filterMenuItems(query);
+            });
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+
+        // Mode Navigation
+        function switchView(mode) {
+            const custApp = document.getElementById('customerApp');
+            const adminApp = document.getElementById('adminApp');
+            const custBtn = document.getElementById('viewCustomerBtn');
+            const adminBtn = document.getElementById('viewAdminBtn');
+
+            if (mode === 'admin') {
+                if (!isAdminLoggedIn) {
+                    openAdminAuthModal();
+                    return;
+                }
+                custApp.classList.add('hidden');
+                adminApp.classList.remove('hidden');
+                custBtn.classList.remove('bg-gold', 'text-brandDark');
+                custBtn.classList.add('bg-brandCard', 'text-gray-300');
+                adminBtn.classList.add('bg-gold', 'text-brandDark');
+                adminBtn.classList.remove('bg-brandCard', 'text-gray-300');
+                renderAdminDashboard();
+            } else {
+                custApp.classList.remove('hidden');
+                adminApp.classList.add('hidden');
+                adminBtn.classList.remove('bg-gold', 'text-brandDark');
+                adminBtn.classList.add('bg-brandCard', 'text-gray-300');
+                custBtn.classList.add('bg-gold', 'text-brandDark');
+                custBtn.classList.remove('bg-brandCard', 'text-gray-300');
+                renderMenu();
+            }
+        }
+
+        // Admin Auth
+        function openAdminAuthModal() {
+            if (isAdminLoggedIn) {
+                switchView('admin');
+                return;
+            }
+            document.getElementById('adminPinInput').value = '';
+            document.getElementById('pinErrorMsg').classList.add('hidden');
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+            document.getElementById('adminAuthModal').classList.add('flex');
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+            document.getElementById('adminAuthModal').classList.remove('flex');
+        }
+
+        function verifyAdminPin() {
+            const entered = document.getElementById('adminPinInput').value;
+            if (entered === appSettings.adminPin) {
+                isAdminLoggedIn = true;
+                closeAdminAuthModal();
+                switchView('admin');
+                showToast('مرحباً بك في لوحة تحكم الإدارة');
+            } else {
+                document.getElementById('pinErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        // Price Helpers
+        function getItemPrice(item, sizeKey) {
+            if (item.hasSizes && item.sizes) {
+                if (item.sizes[sizeKey]) return item.sizes[sizeKey].price;
+                return DEFAULT_REGULAR_PIZZA_SIZES[sizeKey].price;
+            }
+            return item.price || 0;
+        }
+
+        // Menu Rendering
+        function renderMenu() {
+            const pizzaContainer = document.getElementById('pizza-container');
+            const meatContainer = document.getElementById('meat-container');
+            const fatayerContainer = document.getElementById('fatayer-container');
+
+            pizzaContainer.innerHTML = '';
+            meatContainer.innerHTML = '';
+            fatayerContainer.innerHTML = '';
+
+            menuData.filter(i => i.available !== false).forEach(item => {
+                const cardHtml = createCardHTML(item);
+                if (item.category === 'pizza') pizzaContainer.innerHTML += cardHtml;
+                else if (item.category === 'meat') meatContainer.innerHTML += cardHtml;
+                else if (item.category === 'fatayer') fatayerContainer.innerHTML += cardHtml;
+            });
+        }
+
+        function createCardHTML(item) {
+            if (item.hasSizes) {
+                const currentSizeKey = pizzaSelectedSizes[item.id] || 'medium';
+                const price = getItemPrice(item, currentSizeKey);
+                const cartKey = `${item.id}_${currentSizeKey}`;
+                const qty = cart[cartKey] || 0;
+
+                const pSmall = getItemPrice(item, 'small').toLocaleString();
+                const pMed = getItemPrice(item, 'medium').toLocaleString();
+                const pLrg = getItemPrice(item, 'large').toLocaleString();
+
+                return `
+                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-xl p-3.5 flex flex-col justify-between transition shadow-md" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brandRedDark to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0 mt-1">
+                                <i class="fa-solid ${item.icon || 'fa-pizza-slice'} text-xl"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-extrabold text-base text-amber-100 mb-0.5">${item.name}</h3>
+                                <p class="text-xs text-amber-200/90 font-medium mb-2 leading-relaxed bg-black/20 p-1.5 rounded border border-gold/10">${item.desc || ''}</p>
+                                
+                                <div class="flex flex-wrap items-center gap-1 mb-2 bg-black/40 p-1 rounded-lg border border-gold/20 max-w-fit">
+                                    <button onclick="selectPizzaSize('${item.id}', 'small')" class="size-btn-${item.id} text-[11px] font-bold px-2 py-0.5 rounded transition ${currentSizeKey === 'small' ? 'bg-gold text-brandDark' : 'text-gray-400 hover:text-white'}">
+                                        صغير (${pSmall} ل.س)
+                                    </button>
+                                    <button onclick="selectPizzaSize('${item.id}', 'medium')" class="size-btn-${item.id} text-[11px] font-bold px-2 py-0.5 rounded transition ${currentSizeKey === 'medium' ? 'bg-gold text-brandDark' : 'text-gray-400 hover:text-white'}">
+                                        وسط (${pMed} ل.س)
+                                    </button>
+                                    <button onclick="selectPizzaSize('${item.id}', 'large')" class="size-btn-${item.id} text-[11px] font-bold px-2 py-0.5 rounded transition ${currentSizeKey === 'large' ? 'bg-gold text-brandDark' : 'text-gray-400 hover:text-white'}">
+                                        كبير (${pLrg} ل.س)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-800 mt-1">
+                            <span id="price-display-${item.id}" class="text-xs text-gold font-bold">${price.toLocaleString()} ل.س</span>
+                            <div id="controls-${item.id}">
+                                ${renderQuantityControls(cartKey, qty, item.id)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const qty = cart[item.id] || 0;
+            const isFatayer = item.category === 'fatayer';
+
+            if (isFatayer) {
+                return `
+                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-xl p-3 flex flex-col justify-between transition shadow-md relative group" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                        <div>
+                            <div class="w-8 h-8 rounded-full bg-gold/10 text-gold flex items-center justify-center mb-2">
+                                <i class="fa-solid ${item.icon || 'fa-bread-slice'} text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-sm text-amber-100 mb-1 leading-tight">${item.name}</h3>
+                            <p class="text-[11px] text-gray-400 line-clamp-1">${item.desc || ''}</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-800 flex items-center justify-between">
+                            <span class="text-xs text-gold font-bold">${item.price ? item.price.toLocaleString() + ' ل.س' : ''}</span>
+                            <div class="flex items-center gap-1.5" id="controls-${item.id}">
+                                ${renderQuantityControls(item.id, qty)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-xl p-3.5 flex items-center justify-between transition shadow-md" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brandRedDark to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0">
+                            <i class="fa-solid ${item.icon || 'fa-fire'} text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-base text-amber-100 mb-0.5">${item.name}</h3>
+                            <p class="text-xs text-gray-400 leading-relaxed">${item.desc || ''}</p>
+                        </div>
+                    </div>
+                    <div class="shrink-0 mr-2" id="controls-${item.id}">
+                        ${renderQuantityControls(item.id, qty)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectPizzaSize(itemId, sizeKey) {
+            pizzaSelectedSizes[itemId] = sizeKey;
+            
+            const item = menuData.find(i => i.id === itemId);
+            if (!item) return;
+
+            const priceDisplay = document.getElementById(`price-display-${itemId}`);
+            const controlsContainer = document.getElementById(`controls-${itemId}`);
+            
+            const currentPrice = getItemPrice(item, sizeKey);
+
+            if (priceDisplay) {
+                priceDisplay.innerText = `${currentPrice.toLocaleString()} ل.س`;
+            }
+
+            const cartKey = `${itemId}_${sizeKey}`;
+            const qty = cart[cartKey] || 0;
+            if (controlsContainer) {
+                controlsContainer.innerHTML = renderQuantityControls(cartKey, qty, itemId);
+            }
+
+            const buttons = document.querySelectorAll(`.size-btn-${itemId}`);
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-gold', 'text-brandDark');
+                btn.classList.add('text-gray-400');
+            });
+            event.currentTarget.classList.remove('text-gray-400');
+            event.currentTarget.classList.add('bg-gold', 'text-brandDark');
+        }
+
+        function renderQuantityControls(cartKey, qty, itemId = null) {
+            const targetId = itemId ? itemId : cartKey;
+            if (qty > 0) {
+                return `
+                    <div class="flex items-center bg-black/60 border border-gold/40 rounded-lg p-0.5 shadow">
+                        <button onclick="updateQty('${cartKey}', -1, '${targetId}')" class="w-7 h-7 bg-brandRed hover:bg-brandRedDark text-white rounded flex items-center justify-center font-bold text-xs transition active:scale-90">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <span class="w-7 text-center text-xs font-black text-gold">${qty}</span>
+                        <button onclick="updateQty('${cartKey}', 1, '${targetId}')" class="w-7 h-7 bg-gold hover:bg-goldHover text-brandDark rounded flex items-center justify-center font-bold text-xs transition active:scale-90">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                `;
+            }
+            return `
+                <button onclick="updateQty('${cartKey}', 1, '${targetId}')" class="bg-gradient-to-r from-gold to-amber-500 hover:from-amber-500 hover:to-gold text-brandDark font-extrabold text-xs px-3 py-1.5 rounded-lg border border-gold/50 shadow transition-transform active:scale-95 flex items-center gap-1">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>أضف</span>
+                </button>
+            `;
+        }
+
+        function updateQty(cartKey, change, itemId) {
+            const current = cart[cartKey] || 0;
+            const updated = current + change;
+
+            if (updated <= 0) {
+                delete cart[cartKey];
+            } else {
+                cart[cartKey] = updated;
+            }
+
+            const container = document.getElementById(`controls-${itemId}`);
+            if (container) {
+                container.innerHTML = renderQuantityControls(cartKey, cart[cartKey] || 0, itemId);
+            }
+
+            updateCartSummary();
+            renderCartModalList();
+        }
+
+        function getItemDetailsFromCartKey(cartKey) {
+            if (cartKey.includes('_')) {
+                const [id, sizeKey] = cartKey.split('_');
+                const item = menuData.find(i => i.id === id);
+                if (!item) return null;
+                const price = getItemPrice(item, sizeKey);
+                const sizeLabel = DEFAULT_REGULAR_PIZZA_SIZES[sizeKey] ? DEFAULT_REGULAR_PIZZA_SIZES[sizeKey].label : sizeKey;
+                return {
+                    name: `${item.name} (${sizeLabel})`,
+                    price: price,
+                    category: item.category
+                };
+            } else {
+                const item = menuData.find(i => i.id === cartKey);
+                if (!item) return null;
+                return {
+                    name: item.name,
+                    price: item.price || null,
+                    category: item.category
+                };
+            }
+        }
+
+        function updateCartSummary() {
+            let totalItems = 0;
+            let totalPriceNew = 0;
+
+            for (let cartKey in cart) {
+                const details = getItemDetailsFromCartKey(cartKey);
+                if (details) {
+                    totalItems += cart[cartKey];
+                    if (details.price) {
+                        totalPriceNew += details.price * cart[cartKey];
+                    }
+                }
+            }
+
+            const totalPriceOld = totalPriceNew * appSettings.multiplier;
+
+            document.getElementById('cartBadge').innerText = totalItems;
+            
+            const priceText = totalPriceNew > 0 ? ` (${totalPriceNew.toLocaleString()} ل.س)` : '';
+            document.getElementById('cartCountText').innerText = `${totalItems} صنف${priceText}`;
+            
+            document.getElementById('modalTotalItemsCount').innerText = `${totalItems} قطعة`;
+            document.getElementById('modalTotalNewCurrency').innerText = `${totalPriceNew.toLocaleString()} ل.س`;
+            document.getElementById('modalTotalOldCurrency').innerText = `${totalPriceOld.toLocaleString()} ليرة قديمة`;
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+
+            document.querySelectorAll('#categoryTabs .cat-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-gold', 'text-brandDark', 'font-bold');
+                btn.classList.add('bg-brandCard', 'text-gray-300', 'font-semibold');
+            });
+
+            event.currentTarget.classList.remove('bg-brandCard', 'text-gray-300');
+            event.currentTarget.classList.add('active', 'bg-gold', 'text-brandDark', 'font-bold');
+
+            const secPizza = document.getElementById('sec-pizza');
+            const secMeat = document.getElementById('sec-meat');
+            const secFatayer = document.getElementById('sec-fatayer');
+
+            if (cat === 'all') {
+                secPizza.classList.remove('hidden');
+                secMeat.classList.remove('hidden');
+                secFatayer.classList.remove('hidden');
+            } else if (cat === 'pizza') {
+                secPizza.classList.remove('hidden');
+                secMeat.classList.add('hidden');
+                secFatayer.classList.add('hidden');
+            } else if (cat === 'meat') {
+                secPizza.classList.add('hidden');
+                secMeat.classList.remove('hidden');
+                secFatayer.classList.add('hidden');
+            } else if (cat === 'fatayer') {
+                secPizza.classList.add('hidden');
+                secMeat.classList.add('hidden');
+                secFatayer.classList.remove('hidden');
+            }
+
+            resetSearch();
+        }
+
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            filterMenuItems('');
+        }
+
+        function filterMenuItems(query) {
+            const cards = document.querySelectorAll('.menu-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name').toLowerCase();
+                const category = card.getAttribute('data-category');
+
+                const matchesQuery = name.includes(query);
+                const matchesCat = (currentCategory === 'all' || currentCategory === category);
+
+                if (matchesQuery && matchesCat) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            const noResults = document.getElementById('noResults');
+            if (visibleCount === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
+
+        function toggleCartModal() {
+            const modal = document.getElementById('cartModal');
+            if (modal.classList.contains('hidden')) {
+                renderCartModalList();
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function renderCartModalList() {
+            const container = document.getElementById('cartItemsList');
+            const emptyView = document.getElementById('emptyCartView');
+
+            container.innerHTML = '';
+
+            const cartKeys = Object.keys(cart);
+            if (cartKeys.length === 0) {
+                emptyView.classList.remove('hidden');
+                container.classList.add('hidden');
+                return;
+            }
+
+            emptyView.classList.add('hidden');
+            container.classList.remove('hidden');
+
+            cartKeys.forEach(cartKey => {
+                const details = getItemDetailsFromCartKey(cartKey);
+                if (!details) return;
+
+                const qty = cart[cartKey];
+                const itemTotalNew = details.price ? details.price * qty : null;
+                const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+
+                const priceSubText = details.price 
+                    ? `${details.price.toLocaleString()} ل.س × ${qty} = ${itemTotalNew.toLocaleString()} ل.س`
+                    : `العدد: ${qty}`;
+
+                const row = document.createElement('div');
+                row.className = 'py-3 flex items-center justify-between gap-2';
+                row.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-sm text-amber-100">${details.name}</h4>
+                        <span class="text-[11px] text-gold font-semibold">${priceSubText}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-black/50 border border-gray-700 rounded-lg p-1">
+                        <button onclick="updateQty('${cartKey}', -1, '${itemId}')" class="w-6 h-6 bg-brandRed text-white rounded flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <span class="w-6 text-center text-xs font-bold text-gold">${qty}</span>
+                        <button onclick="updateQty('${cartKey}', 1, '${itemId}')" class="w-6 h-6 bg-gold text-brandDark rounded flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function sendOrderWhatsApp() {
+            const cartKeys = Object.keys(cart);
+            if (cartKeys.length === 0) {
+                showToast('سلتك فارغة! اختر بعض الوجبات أولاً');
+                return;
+            }
+
+            let message = `*طلب جديد من منيو العسسي الإلكتروني:*%0A%0A`;
+            let counter = 1;
+            let totalPriceNew = 0;
+            let hasPrice = false;
+
+            cartKeys.forEach(cartKey => {
+                const details = getItemDetailsFromCartKey(cartKey);
+                if (details) {
+                    if (details.price) {
+                        const itemTotal = details.price * cart[cartKey];
+                        totalPriceNew += itemTotal;
+                        hasPrice = true;
+                        message += `${counter}. *${details.name}* × (${cart[cartKey]}) = ${itemTotal.toLocaleString()} ل.س%0A`;
+                    } else {
+                        message += `${counter}. *${details.name}* × (${cart[cartKey]})%0A`;
+                    }
+                    counter++;
+                }
+            });
+
+            if (hasPrice) {
+                const totalPriceOld = totalPriceNew * appSettings.multiplier;
+                message += `%0A*المجموع (بالعملة الجديدة):* ${totalPriceNew.toLocaleString()} ل.س`;
+                message += `%0A*المجموع (بالعملة القديمة):* ${totalPriceOld.toLocaleString()} ليرة قديمة%0A`;
+            }
+
+            const notes = document.getElementById('orderNotes').value.trim();
+            if (notes) {
+                message += `%0A*ملاحظات/عنوان التوصيل:*%0A${encodeURIComponent(notes)}%0A`;
+            }
+
+            message += `%0A*يرجى تأكيد الطلب والتجهيز. شكراً لكم!*`;
+
+            const phone = appSettings.whatsapp || "963942568502";
+            const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function submitDirectOrder() {
+            const cartKeys = Object.keys(cart);
+            if (cartKeys.length === 0) {
+                showToast('سلتك فارغة!');
+                return;
+            }
+
+            const itemsList = [];
+            let totalNew = 0;
+
+            cartKeys.forEach(cartKey => {
+                const details = getItemDetailsFromCartKey(cartKey);
+                if (details) {
+                    const qty = cart[cartKey];
+                    const itemTotal = details.price ? details.price * qty : 0;
+                    totalNew += itemTotal;
+                    itemsList.push({
+                        name: details.name,
+                        qty: qty,
+                        price: details.price,
+                        subtotal: itemTotal
+                    });
+                }
+            });
+
+            const newOrder = {
+                id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+                time: new Date().toLocaleTimeString('ar-SY', { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString('ar-SY'),
+                items: itemsList,
+                total: totalNew,
+                notes: document.getElementById('orderNotes').value.trim(),
+                status: 'pending' // pending, preparing, delivering, completed, canceled
+            };
+
+            liveOrders.unshift(newOrder);
+            saveOrdersToStorage();
+
+            cart = {};
+            updateCartSummary();
+            toggleCartModal();
+            document.getElementById('orderNotes').value = '';
+
+            showToast('تم إرسال طلبك بنجاح لوحة الإدارة!');
+        }
+
+        // ================= ADMIN DASHBOARD FUNCTIONS =================
+
+        function renderAdminDashboard() {
+            renderAdminStats();
+            renderAdminOrders();
+            renderAdminMenuItems();
+        }
+
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab').forEach(el => {
+                el.classList.remove('bg-gold', 'text-brandDark', 'font-extrabold');
+                el.classList.add('bg-brandCard', 'text-gray-300');
+            });
+
+            if (tab === 'orders') {
+                document.getElementById('adminTabOrders').classList.remove('hidden');
+                document.getElementById('tabBtnOrders').classList.add('bg-gold', 'text-brandDark', 'font-extrabold');
+            } else if (tab === 'menu') {
+                document.getElementById('adminTabMenu').classList.remove('hidden');
+                document.getElementById('tabBtnMenu').classList.add('bg-gold', 'text-brandDark', 'font-extrabold');
+            } else if (tab === 'settings') {
+                document.getElementById('adminTabSettings').classList.remove('hidden');
+                document.getElementById('tabBtnSettings').classList.add('bg-gold', 'text-brandDark', 'font-extrabold');
+            }
+        }
+
+        function renderAdminStats() {
+            const pendingOrders = liveOrders.filter(o => o.status === 'pending').length;
+            const completedOrders = liveOrders.filter(o => o.status === 'completed');
+            const totalSalesSum = completedOrders.reduce((sum, o) => sum + o.total, 0);
+
+            document.getElementById('statNewOrders').innerText = pendingOrders;
+            document.getElementById('statTotalSales').innerText = `${totalSalesSum.toLocaleString()} ل.س`;
+            document.getElementById('statTotalItems').innerText = menuData.length;
+            document.getElementById('statCompletedOrders').innerText = completedOrders.length;
+        }
+
+        function renderAdminOrders() {
+            const container = document.getElementById('adminOrdersContainer');
+            container.innerHTML = '';
+
+            if (liveOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-brandCard rounded-xl border border-gold/20">
+                        <i class="fa-solid fa-inbox text-3xl text-gray-600 mb-2"></i>
+                        <p class="text-xs text-gray-400">لا يوجد أي طلبات واردة حالياً</p>
+                    </div>
+                `;
+                return;
+            }
+
+            liveOrders.forEach(order => {
+                const statusBadges = {
+                    pending: { text: 'جديد بانتظار التأكيد', bg: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+                    preparing: { text: 'قيد التحضير والتجهيز', bg: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
+                    delivering: { text: 'جاري التوصيل للزبون', bg: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
+                    completed: { text: 'تم التسليم والمكتمل', bg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
+                    canceled: { text: 'طلب ملغى', bg: 'bg-red-500/20 text-red-300 border-red-500/40' },
+                };
+
+                const currentBadge = statusBadges[order.status] || statusBadges.pending;
+
+                let itemsHtml = order.items.map(i => `
+                    <div class="flex justify-between text-xs text-gray-300 py-1 border-b border-gray-800">
+                        <span>• ${i.name} (×${i.qty})</span>
+                        <span class="font-bold text-gold">${i.subtotal ? i.subtotal.toLocaleString() + ' ل.س' : ''}</span>
+                    </div>
+                `).join('');
+
+                const card = document.createElement('div');
+                card.className = 'bg-brandCard border border-gold/30 rounded-xl p-4 space-y-3';
+                card.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gold/20 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-gold text-sm">${order.id}</span>
+                            <span class="text-xs text-gray-400">(${order.time})</span>
+                        </div>
+                        <span class="text-[11px] px-2.5 py-0.5 rounded-full border font-bold ${currentBadge.bg}">
+                            ${currentBadge.text}
+                        </span>
+                    </div>
+
+                    <div class="space-y-1">
+                        ${itemsHtml}
+                    </div>
+
+                    ${order.notes ? `
+                        <div class="bg-black/40 p-2 rounded-lg text-xs text-amber-200 border border-gold/10">
+                            <strong>ملاحظات التوصيل:</strong> ${order.notes}
+                        </div>
+                    ` : ''}
+
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-800">
+                        <span class="text-xs font-black text-emerald-400">الإجمالي: ${order.total.toLocaleString()} ل.س</span>
+                        <div class="flex items-center gap-1.5">
+                            <select onchange="updateOrderStatus('${order.id}', this.value)" class="bg-black/60 border border-gold/40 text-xs text-gray-200 rounded-lg p-1.5 focus:outline-none">
+                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>جديد</option>
+                                <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>قيد التحضير</option>
+                                <option value="delivering" ${order.status === 'delivering' ? 'selected' : ''}>جاري التوصيل</option>
+                                <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>مكتمل</option>
+                                <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>إلغاء</option>
+                            </select>
+                            <button onclick="deleteOrder('${order.id}')" class="text-red-400 hover:text-red-300 p-1.5 text-xs">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            const order = liveOrders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                saveOrdersToStorage();
+                renderAdminStats();
+                renderAdminOrders();
+                showToast('تم تحديث حالة الطلب');
+            }
+        }
+
+        function deleteOrder(orderId) {
+            liveOrders = liveOrders.filter(o => o.id !== orderId);
+            saveOrdersToStorage();
+            renderAdminStats();
+            renderAdminOrders();
+            showToast('تم حذف الطلب');
+        }
+
+        function clearAllOrders() {
+            if (confirm('هل أنت تأكد من حذف كافة الطلبات المكتملة والملغاة؟')) {
+                liveOrders = liveOrders.filter(o => o.status !== 'completed' && o.status !== 'canceled');
+                saveOrdersToStorage();
+                renderAdminStats();
+                renderAdminOrders();
+                showToast('تم تنظيف سجل الطلبات');
+            }
+        }
+
+        // Admin Menu Item Management
+        function renderAdminMenuItems() {
+            const container = document.getElementById('adminMenuContainer');
+            container.innerHTML = '';
+
+            menuData.forEach(item => {
+                let priceText = '';
+                if (item.hasSizes && item.sizes) {
+                    priceText = `صغير: ${getItemPrice(item, 'small')} | وسط: ${getItemPrice(item, 'medium')} | كبير: ${getItemPrice(item, 'large')} ل.س`;
+                } else {
+                    priceText = item.price ? `${item.price.toLocaleString()} ل.س` : 'حسب الاختيار';
+                }
+
+                const card = document.createElement('div');
+                card.className = `bg-brandCard border ${item.available !== false ? 'border-gold/20' : 'border-red-900/40 opacity-60'} rounded-xl p-3.5 flex items-center justify-between`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-gold/10 border border-gold/30 text-gold flex items-center justify-center shrink-0">
+                            <i class="fa-solid ${item.icon || 'fa-utensils'} text-base"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-amber-100">${item.name}</h4>
+                            <span class="text-[11px] text-gold font-semibold block">${priceText}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="toggleItemAvailability('${item.id}')" title="توفير/إخفاء" class="w-8 h-8 rounded-lg ${item.available !== false ? 'bg-emerald-600/20 text-emerald-400' : 'bg-red-600/20 text-red-400'} flex items-center justify-center text-xs">
+                            <i class="fa-solid ${item.available !== false ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                        </button>
+                        <button onclick="openEditItemModal('${item.id}')" title="تعديل" class="w-8 h-8 rounded-lg bg-gold/20 text-gold flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="deleteMenuItem('${item.id}')" title="حذف" class="w-8 h-8 rounded-lg bg-red-600/20 text-red-400 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleItemAvailability(itemId) {
+            const item = menuData.find(i => i.id === itemId);
+            if (item) {
+                item.available = item.available === false ? true : false;
+                saveMenuToStorage();
+                renderAdminMenuItems();
+                renderMenu();
+                showToast('تم تحديث توفر الوجبة');
+            }
+        }
+
+        function deleteMenuItem(itemId) {
+            if (confirm('هل أنت متأكد من حذف هذه الوجبة من المنيو؟')) {
+                menuData = menuData.filter(i => i.id !== itemId);
+                saveMenuToStorage();
+                renderAdminMenuItems();
+                renderAdminStats();
+                renderMenu();
+                showToast('تم حذف الوجبة بنجاح');
+            }
+        }
+
+        function restoreDefaultMenu() {
+            if (confirm('هل تريد استعادة جميع الوجبات والأسعار إلى الوضع الافتراضي؟')) {
+                menuData = [...INITIAL_MENU_DATA];
+                saveMenuToStorage();
+                renderAdminMenuItems();
+                renderAdminStats();
+                renderMenu();
+                showToast('تمت استعادة المنيو الافتراضي');
+            }
+        }
+
+        function toggleSizeFields() {
+            const hasSizes = document.getElementById('itemFormHasSizes').checked;
+            const singleBox = document.getElementById('singlePriceBox');
+            const sizesBox = document.getElementById('sizesPriceBox');
+
+            if (hasSizes) {
+                singleBox.classList.add('hidden');
+                sizesBox.classList.remove('hidden');
+            } else {
+                singleBox.classList.remove('hidden');
+                sizesBox.classList.add('hidden');
+            }
+        }
+
+        function openAddItemModal() {
+            document.getElementById('editItemId').value = '';
+            document.getElementById('itemModalTitle').innerText = 'إضافة وجبة جديدة';
+            document.getElementById('itemFormName').value = '';
+            document.getElementById('itemFormCategory').value = 'pizza';
+            document.getElementById('itemFormDesc').value = '';
+            document.getElementById('itemFormPrice').value = '';
+            document.getElementById('itemFormHasSizes').checked = false;
+            document.getElementById('itemPriceSmall').value = '';
+            document.getElementById('itemPriceMedium').value = '';
+            document.getElementById('itemPriceLarge').value = '';
+            document.getElementById('itemFormIcon').value = 'fa-pizza-slice';
+            toggleSizeFields();
+
+            document.getElementById('itemModal').classList.remove('hidden');
+            document.getElementById('itemModal').classList.add('flex');
+        }
+
+        function openEditItemModal(itemId) {
+            const item = menuData.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('editItemId').value = item.id;
+            document.getElementById('itemModalTitle').innerText = 'تعديل الوجبة';
+            document.getElementById('itemFormName').value = item.name;
+            document.getElementById('itemFormCategory').value = item.category;
+            document.getElementById('itemFormDesc').value = item.desc || '';
+            document.getElementById('itemFormPrice').value = item.price || '';
+            
+            const hasSizes = !!item.hasSizes;
+            document.getElementById('itemFormHasSizes').checked = hasSizes;
+            if (hasSizes && item.sizes) {
+                document.getElementById('itemPriceSmall').value = item.sizes.small ? item.sizes.small.price : '';
+                document.getElementById('itemPriceMedium').value = item.sizes.medium ? item.sizes.medium.price : '';
+                document.getElementById('itemPriceLarge').value = item.sizes.large ? item.sizes.large.price : '';
+            }
+
+            document.getElementById('itemFormIcon').value = item.icon || 'fa-utensils';
+            toggleSizeFields();
+
+            document.getElementById('itemModal').classList.remove('hidden');
+            document.getElementById('itemModal').classList.add('flex');
+        }
+
+        function closeItemModal() {
+            document.getElementById('itemModal').classList.add('hidden');
+            document.getElementById('itemModal').classList.remove('flex');
+        }
+
+        function saveMenuItem() {
+            const editId = document.getElementById('editItemId').value;
+            const name = document.getElementById('itemFormName').value.trim();
+            const category = document.getElementById('itemFormCategory').value;
+            const desc = document.getElementById('itemFormDesc').value.trim();
+            const icon = document.getElementById('itemFormIcon').value;
+            const hasSizes = document.getElementById('itemFormHasSizes').checked;
+
+            if (!name) {
+                alert('يرجى كتابة اسم الوجبة');
+                return;
+            }
+
+            let newItemObj = {
+                id: editId ? editId : 'custom_' + Date.now(),
+                name: name,
+                category: category,
+                desc: desc,
+                icon: icon,
+                hasSizes: hasSizes,
+                available: true
+            };
+
+            if (hasSizes) {
+                const sPrice = parseFloat(document.getElementById('itemPriceSmall').value) || 300;
+                const mPrice = parseFloat(document.getElementById('itemPriceMedium').value) || 600;
+                const lPrice = parseFloat(document.getElementById('itemPriceLarge').value) || 1200;
+
+                newItemObj.sizes = {
+                    small: { label: 'صغير', price: sPrice },
+                    medium: { label: 'وسط', price: mPrice },
+                    large: { label: 'كبير', price: lPrice }
+                };
+            } else {
+                newItemObj.price = parseFloat(document.getElementById('itemFormPrice').value) || 0;
+            }
+
+            if (editId) {
+                const idx = menuData.findIndex(i => i.id === editId);
+                if (idx !== -1) menuData[idx] = newItemObj;
+            } else {
+                menuData.push(newItemObj);
+            }
+
+            saveMenuToStorage();
+            closeItemModal();
+            renderAdminMenuItems();
+            renderAdminStats();
+            renderMenu();
+            showToast(editId ? 'تم تعديل الوجبة بنجاح' : 'تم إضافة الوجبة الجديدة');
+        }
+
+        function saveSettings() {
+            appSettings.phone = document.getElementById('settingPhone').value.trim();
+            appSettings.whatsapp = document.getElementById('settingWhatsApp').value.trim();
+            appSettings.multiplier = parseFloat(document.getElementById('settingCurrencyMultiplier').value) || 100;
+            appSettings.adminPin = document.getElementById('settingAdminPin').value.trim() || '1234';
+
+            saveSettingsToStorage();
+            updateUIFromSettings();
+            updateCartSummary();
+            showToast('تم حفظ إعدادات المحل بنجاح');
+        }
+    </script>
+</body>
+</html>
