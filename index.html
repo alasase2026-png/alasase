@@ -47,14 +47,6 @@
             background-image: radial-gradient(#261f1c 1px, transparent 0);
             background-size: 24px 24px;
         }
-        .pulse-badge {
-            animation: pulse 1.8s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.85; }
-            100% { transform: scale(1); opacity: 1; }
-        }
     </style>
 </head>
 <body class="wood-pattern min-h-screen pb-24 text-gray-100 flex flex-col justify-between select-none">
@@ -124,7 +116,7 @@
                 </div>
 
                 <!-- Search Input -->
-                <div class="relative max-w-md mx-auto mt-4">
+                <div class="relative max-w-4xl mx-auto mt-4">
                     <input type="text" id="searchInput" placeholder="ابحث عن وجبتك المفضلة..." 
                         class="w-full bg-black/50 border border-gold/30 rounded-full py-2.5 px-10 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-gold transition shadow-inner">
                     <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3.5 text-gold/60 text-sm"></i>
@@ -237,7 +229,7 @@
                 </div>
                 <div>
                     <h2 class="text-xl font-black text-gold">لوحة تحكم إدارة المطعم</h2>
-                    <p class="text-xs text-gray-400">إدارة الوجبات والأسعار ومتابعة الطلبات المباشرة</p>
+                    <p class="text-xs text-gray-400">إدارة الوجبات والأسعار ومتابعة الطلبات المباشرة (متصل بالإنترنت)</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -312,7 +304,7 @@
                     <span>الطلبات الواردة حديثاً</span>
                 </h3>
                 <button onclick="clearAllOrders()" class="text-xs text-red-400 hover:text-red-300 font-semibold border border-red-500/30 px-3 py-1 rounded-lg">
-                    حذف سجل الطلبات المكتملة
+                    حذف سجل الطلبات
                 </button>
             </div>
             <div id="adminOrdersContainer" class="space-y-3">
@@ -328,7 +320,7 @@
                     <span>قائمة أصناف المنيو</span>
                 </h3>
                 <button onclick="restoreDefaultMenu()" class="text-xs text-amber-300 hover:text-amber-200 border border-gold/30 px-3 py-1 rounded-lg">
-                    إعادة ضبط المنيو للوضع الافتراضي
+                    إعادة ضبط المنيو الافتراضي
                 </button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="adminMenuContainer">
@@ -557,9 +549,44 @@
         </p>
     </footer>
 
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, get, child, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // إعدادات Firebase الخاصة بمشروعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyAo1YH7Riu1ppzNgUJTdxEtjIFOorAUgKY",
+            authDomain: "al-asase2026.firebaseapp.com",
+            databaseURL: "https://al-asase2026-default-rtdb.firebaseio.com/",
+            projectId: "al-asase2026",
+            storageBucket: "al-asase2026.firebasestorage.app",
+            messagingSenderId: "1094218434468",
+            appId: "1:1094218434468:web:b1fa1b2c0ceb88af56e331",
+            measurementId: "G-ETWEW6ZK0J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // تصدير الدوال للاستخدام العام في الصفحة
+        window.FB_DB = db;
+        window.FB_Ref = ref;
+        window.FB_Set = set;
+        window.FB_Get = get;
+        window.FB_Child = child;
+        window.FB_Push = push;
+        window.FB_OnValue = onValue;
+        window.FB_Remove = remove;
+
+        // بدء تشغيل النظام بعد تحميل قاعدة البيانات
+        if (window.initializeAppSystem) {
+            window.initializeAppSystem();
+        }
+    </script>
+
     <!-- App Logic & Scripts -->
     <script>
-        // Initial Default Menu Items Data
         const DEFAULT_ASASI_PIZZA_SIZES = {
             small: { label: 'صغير', price: 500 },
             medium: { label: 'وسط', price: 800 },
@@ -573,7 +600,6 @@
         };
 
         const INITIAL_MENU_DATA = [
-            // Pizza Section
             { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك ورغبتك', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_ASASI_PIZZA_SIZES, available: true },
             { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
             { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
@@ -582,7 +608,6 @@
             { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
             { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true },
 
-            // Meat Section
             { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire', available: true },
             { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات', icon: 'fa-fire', available: true },
             { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية', icon: 'fa-fire', available: true },
@@ -590,7 +615,6 @@
             { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire', available: true },
             { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire', available: true },
 
-            // Fatayer Section
             { id: 'f1', name: 'فطيرة جبنة', price: 15, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice', available: true },
             { id: 'f2', name: 'فطيرة محمرة', price: 15, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice', available: true },
             { id: 'f3', name: 'مناقيش زعتر', price: 15, category: 'fatayer', desc: 'زعتر فاخر', icon: 'fa-bread-slice', available: true },
@@ -603,8 +627,6 @@
             { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice', available: true },
             { id: 'f11', name: 'فطيرة مرتديلا', price: 30, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice', available: true },
             { id: 'f12', name: 'فطيرة سنفورة', price: 40, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice', available: true },
-
-            // Fatayer Section (With Kashkaval)
             { id: 'f13', name: 'فطيرة قشقوان', price: 40, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', available: true },
             { id: 'f14', name: 'محمرة قشقوان', price: 40, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese', available: true },
             { id: 'f15', name: 'توشكا', price: 70, category: 'fatayer', desc: 'توشكا غنية بالجبن واللحم المتبل', icon: 'fa-cheese', available: true },
@@ -614,7 +636,6 @@
             { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese', available: true }
         ];
 
-        // State variables
         let menuData = [];
         let liveOrders = [];
         let appSettings = {
@@ -629,41 +650,57 @@
         let currentCategory = 'all';
         let isAdminLoggedIn = false;
 
-        // Initialize Local Storage
-        function initStorage() {
-            const storedMenu = localStorage.getItem('asasi_menu');
-            if (storedMenu) {
-                menuData = JSON.parse(storedMenu);
-            } else {
-                menuData = [...INITIAL_MENU_DATA];
-                saveMenuToStorage();
-            }
+        window.initializeAppSystem = function() {
+            initFirebaseListeners();
+        };
 
-            const storedSettings = localStorage.getItem('asasi_settings');
-            if (storedSettings) {
-                appSettings = JSON.parse(storedSettings);
-            } else {
-                saveSettingsToStorage();
-            }
+        // الربط المباشر مع قاعدة البيانات السحابية (Realtime Database)
+        function initFirebaseListeners() {
+            const db = window.FB_DB;
+            
+            // 1. الاستماع لتحديثات المنيو فورياً
+            const menuRef = window.FB_Ref(db, 'asasi_menu');
+            window.FB_OnValue(menuRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    menuData = Array.isArray(data) ? data : Object.values(data);
+                } else {
+                    // إذا كانت القاعدة فارغة أول مرة، نرفع البيانات الافتراضية
+                    window.FB_Set(menuRef, INITIAL_MENU_DATA);
+                    menuData = [...INITIAL_MENU_DATA];
+                }
+                renderMenu();
+                if (isAdminLoggedIn) renderAdminMenuItems();
+                renderAdminStats();
+            });
 
-            const storedOrders = localStorage.getItem('asasi_orders');
-            if (storedOrders) {
-                liveOrders = JSON.parse(storedOrders);
-            }
+            // 2. الاستماع لتحديثات الإعدادات
+            const settingsRef = window.FB_Ref(db, 'asasi_settings');
+            window.FB_OnValue(settingsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    appSettings = data;
+                } else {
+                    window.FB_Set(settingsRef, appSettings);
+                }
+                updateUIFromSettings();
+            });
 
-            updateUIFromSettings();
-        }
-
-        function saveMenuToStorage() {
-            localStorage.setItem('asasi_menu', JSON.stringify(menuData));
-        }
-
-        function saveSettingsToStorage() {
-            localStorage.setItem('asasi_settings', JSON.stringify(appSettings));
-        }
-
-        function saveOrdersToStorage() {
-            localStorage.setItem('asasi_orders', JSON.stringify(liveOrders));
+            // 3. الاستماع للطلبات الواردة أونلاين
+            const ordersRef = window.FB_Ref(db, 'asasi_orders');
+            window.FB_OnValue(ordersRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    liveOrders = Object.entries(data).map(([key, val]) => ({ ...val, firebaseKey: key }));
+                    liveOrders.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                } else {
+                    liveOrders = [];
+                }
+                if (isAdminLoggedIn) {
+                    renderAdminOrders();
+                    renderAdminStats();
+                }
+            });
         }
 
         function updateUIFromSettings() {
@@ -679,11 +716,7 @@
             document.getElementById('settingAdminPin').value = appSettings.adminPin;
         }
 
-        // App Initialization
         document.addEventListener('DOMContentLoaded', () => {
-            initStorage();
-            renderMenu();
-
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase();
                 const clearBtn = document.getElementById('clearSearch');
@@ -702,7 +735,6 @@
             }, 2500);
         }
 
-        // Mode Navigation
         function switchView(mode) {
             const custApp = document.getElementById('customerApp');
             const adminApp = document.getElementById('adminApp');
@@ -732,7 +764,6 @@
             }
         }
 
-        // Admin Auth
         function openAdminAuthModal() {
             if (isAdminLoggedIn) {
                 switchView('admin');
@@ -761,7 +792,6 @@
             }
         }
 
-        // Price Helpers
         function getItemPrice(item, sizeKey) {
             if (item.hasSizes && item.sizes) {
                 if (item.sizes[sizeKey]) return item.sizes[sizeKey].price;
@@ -770,11 +800,12 @@
             return item.price || 0;
         }
 
-        // Menu Rendering
         function renderMenu() {
             const pizzaContainer = document.getElementById('pizza-container');
             const meatContainer = document.getElementById('meat-container');
             const fatayerContainer = document.getElementById('fatayer-container');
+
+            if (!pizzaContainer || !meatContainer || !fatayerContainer) return;
 
             pizzaContainer.innerHTML = '';
             meatContainer.innerHTML = '';
@@ -874,7 +905,7 @@
             `;
         }
 
-        function selectPizzaSize(itemId, sizeKey) {
+        window.selectPizzaSize = function(itemId, sizeKey) {
             pizzaSelectedSizes[itemId] = sizeKey;
             
             const item = menuData.find(i => i.id === itemId);
@@ -882,7 +913,6 @@
 
             const priceDisplay = document.getElementById(`price-display-${itemId}`);
             const controlsContainer = document.getElementById(`controls-${itemId}`);
-            
             const currentPrice = getItemPrice(item, sizeKey);
 
             if (priceDisplay) {
@@ -927,7 +957,7 @@
             `;
         }
 
-        function updateQty(cartKey, change, itemId) {
+        window.updateQty = function(cartKey, change, itemId) {
             const current = cart[cartKey] || 0;
             const updated = current + change;
 
@@ -985,17 +1015,20 @@
 
             const totalPriceOld = totalPriceNew * appSettings.multiplier;
 
-            document.getElementById('cartBadge').innerText = totalItems;
-            
-            const priceText = totalPriceNew > 0 ? ` (${totalPriceNew.toLocaleString()} ل.س)` : '';
-            document.getElementById('cartCountText').innerText = `${totalItems} صنف${priceText}`;
-            
-            document.getElementById('modalTotalItemsCount').innerText = `${totalItems} قطعة`;
-            document.getElementById('modalTotalNewCurrency').innerText = `${totalPriceNew.toLocaleString()} ل.س`;
-            document.getElementById('modalTotalOldCurrency').innerText = `${totalPriceOld.toLocaleString()} ليرة قديمة`;
+            const badge = document.getElementById('cartBadge');
+            const countText = document.getElementById('cartCountText');
+            const modItems = document.getElementById('modalTotalItemsCount');
+            const modNew = document.getElementById('modalTotalNewCurrency');
+            const modOld = document.getElementById('modalTotalOldCurrency');
+
+            if (badge) badge.innerText = totalItems;
+            if (countText) countText.innerText = `${totalItems} صنف${totalPriceNew > 0 ? ` (${totalPriceNew.toLocaleString()} ل.س)` : ''}`;
+            if (modItems) modItems.innerText = `${totalItems} قطعة`;
+            if (modNew) modNew.innerText = `${totalPriceNew.toLocaleString()} ل.س`;
+            if (modOld) modOld.innerText = `${totalPriceOld.toLocaleString()} ليرة قديمة`;
         }
 
-        function filterCategory(cat) {
+        window.filterCategory = function(cat) {
             currentCategory = cat;
 
             document.querySelectorAll('#categoryTabs .cat-btn').forEach(btn => {
@@ -1031,7 +1064,7 @@
             resetSearch();
         }
 
-        function resetSearch() {
+        window.resetSearch = function() {
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearch').classList.add('hidden');
             filterMenuItems('');
@@ -1064,7 +1097,7 @@
             }
         }
 
-        function toggleCartModal() {
+        window.toggleCartModal = function() {
             const modal = document.getElementById('cartModal');
             if (modal.classList.contains('hidden')) {
                 renderCartModalList();
@@ -1081,7 +1114,6 @@
             const emptyView = document.getElementById('emptyCartView');
 
             container.innerHTML = '';
-
             const cartKeys = Object.keys(cart);
             if (cartKeys.length === 0) {
                 emptyView.classList.remove('hidden');
@@ -1125,7 +1157,7 @@
             });
         }
 
-        function sendOrderWhatsApp() {
+        window.sendOrderWhatsApp = function() {
             const cartKeys = Object.keys(cart);
             if (cartKeys.length === 0) {
                 showToast('سلتك فارغة! اختر بعض الوجبات أولاً');
@@ -1166,12 +1198,11 @@
             message += `%0A*يرجى تأكيد الطلب والتجهيز. شكراً لكم!*`;
 
             const phone = appSettings.whatsapp || "963942568502";
-            const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
-
-            window.open(whatsappUrl, '_blank');
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
         }
 
-        function submitDirectOrder() {
+        // إرسال الطلب المباشر وحفظه في Firebase فوراً لتراه في لوحة التحكم
+        window.submitDirectOrder = function() {
             const cartKeys = Object.keys(cart);
             if (cartKeys.length === 0) {
                 showToast('سلتك فارغة!');
@@ -1200,20 +1231,22 @@
                 id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
                 time: new Date().toLocaleTimeString('ar-SY', { hour: '2-digit', minute: '2-digit' }),
                 date: new Date().toLocaleDateString('ar-SY'),
+                timestamp: Date.now(),
                 items: itemsList,
                 total: totalNew,
                 notes: document.getElementById('orderNotes').value.trim(),
-                status: 'pending' // pending, preparing, delivering, completed, canceled
+                status: 'pending'
             };
 
-            liveOrders.unshift(newOrder);
-            saveOrdersToStorage();
+            const db = window.FB_DB;
+            const ordersRef = window.FB_Ref(db, 'asasi_orders');
+            const newOrderRef = window.FB_Push(ordersRef);
+            window.FB_Set(newOrderRef, newOrder);
 
             cart = {};
             updateCartSummary();
             toggleCartModal();
             document.getElementById('orderNotes').value = '';
-
             showToast('تم إرسال طلبك بنجاح لوحة الإدارة!');
         }
 
@@ -1225,7 +1258,7 @@
             renderAdminMenuItems();
         }
 
-        function switchAdminTab(tab) {
+        window.switchAdminTab = function(tab) {
             document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.admin-tab').forEach(el => {
                 el.classList.remove('bg-gold', 'text-brandDark', 'font-extrabold');
@@ -1247,16 +1280,22 @@
         function renderAdminStats() {
             const pendingOrders = liveOrders.filter(o => o.status === 'pending').length;
             const completedOrders = liveOrders.filter(o => o.status === 'completed');
-            const totalSalesSum = completedOrders.reduce((sum, o) => sum + o.total, 0);
+            const totalSalesSum = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
 
-            document.getElementById('statNewOrders').innerText = pendingOrders;
-            document.getElementById('statTotalSales').innerText = `${totalSalesSum.toLocaleString()} ل.س`;
-            document.getElementById('statTotalItems').innerText = menuData.length;
-            document.getElementById('statCompletedOrders').innerText = completedOrders.length;
+            const statNew = document.getElementById('statNewOrders');
+            const statSales = document.getElementById('statTotalSales');
+            const statItems = document.getElementById('statTotalItems');
+            const statComp = document.getElementById('statCompletedOrders');
+
+            if (statNew) statNew.innerText = pendingOrders;
+            if (statSales) statSales.innerText = `${totalSalesSum.toLocaleString()} ل.س`;
+            if (statItems) statItems.innerText = menuData.length;
+            if (statComp) statComp.innerText = completedOrders.length;
         }
 
         function renderAdminOrders() {
             const container = document.getElementById('adminOrdersContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             if (liveOrders.length === 0) {
@@ -1279,8 +1318,7 @@
                 };
 
                 const currentBadge = statusBadges[order.status] || statusBadges.pending;
-
-                let itemsHtml = order.items.map(i => `
+                let itemsHtml = (order.items || []).map(i => `
                     <div class="flex justify-between text-xs text-gray-300 py-1 border-b border-gray-800">
                         <span>• ${i.name} (×${i.qty})</span>
                         <span class="font-bold text-gold">${i.subtotal ? i.subtotal.toLocaleString() + ' ل.س' : ''}</span>
@@ -1300,9 +1338,7 @@
                         </span>
                     </div>
 
-                    <div class="space-y-1">
-                        ${itemsHtml}
-                    </div>
+                    <div class="space-y-1">${itemsHtml}</div>
 
                     ${order.notes ? `
                         <div class="bg-black/40 p-2 rounded-lg text-xs text-amber-200 border border-gold/10">
@@ -1311,16 +1347,16 @@
                     ` : ''}
 
                     <div class="flex items-center justify-between pt-2 border-t border-gray-800">
-                        <span class="text-xs font-black text-emerald-400">الإجمالي: ${order.total.toLocaleString()} ل.س</span>
+                        <span class="text-xs font-black text-emerald-400">الإجمالي: ${(order.total || 0).toLocaleString()} ل.س</span>
                         <div class="flex items-center gap-1.5">
-                            <select onchange="updateOrderStatus('${order.id}', this.value)" class="bg-black/60 border border-gold/40 text-xs text-gray-200 rounded-lg p-1.5 focus:outline-none">
+                            <select onchange="updateOrderStatus('${order.firebaseKey}', this.value)" class="bg-black/60 border border-gold/40 text-xs text-gray-200 rounded-lg p-1.5 focus:outline-none">
                                 <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>جديد</option>
                                 <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>قيد التحضير</option>
                                 <option value="delivering" ${order.status === 'delivering' ? 'selected' : ''}>جاري التوصيل</option>
                                 <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>مكتمل</option>
                                 <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>إلغاء</option>
                             </select>
-                            <button onclick="deleteOrder('${order.id}')" class="text-red-400 hover:text-red-300 p-1.5 text-xs">
+                            <button onclick="deleteOrder('${order.firebaseKey}')" class="text-red-400 hover:text-red-300 p-1.5 text-xs">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
@@ -1330,38 +1366,29 @@
             });
         }
 
-        function updateOrderStatus(orderId, newStatus) {
-            const order = liveOrders.find(o => o.id === orderId);
-            if (order) {
-                order.status = newStatus;
-                saveOrdersToStorage();
-                renderAdminStats();
-                renderAdminOrders();
-                showToast('تم تحديث حالة الطلب');
-            }
+        window.updateOrderStatus = function(firebaseKey, newStatus) {
+            const db = window.FB_DB;
+            window.FB_Set(window.FB_Ref(db, `asasi_orders/${firebaseKey}/status`), newStatus);
+            showToast('تم تحديث حالة الطلب');
         }
 
-        function deleteOrder(orderId) {
-            liveOrders = liveOrders.filter(o => o.id !== orderId);
-            saveOrdersToStorage();
-            renderAdminStats();
-            renderAdminOrders();
+        window.deleteOrder = function(firebaseKey) {
+            const db = window.FB_DB;
+            window.FB_Remove(window.FB_Ref(db, `asasi_orders/${firebaseKey}`));
             showToast('تم حذف الطلب');
         }
 
-        function clearAllOrders() {
-            if (confirm('هل أنت تأكد من حذف كافة الطلبات المكتملة والملغاة؟')) {
-                liveOrders = liveOrders.filter(o => o.status !== 'completed' && o.status !== 'canceled');
-                saveOrdersToStorage();
-                renderAdminStats();
-                renderAdminOrders();
+        window.clearAllOrders = function() {
+            if (confirm('هل أنت متأكد من حذف كافة الطلبات؟')) {
+                const db = window.FB_DB;
+                window.FB_Set(window.FB_Ref(db, 'asasi_orders'), null);
                 showToast('تم تنظيف سجل الطلبات');
             }
         }
 
-        // Admin Menu Item Management
         function renderAdminMenuItems() {
             const container = document.getElementById('adminMenuContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             menuData.forEach(item => {
@@ -1400,40 +1427,37 @@
             });
         }
 
-        function toggleItemAvailability(itemId) {
-            const item = menuData.find(i => i.id === itemId);
-            if (item) {
-                item.available = item.available === false ? true : false;
-                saveMenuToStorage();
-                renderAdminMenuItems();
-                renderMenu();
+        window.toggleItemAvailability = function(itemId) {
+            const idx = menuData.findIndex(i => i.id === itemId);
+            if (idx !== -1) {
+                menuData[idx].available = menuData[idx].available === false ? true : false;
+                syncMenuToFirebase();
                 showToast('تم تحديث توفر الوجبة');
             }
         }
 
-        function deleteMenuItem(itemId) {
+        window.deleteMenuItem = function(itemId) {
             if (confirm('هل أنت متأكد من حذف هذه الوجبة من المنيو؟')) {
                 menuData = menuData.filter(i => i.id !== itemId);
-                saveMenuToStorage();
-                renderAdminMenuItems();
-                renderAdminStats();
-                renderMenu();
+                syncMenuToFirebase();
                 showToast('تم حذف الوجبة بنجاح');
             }
         }
 
-        function restoreDefaultMenu() {
+        window.restoreDefaultMenu = function() {
             if (confirm('هل تريد استعادة جميع الوجبات والأسعار إلى الوضع الافتراضي؟')) {
                 menuData = [...INITIAL_MENU_DATA];
-                saveMenuToStorage();
-                renderAdminMenuItems();
-                renderAdminStats();
-                renderMenu();
+                syncMenuToFirebase();
                 showToast('تمت استعادة المنيو الافتراضي');
             }
         }
 
-        function toggleSizeFields() {
+        function syncMenuToFirebase() {
+            const db = window.FB_DB;
+            window.FB_Set(window.FB_Ref(db, 'asasi_menu'), menuData);
+        }
+
+        window.toggleSizeFields = function() {
             const hasSizes = document.getElementById('itemFormHasSizes').checked;
             const singleBox = document.getElementById('singlePriceBox');
             const sizesBox = document.getElementById('sizesPriceBox');
@@ -1447,7 +1471,7 @@
             }
         }
 
-        function openAddItemModal() {
+        window.openAddItemModal = function() {
             document.getElementById('editItemId').value = '';
             document.getElementById('itemModalTitle').innerText = 'إضافة وجبة جديدة';
             document.getElementById('itemFormName').value = '';
@@ -1459,13 +1483,13 @@
             document.getElementById('itemPriceMedium').value = '';
             document.getElementById('itemPriceLarge').value = '';
             document.getElementById('itemFormIcon').value = 'fa-pizza-slice';
-            toggleSizeFields();
+            window.toggleSizeFields();
 
             document.getElementById('itemModal').classList.remove('hidden');
             document.getElementById('itemModal').classList.add('flex');
         }
 
-        function openEditItemModal(itemId) {
+        window.openEditItemModal = function(itemId) {
             const item = menuData.find(i => i.id === itemId);
             if (!item) return;
 
@@ -1485,18 +1509,18 @@
             }
 
             document.getElementById('itemFormIcon').value = item.icon || 'fa-utensils';
-            toggleSizeFields();
+            window.toggleSizeFields();
 
             document.getElementById('itemModal').classList.remove('hidden');
             document.getElementById('itemModal').classList.add('flex');
         }
 
-        function closeItemModal() {
+        window.closeItemModal = function() {
             document.getElementById('itemModal').classList.add('hidden');
             document.getElementById('itemModal').classList.remove('flex');
         }
 
-        function saveMenuItem() {
+        window.saveMenuItem = function() {
             const editId = document.getElementById('editItemId').value;
             const name = document.getElementById('itemFormName').value.trim();
             const category = document.getElementById('itemFormCategory').value;
@@ -1520,14 +1544,10 @@
             };
 
             if (hasSizes) {
-                const sPrice = parseFloat(document.getElementById('itemPriceSmall').value) || 300;
-                const mPrice = parseFloat(document.getElementById('itemPriceMedium').value) || 600;
-                const lPrice = parseFloat(document.getElementById('itemPriceLarge').value) || 1200;
-
                 newItemObj.sizes = {
-                    small: { label: 'صغير', price: sPrice },
-                    medium: { label: 'وسط', price: mPrice },
-                    large: { label: 'كبير', price: lPrice }
+                    small: { label: 'صغير', price: parseFloat(document.getElementById('itemPriceSmall').value) || 300 },
+                    medium: { label: 'وسط', price: parseFloat(document.getElementById('itemPriceMedium').value) || 600 },
+                    large: { label: 'كبير', price: parseFloat(document.getElementById('itemPriceLarge').value) || 1200 }
                 };
             } else {
                 newItemObj.price = parseFloat(document.getElementById('itemFormPrice').value) || 0;
@@ -1540,23 +1560,19 @@
                 menuData.push(newItemObj);
             }
 
-            saveMenuToStorage();
-            closeItemModal();
-            renderAdminMenuItems();
-            renderAdminStats();
-            renderMenu();
+            syncMenuToFirebase();
+            window.closeItemModal();
             showToast(editId ? 'تم تعديل الوجبة بنجاح' : 'تم إضافة الوجبة الجديدة');
         }
 
-        function saveSettings() {
+        window.saveSettings = function() {
             appSettings.phone = document.getElementById('settingPhone').value.trim();
             appSettings.whatsapp = document.getElementById('settingWhatsApp').value.trim();
             appSettings.multiplier = parseFloat(document.getElementById('settingCurrencyMultiplier').value) || 100;
             appSettings.adminPin = document.getElementById('settingAdminPin').value.trim() || '1234';
 
-            saveSettingsToStorage();
-            updateUIFromSettings();
-            updateCartSummary();
+            const db = window.FB_DB;
+            window.FB_Set(window.FB_Ref(db, 'asasi_settings'), appSettings);
             showToast('تم حفظ إعدادات المحل بنجاح');
         }
     </script>
