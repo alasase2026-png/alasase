@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مطعم وملحمة العسسي</title>
+    <title>ملحمة ومعجنات العسسي - المنيو الذكي وتتبع الطلبات</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -36,8 +37,8 @@
             color: #f3f4f6;
         }
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
             background: #120f0e;
@@ -54,6 +55,13 @@
             background-image: radial-gradient(#261f1c 1px, transparent 0);
             background-size: 24px 24px;
         }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
     </style>
 </head>
 <body class="wood-pattern min-h-screen flex flex-col justify-between selection:bg-gold selection:text-brandDark">
@@ -67,39 +75,56 @@
     <!-- MAIN CUSTOMER APP -->
     <div id="customerApp" class="flex flex-col min-h-screen">
         <!-- Header -->
-        <header class="bg-brandCard border-b border-gold/20 sticky top-0 z-30 shadow-lg">
+        <header class="bg-brandCard/95 backdrop-blur border-b border-gold/20 sticky top-0 z-30 shadow-lg">
             <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brandRed to-brandRedDark border border-gold/40 flex items-center justify-center text-gold shadow-inner">
-                        <i class="fa-solid fa-fire text-lg"></i>
+                    <div class="w-11 h-11 rounded-xl overflow-hidden border border-gold/40 flex items-center justify-center bg-brandDark shadow-inner shrink-0">
+                        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=150" onerror="this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=150'" alt="ملحمة ومعجنات العسسي" class="w-full h-full object-cover">
                     </div>
                     <div>
-                        <h1 class="font-black text-base text-amber-100 tracking-wider">مطعم وملحمة العسسي</h1>
-                        <p class="text-[10px] text-gold font-semibold">ملحمة ومعجنات • طازج ولذيذ</p>
+                        <h1 class="font-black text-sm md:text-base text-amber-100 tracking-wider">ملحمة ومعجنات العسسي</h1>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <p class="text-[10px] text-gold font-semibold">طازج ولذيذ يومياً</p>
+                            <!-- Live Status Badge in Header -->
+                            <span id="headerStatusBadge" class="text-[9px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border">
+                                <span id="statusDot" class="w-1.5 h-1.5 rounded-full"></span>
+                                <span id="statusText">جاري التحقق...</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button onclick="openTrackerModal()" class="bg-gold/20 border border-gold/40 hover:bg-gold/30 text-gold text-xs px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>تتبع طلبي</span>
+                    </button>
                     <button onclick="openAdminAuthModal()" id="viewAdminBtn" class="bg-brandCard border border-gold/30 hover:border-gold text-gray-300 text-xs px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 shadow">
                         <i class="fa-solid fa-lock text-gold"></i>
                         <span>الإدارة</span>
                     </button>
-                    <a id="callActionBtn" href="tel:0942568502" class="bg-gold hover:bg-goldHover text-brandDark text-xs px-3 py-1.5 rounded-lg font-black transition flex items-center gap-1.5 shadow">
-                        <i class="fa-solid fa-phone"></i>
-                        <span>اتصال</span>
-                    </a>
                 </div>
             </div>
         </header>
 
         <!-- Hero Section -->
         <section class="relative bg-gradient-to-b from-brandCard to-brandDark border-b border-gold/10 py-6 px-4 text-center overflow-hidden">
-            <div class="max-w-2xl mx-auto relative z-10 space-y-2">
-                <span class="text-xs bg-gold/10 text-gold border border-gold/30 px-3 py-1 rounded-full font-bold inline-block">العسسي</span>
-                <h2 class="text-xl md:text-2xl font-black text-amber-100">أطيب المشاوي، المعجنات والبيتزا الطازجة</h2>
-                <p class="text-xs text-gray-400">بإدارة: <span class="text-amber-200 font-bold">أبو أيمن - أبو النور</span></p>
-                <div class="flex flex-wrap items-center justify-center gap-3 pt-2 text-[11px] text-gray-300">
-                    <span class="bg-black/40 px-2.5 py-1 rounded-lg border border-gold/10 flex items-center gap-1"><i class="fa-solid fa-utensils text-gold"></i> مستعدون لأي طلبات وحفلات</span>
-                    <span class="bg-black/40 px-2.5 py-1 rounded-lg border border-gold/10 flex items-center gap-1"><i class="fa-solid fa-motorcycle text-gold"></i> يوجد توصيل طلبات</span>
+            <div class="absolute inset-0 opacity-5 bg-[radial-gradient(#d4af37_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            <div class="max-w-2xl mx-auto relative z-10 space-y-3">
+                <div class="inline-flex items-center gap-2 bg-gold/10 text-gold border border-gold/30 px-3 py-1 rounded-full text-xs font-bold">
+                    <i class="fa-solid fa-star text-[10px]"></i>
+                    <span>بإدارة: أبو أيمن - أبو النور</span>
+                </div>
+                <h2 class="text-xl md:text-2xl font-black text-amber-100 leading-tight">أطيب المشاوي، المعجنات والبيتزا الطازجة</h2>
+                
+                <!-- Notice Banner if Closed -->
+                <div id="shopClosedNotice" class="hidden bg-red-950/60 border border-red-500/50 text-red-200 text-xs py-2 px-3 rounded-xl font-bold flex items-center justify-center gap-2 animate-pulse-slow">
+                    <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                    <span>المحل مغلق حالياً، يمكنك تصفح المنيو وإرسال طلبك وسيتم تجهيزه فور افتتاحنا!</span>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-3 pt-1 text-[11px] text-gray-300">
+                    <span class="bg-black/40 px-3 py-1.5 rounded-xl border border-gold/15 flex items-center gap-1.5"><i class="fa-solid fa-utensils text-gold"></i> مستعدون للحفلات والطلبات الخاصة</span>
+                    <span class="bg-black/40 px-3 py-1.5 rounded-xl border border-gold/15 flex items-center gap-1.5"><i class="fa-solid fa-motorcycle text-gold"></i> يوجد خدمة توصيل</span>
                 </div>
             </div>
         </section>
@@ -117,7 +142,7 @@
         <!-- Search Bar -->
         <div class="max-w-4xl mx-auto w-full px-4 pt-4">
             <div class="relative">
-                <input type="text" id="searchInput" placeholder="ابحث عن وجبتك المفضلة..." class="w-full bg-brandCard border border-gold/30 rounded-xl px-4 py-2.5 pr-10 text-xs text-amber-100 placeholder-gray-500 focus:outline-none focus:border-gold transition">
+                <input type="text" id="searchInput" placeholder="ابحث عن وجبتك المفضلة (بيتزا، كباب، فطيرة...)" class="w-full bg-brandCard border border-gold/30 rounded-xl px-4 py-2.5 pr-10 text-xs text-amber-100 placeholder-gray-500 focus:outline-none focus:border-gold transition shadow">
                 <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3.5 text-gray-500 text-xs"></i>
                 <button id="clearSearch" onclick="resetSearch()" class="absolute left-3.5 top-3 text-gray-500 hover:text-white hidden text-xs"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -184,7 +209,7 @@
 
         <!-- Footer -->
         <footer class="bg-brandCard border-t border-gold/10 py-6 px-4 text-center text-xs text-gray-400 space-y-3 mb-16 md:mb-0">
-            <p class="font-bold text-amber-100">العسسي - ملحمة ومعجنات طازجة يومياً</p>
+            <p class="font-bold text-amber-100">ملحمة ومعجنات العسسي - طازجة يومياً</p>
             <p>يوجد خدمة توصيل الطلبات • للتواصل: <a id="footerPhoneLink" href="tel:0942568502" class="text-gold font-bold underline">0942568502</a></p>
             <div class="flex items-center justify-center gap-4 text-base pt-1">
                 <a href="#" class="text-gray-400 hover:text-gold transition"><i class="fa-brands fa-facebook"></i></a>
@@ -231,17 +256,48 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-[11px] text-gray-400 mb-1">ملاحظات الإضافة وعنوان التوصيل بالتفصيل:</label>
-                    <textarea id="orderNotes" rows="2" placeholder="اكتب عنوانك ورقمك وملاحظاتك هنا..." class="w-full bg-brandDark border border-gold/30 rounded-xl p-2.5 text-xs text-amber-100 focus:outline-none focus:border-gold resize-none"></textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] text-gray-400 mb-1">اسم الزبون الكريم:</label>
+                        <input type="text" id="customerNameInput" placeholder="الاسم الكامل..." class="w-full bg-brandDark border border-gold/30 rounded-xl p-2.5 text-xs text-amber-100 focus:outline-none focus:border-gold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-gray-400 mb-1">رقم الهاتف للتواصل:</label>
+                        <input type="text" id="customerPhoneInput" placeholder="رقم الهاتف..." class="w-full bg-brandDark border border-gold/30 rounded-xl p-2.5 text-xs text-amber-100 focus:outline-none focus:border-gold">
+                    </div>
                 </div>
 
-                <div class="pt-1">
-                    <button onclick="sendOrderWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+                <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">عنوان التوصيل بالتفصيل وملاحظات الطلب:</label>
+                    <textarea id="orderNotes" rows="2" placeholder="المنطقة، الحي، الطابق، ملاحظات..." class="w-full bg-brandDark border border-gold/30 rounded-xl p-2.5 text-xs text-amber-100 focus:outline-none focus:border-gold resize-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="submitOnlineOrder('whatsapp')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl shadow transition flex items-center justify-center gap-1.5">
                         <i class="fa-brands fa-whatsapp text-base"></i>
-                        <span>إرسال الطلب عبر الواتساب</span>
+                        <span>إرسال عبر الواتساب</span>
+                    </button>
+                    <button onclick="submitOnlineOrder('online')" class="bg-gold hover:bg-goldHover text-brandDark font-black text-xs py-3 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane text-base"></i>
+                        <span>إرسال أونلاين وتتبع الحالة</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER TRACKER MODAL -->
+    <div id="trackerModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-brandCard border border-gold/40 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-gold/20 pb-3">
+                <h3 class="font-black text-sm text-amber-100 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-gold"></i>
+                    <span>تتبع حالة طلباتك أونلاين</span>
+                </h3>
+                <button onclick="closeTrackerModal()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <div id="trackerListContainer" class="space-y-3">
+                <!-- Orders will list here -->
             </div>
         </div>
     </div>
@@ -286,8 +342,8 @@
         <main class="max-w-4xl mx-auto w-full px-4 py-4 flex-grow space-y-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div class="bg-brandCard border border-gold/20 p-3 rounded-xl shadow">
-                    <span class="text-[10px] text-gray-400 block">الطلبات الواردة</span>
-                    <span id="statNewOrders" class="text-lg font-black text-gold">0</span>
+                    <span class="text-[10px] text-gray-400 block">حالة العمل الآن</span>
+                    <span id="adminLiveStatusText" class="text-sm font-black text-emerald-400">مفتوح</span>
                 </div>
                 <div class="bg-brandCard border border-gold/20 p-3 rounded-xl shadow">
                     <span class="text-[10px] text-gray-400 block">إجمالي المبيعات</span>
@@ -305,15 +361,15 @@
 
             <!-- Admin Nav Tabs -->
             <div class="flex items-center gap-2 border-b border-gold/20 pb-2 overflow-x-auto">
-                <button onclick="switchAdminTab('orders')" id="tabBtnOrders" class="admin-tab bg-gold text-brandDark text-xs px-4 py-2 rounded-xl font-extrabold whitespace-nowrap shadow transition">إدارة الطلبات</button>
-                <button onclick="switchAdminTab('menu')" id="tabBtnMenu" class="admin-tab bg-brandCard text-gray-300 text-xs px-4 py-2 rounded-xl font-semibold whitespace-nowrap border border-gold/20 transition">إدارة الوجبات والأسعار والصور</button>
-                <button onclick="switchAdminTab('settings')" id="tabBtnSettings" class="admin-tab bg-brandCard text-gray-300 text-xs px-4 py-2 rounded-xl font-semibold whitespace-nowrap border border-gold/20 transition">إعدادات المحل</button>
+                <button onclick="switchAdminTab('orders')" id="tabBtnOrders" class="admin-tab bg-gold text-brandDark text-xs px-4 py-2 rounded-xl font-extrabold whitespace-nowrap shadow transition">إدارة الطلبات أونلاين</button>
+                <button onclick="switchAdminTab('menu')" id="tabBtnMenu" class="admin-tab bg-brandCard text-gray-300 text-xs px-4 py-2 rounded-xl font-semibold whitespace-nowrap border border-gold/20 transition">إدارة الوجبات والأسعار</button>
+                <button onclick="switchAdminTab('settings')" id="tabBtnSettings" class="admin-tab bg-brandCard text-gray-300 text-xs px-4 py-2 rounded-xl font-semibold whitespace-nowrap border border-gold/20 transition">إعدادات المحل والدوام</button>
             </div>
 
             <!-- Tab 1: Orders -->
             <div id="adminTabOrders" class="admin-tab-content space-y-3">
                 <div class="flex items-center justify-between">
-                    <h3 class="font-black text-xs text-amber-100">الطلبات الواردة عبر الواتساب</h3>
+                    <h3 class="font-black text-xs text-amber-100">الطلبات الواردة المباشرة (تتحدث لحظياً)</h3>
                     <button onclick="clearAllOrders()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white text-[11px] px-2.5 py-1 rounded-lg font-bold transition">حذف سجل الطلبات</button>
                 </div>
                 <div id="adminOrdersContainer" class="space-y-3"></div>
@@ -328,19 +384,43 @@
                             <i class="fa-solid fa-plus text-[10px]"></i>
                             <span>إضافة وجبة</span>
                         </button>
-                        <button onclick="restoreDefaultMenu()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs px-2.5 py-1.5 rounded-lg font-bold transition">إعادة ضبط المنيو</button>
+                        <button onclick="restoreDefaultMenu()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs px-2.5 py-1.5 rounded-lg font-bold transition">إعادة ضبط</button>
                     </div>
                 </div>
                 <div id="adminMenuContainer" class="space-y-2.5"></div>
             </div>
 
-            <!-- Tab 3: Settings -->
+            <!-- Tab 3: Settings & Working Hours -->
             <div id="adminTabSettings" class="admin-tab-content hidden space-y-4">
-                <div class="bg-brandCard border border-gold/20 rounded-2xl p-4 space-y-3">
-                    <h3 class="font-black text-xs text-amber-100 border-b border-gold/20 pb-2">بيانات الاتصال والتسعير</h3>
+                <div class="bg-brandCard border border-gold/20 rounded-2xl p-4 space-y-4">
+                    <h3 class="font-black text-xs text-amber-100 border-b border-gold/20 pb-2">إدارة أوقات الدوام وفتح وإغلاق المحل</h3>
+                    
+                    <!-- Open/Close Status Toggle Control -->
+                    <div class="bg-brandDark p-3.5 rounded-xl border border-gold/20 flex items-center justify-between">
+                        <div>
+                            <span class="font-bold text-xs text-amber-100 block">حالة العمل اليدوية (فتح / إغلاق):</span>
+                            <span class="text-[10px] text-gray-400">تستطيع إغلاق المحل يدوياً فوراً في أي وقت بغض النظر عن الساعات.</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="settingManualStatus" class="bg-brandCard border border-gold/30 text-xs text-amber-100 rounded-xl px-3 py-1.5 font-bold focus:outline-none">
+                                <option value="auto">تلقائي (حسب مواعيد العمل)</option>
+                                <option value="open">فتح دائم (مفتوح الآن)</option>
+                                <option value="closed">إغلاق دائم (مغلق الآن)</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                         <div>
-                            <label class="block text-gray-400 mb-1">رقم هاتف الاتصال المباشر:</label>
+                            <label class="block text-gray-400 mb-1">ساعة الفتح اليومية:</label>
+                            <input type="time" id="settingOpenTime" class="w-full bg-brandDark border border-gold/30 rounded-xl px-3 py-2 text-amber-100 focus:outline-none focus:border-gold">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-1">ساعة الإغلاق اليومية:</label>
+                            <input type="time" id="settingCloseTime" class="w-full bg-brandDark border border-gold/30 rounded-xl px-3 py-2 text-amber-100 focus:outline-none focus:border-gold">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-1">رقم الهاتف المباشر:</label>
                             <input type="text" id="settingPhone" class="w-full bg-brandDark border border-gold/30 rounded-xl px-3 py-2 text-amber-100 focus:outline-none focus:border-gold">
                         </div>
                         <div>
@@ -348,11 +428,11 @@
                             <input type="text" id="settingWhatsApp" class="w-full bg-brandDark border border-gold/30 rounded-xl px-3 py-2 text-amber-100 focus:outline-none focus:border-gold">
                         </div>
                         <div>
-                            <label class="block text-gray-400 mb-1">معامل تحويل العملة القديمة (مثال: 100):</label>
+                            <label class="block text-gray-400 mb-1">معامل تحويل العملة القديمة:</label>
                             <input type="number" id="settingCurrencyMultiplier" class="w-full bg-brandDark border border-gold/30 rounded-xl px-3 py-2 text-amber-100 focus:outline-none focus:border-gold">
                         </div>
                         <div>
-                            <label class="block text-gray-400 mb-1">رمز المرور الخاص بدخول لوحة التحكم:</label>
+                            <label class="block text-gray-400 mb-1">رمز المرور للوحة التحكم:</label>
                             <input type="text" id="settingAdminPin" class="w-full bg-brandDark border border-gold/30 rounded-xl px-3 py-2 text-amber-100 focus:outline-none focus:border-gold">
                         </div>
                     </div>
@@ -421,13 +501,12 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-gray-400 mb-1">أيقونة بديلة في حال عدم توفر صورة (FontAwesome):</label>
+                    <label class="block text-gray-400 mb-1">أيقونة بديلة:</label>
                     <select id="itemFormIcon" class="w-full bg-brandDark border border-gold/30 rounded-xl px-3 py-2 text-amber-100 focus:outline-none focus:border-gold">
-                        <option value="fa-pizza-slice">بيتزا (fa-pizza-slice)</option>
-                        <option value="fa-fire">مشاوي/فحم (fa-fire)</option>
-                        <option value="fa-bread-slice">فطائر (fa-bread-slice)</option>
-                        <option value="fa-cheese">جبن (fa-cheese)</option>
-                        <option value="fa-cookie">حلويات/أخرى (fa-cookie)</option>
+                        <option value="fa-pizza-slice">بيتزا</option>
+                        <option value="fa-fire">مشاوي</option>
+                        <option value="fa-bread-slice">فطائر</option>
+                        <option value="fa-cheese">جبن</option>
                     </select>
                 </div>
             </div>
@@ -438,8 +517,12 @@
         </div>
     </div>
 
-    <!-- CORE JS & FIREBASE -->
-    <script>
+    <!-- FIREBASE SDKS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         const DEFAULT_ASASI_PIZZA_SIZES = {
             small: { label: 'صغير', price: 500 },
             medium: { label: 'وسط', price: 800 },
@@ -452,7 +535,7 @@
         };
 
         const INITIAL_MENU_DATA = [
-            { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك ورغبتك', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_ASASI_PIZZA_SIZES, available: true, image: '' },
+            { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_ASASI_PIZZA_SIZES, available: true, image: '' },
             { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true, image: '' },
             { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true, image: '' },
             { id: 'p4', name: 'بيتزا جبنة مكس', category: 'pizza', desc: 'مزيج فاخر من أجود أنواع الأجبان', icon: 'fa-pizza-slice', hasSizes: true, sizes: DEFAULT_REGULAR_PIZZA_SIZES, available: true, image: '' },
@@ -492,16 +575,61 @@
             phone: '0942568502',
             whatsapp: '963942568502',
             multiplier: 100,
-            adminPin: '1234'
+            adminPin: '1234',
+            openTime: '10:00',
+            closeTime: '01:00',
+            manualStatus: 'auto'
         };
         let cart = {};
         let pizzaSelectedSizes = {};
         let currentCategory = 'all';
         let isAdminLoggedIn = false;
+        let currentUser = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // Firebase Initialization
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'asasi-restaurant-app';
+
+        async function initFirebase() {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                setupOrdersListener();
+            }
+        });
+
+        function setupOrdersListener() {
+            const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+            onSnapshot(ordersRef, (snapshot) => {
+                liveOrders = [];
+                snapshot.forEach((docSnap) => {
+                    liveOrders.push({ firebaseKey: docSnap.id, ...docSnap.data() });
+                });
+                renderAdminOrders();
+                renderAdminStats();
+                renderTrackerList();
+            }, (error) => {
+                console.error("Error loading orders:", error);
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
             renderMenu();
             updateUIFromSettings();
+            checkShopStatus();
+            setInterval(checkShopStatus, 60000);
+
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase();
                 const clearBtn = document.getElementById('clearSearch');
@@ -511,16 +639,62 @@
             });
         });
 
+        function checkShopStatus() {
+            let isOpen = true;
+            if (appSettings.manualStatus === 'open') {
+                isOpen = true;
+            } else if (appSettings.manualStatus === 'closed') {
+                isOpen = false;
+            } else {
+                const now = new Date();
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                const [openH, openM] = appSettings.openTime.split(':').map(Number);
+                const [closeH, closeM] = appSettings.closeTime.split(':').map(Number);
+                const openMinutes = openH * 60 + openM;
+                const closeMinutes = closeH * 60 + closeM;
+
+                if (closeMinutes < openMinutes) {
+                    isOpen = (currentMinutes >= openMinutes || currentMinutes <= closeMinutes);
+                } else {
+                    isOpen = (currentMinutes >= openMinutes && currentMinutes <= closeMinutes);
+                }
+            }
+
+            const headerBadge = document.getElementById('headerStatusBadge');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const closedNotice = document.getElementById('shopClosedNotice');
+            const adminStatusText = document.getElementById('adminLiveStatusText');
+
+            if (isOpen) {
+                if (headerBadge) headerBadge.className = "text-[9px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+                if (statusDot) statusDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse";
+                if (statusText) statusText.innerText = "مفتوح الآن";
+                if (closedNotice) closedNotice.classList.add('hidden');
+                if (adminStatusText) {
+                    adminStatusText.innerText = "مفتوح (يعمل)";
+                    adminStatusText.className = "text-sm font-black text-emerald-400";
+                }
+            } else {
+                if (headerBadge) headerBadge.className = "text-[9px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border bg-red-500/20 text-red-400 border-red-500/40";
+                if (statusDot) statusDot.className = "w-1.5 h-1.5 rounded-full bg-red-400";
+                if (statusText) statusText.innerText = "مغلق حالياً";
+                if (closedNotice) closedNotice.classList.remove('hidden');
+                if (adminStatusText) {
+                    adminStatusText.innerText = "مغلق حالياً";
+                    adminStatusText.className = "text-sm font-black text-red-400";
+                }
+            }
+        }
+
         function showToast(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').innerText = msg;
             toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 2500);
+            setTimeout(() => { toast.classList.add('hidden'); }, 2500);
         }
 
-        function switchView(mode) {
+        window.switchView = function(mode) {
             const custApp = document.getElementById('customerApp');
             const adminApp = document.getElementById('adminApp');
             if (mode === 'admin') {
@@ -538,7 +712,7 @@
             }
         }
 
-        function openAdminAuthModal() {
+        window.openAdminAuthModal = function() {
             if (isAdminLoggedIn) {
                 switchView('admin');
                 return;
@@ -549,12 +723,12 @@
             document.getElementById('adminAuthModal').classList.add('flex');
         }
 
-        function closeAdminAuthModal() {
+        window.closeAdminAuthModal = function() {
             document.getElementById('adminAuthModal').classList.add('hidden');
             document.getElementById('adminAuthModal').classList.remove('flex');
         }
 
-        function verifyAdminPin() {
+        window.verifyAdminPin = function() {
             const entered = document.getElementById('adminPinInput').value;
             if (entered === appSettings.adminPin) {
                 isAdminLoggedIn = true;
@@ -597,12 +771,7 @@
                 ? '<span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold">متوفر</span>' 
                 : '<span class="text-[10px] bg-red-500/20 text-red-400 border border-red-500/40 px-2 py-0.5 rounded-full font-bold">نفذت الكمية</span>';
 
-            let imageOrIconHtml = '';
-            if (item.image && item.image.trim() !== '') {
-                imageOrIconHtml = `<div class="w-16 h-16 rounded-xl overflow-hidden border border-gold/30 shrink-0 shadow-inner bg-black/40"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover"></div>`;
-            } else {
-                imageOrIconHtml = `<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brandRedDark to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0 mt-1"><i class="fa-solid ${item.icon || 'fa-utensils'} text-xl"></i></div>`;
-            }
+            let imageOrIconHtml = item.image ? `<div class="w-16 h-16 rounded-xl overflow-hidden border border-gold/30 shrink-0 shadow-inner bg-black/40"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover"></div>` : `<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brandRedDark to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0 mt-1"><i class="fa-solid ${item.icon || 'fa-utensils'} text-xl"></i></div>`;
 
             if (item.hasSizes) {
                 const currentSizeKey = pizzaSelectedSizes[item.id] || 'medium';
@@ -641,13 +810,12 @@
             }
 
             const qty = cart[item.id] || 0;
-            const isFatayer = item.category === 'fatayer';
-            if (isFatayer) {
+            if (item.category === 'fatayer') {
                 return `
-                    <div class="menu-card bg-brandCard border ${isAvailable ? 'border-gold/20 hover:border-gold/60' : 'border-red-900/40 opacity-70'} rounded-xl p-3 flex flex-col justify-between transition shadow-md relative group" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                    <div class="menu-card bg-brandCard border ${isAvailable ? 'border-gold/20 hover:border-gold/60' : 'border-red-900/40 opacity-70'} rounded-xl p-3 flex flex-col justify-between transition shadow-md" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                ${item.image ? `<div class="w-12 h-12 rounded-lg overflow-hidden border border-gold/30 shrink-0"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover"></div>` : `<div class="w-8 h-8 rounded-full bg-gold/10 text-gold flex items-center justify-center"><i class="fa-solid ${item.icon || 'fa-bread-slice'} text-sm"></i></div>`}
+                                ${item.image ? `<div class="w-12 h-12 rounded-lg overflow-hidden border border-gold/30 shrink-0"><img src="${item.image}" class="w-full h-full object-cover"></div>` : `<div class="w-8 h-8 rounded-full bg-gold/10 text-gold flex items-center justify-center"><i class="fa-solid ${item.icon || 'fa-bread-slice'} text-sm"></i></div>`}
                                 ${statusBadge}
                             </div>
                             <h3 class="font-bold text-sm text-amber-100 mb-1 leading-tight">${item.name}</h3>
@@ -689,14 +857,11 @@
             const priceDisplay = document.getElementById(`price-display-${itemId}`);
             const controlsContainer = document.getElementById(`controls-${itemId}`);
             const currentPrice = getItemPrice(item, sizeKey);
-            if (priceDisplay) {
-                priceDisplay.innerText = `${currentPrice.toLocaleString()} ل.س`;
-            }
+            if (priceDisplay) priceDisplay.innerText = `${currentPrice.toLocaleString()} ل.س`;
             const cartKey = `${itemId}_${sizeKey}`;
             const qty = cart[cartKey] || 0;
-            if (controlsContainer) {
-                controlsContainer.innerHTML = renderQuantityControls(cartKey, qty, itemId);
-            }
+            if (controlsContainer) controlsContainer.innerHTML = renderQuantityControls(cartKey, qty, itemId);
+            
             const buttons = document.querySelectorAll(`.size-btn-${itemId}`);
             buttons.forEach(btn => {
                 btn.classList.remove('bg-gold', 'text-brandDark');
@@ -712,31 +877,21 @@
             const item = menuData.find(i => i.id === realItemId);
 
             if (item && item.available === false) {
-                return `
-                    <button disabled class="bg-gray-800 text-red-400 font-bold text-xs px-3 py-1.5 rounded-lg border border-red-900/40 cursor-not-allowed opacity-80 flex items-center gap-1">
-                        <i class="fa-solid fa-ban text-[10px]"></i>
-                        <span>نفذت الكمية</span>
-                    </button>
-                `;
+                return `<button disabled class="bg-gray-800 text-red-400 font-bold text-xs px-3 py-1.5 rounded-lg border border-red-900/40 cursor-not-allowed opacity-80 flex items-center gap-1"><i class="fa-solid fa-ban text-[10px]"></i><span>نفذت الكمية</span></button>`;
             }
 
             if (qty > 0) {
                 return `
                     <div class="flex items-center bg-black/60 border border-gold/40 rounded-lg p-0.5 shadow">
-                        <button onclick="updateQty('${cartKey}', -1, '${targetId}')" class="w-7 h-7 bg-brandRed hover:bg-brandRedDark text-white rounded flex items-center justify-center font-bold text-xs transition active:scale-90">
-                            <i class="fa-solid fa-minus"></i>
-                        </button>
+                        <button onclick="updateQty('${cartKey}', -1, '${targetId}')" class="w-7 h-7 bg-brandRed hover:bg-brandRedDark text-white rounded flex items-center justify-center font-bold text-xs transition active:scale-90"><i class="fa-solid fa-minus"></i></button>
                         <span class="w-7 text-center text-xs font-black text-gold">${qty}</span>
-                        <button onclick="updateQty('${cartKey}', 1, '${targetId}')" class="w-7 h-7 bg-gold hover:bg-goldHover text-brandDark rounded flex items-center justify-center font-bold text-xs transition active:scale-90">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
+                        <button onclick="updateQty('${cartKey}', 1, '${targetId}')" class="w-7 h-7 bg-gold hover:bg-goldHover text-brandDark rounded flex items-center justify-center font-bold text-xs transition active:scale-90"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 `;
             }
             return `
                 <button onclick="updateQty('${cartKey}', 1, '${targetId}')" class="bg-gradient-to-r from-gold to-amber-500 hover:from-amber-500 hover:to-gold text-brandDark font-extrabold text-xs px-3 py-1.5 rounded-lg border border-gold/50 shadow transition-transform active:scale-95 flex items-center gap-1">
-                    <i class="fa-solid fa-plus text-[10px]"></i>
-                    <span>أضف</span>
+                    <i class="fa-solid fa-plus text-[10px]"></i><span>أضف</span>
                 </button>
             `;
         }
@@ -744,15 +899,11 @@
         window.updateQty = function(cartKey, change, itemId) {
             const current = cart[cartKey] || 0;
             const updated = current + change;
-            if (updated <= 0) {
-                delete cart[cartKey];
-            } else {
-                cart[cartKey] = updated;
-            }
+            if (updated <= 0) delete cart[cartKey];
+            else cart[cartKey] = updated;
+            
             const container = document.getElementById(`controls-${itemId}`);
-            if (container) {
-                container.innerHTML = renderQuantityControls(cartKey, cart[cartKey] || 0, itemId);
-            }
+            if (container) container.innerHTML = renderQuantityControls(cartKey, cart[cartKey] || 0, itemId);
             updateCartSummary();
             renderCartModalList();
         }
@@ -779,9 +930,7 @@
                 const details = getItemDetailsFromCartKey(cartKey);
                 if (details) {
                     totalItems += cart[cartKey];
-                    if (details.price) {
-                        totalPriceNew += details.price * cart[cartKey];
-                    }
+                    if (details.price) totalPriceNew += details.price * cart[cartKey];
                 }
             }
             const totalPriceOld = totalPriceNew * appSettings.multiplier;
@@ -853,11 +1002,8 @@
                 }
             });
             const noResults = document.getElementById('noResults');
-            if (visibleCount === 0) {
-                noResults.classList.remove('hidden');
-            } else {
-                noResults.classList.add('hidden');
-            }
+            if (visibleCount === 0) noResults.classList.remove('hidden');
+            else noResults.classList.add('hidden');
         }
 
         window.toggleCartModal = function() {
@@ -901,59 +1047,148 @@
                         <span class="text-[11px] text-gold font-semibold">${priceSubText}</span>
                     </div>
                     <div class="flex items-center gap-1.5 bg-black/50 border border-gray-700 rounded-lg p-1">
-                        <button onclick="updateQty('${cartKey}', -1, '${itemId}')" class="w-6 h-6 bg-brandRed text-white rounded flex items-center justify-center font-bold text-xs">
-                            <i class="fa-solid fa-minus"></i>
-                        </button>
+                        <button onclick="updateQty('${cartKey}', -1, '${itemId}')" class="w-6 h-6 bg-brandRed text-white rounded flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-minus"></i></button>
                         <span class="w-6 text-center text-xs font-bold text-gold">${qty}</span>
-                        <button onclick="updateQty('${cartKey}', 1, '${itemId}')" class="w-6 h-6 bg-gold text-brandDark rounded flex items-center justify-center font-bold text-xs">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
+                        <button onclick="updateQty('${cartKey}', 1, '${itemId}')" class="w-6 h-6 bg-gold text-brandDark rounded flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 `;
                 container.appendChild(row);
             });
         }
 
-        window.sendOrderWhatsApp = function() {
+        window.submitOnlineOrder = async function(type) {
             const cartKeys = Object.keys(cart);
             if (cartKeys.length === 0) {
-                showToast('سلتك فارغة! اختر بعض الوجبات أولاً');
+                showToast('سلتك فارغة!');
                 return;
             }
-            let message = `*طلب جديد من منيو العسسي الإلكتروني:*%0A%0A`;
-            let counter = 1;
+            const customerName = document.getElementById('customerNameInput').value.trim() || 'زبون كريم';
+            const customerPhone = document.getElementById('customerPhoneInput').value.trim() || 'غير متوفر';
+            const notes = document.getElementById('orderNotes').value.trim();
+
+            let orderItems = [];
             let totalPriceNew = 0;
-            let hasPrice = false;
 
             cartKeys.forEach(cartKey => {
                 const details = getItemDetailsFromCartKey(cartKey);
                 if (details) {
-                    if (details.price) {
-                        const itemTotal = details.price * cart[cartKey];
-                        totalPriceNew += itemTotal;
-                        hasPrice = true;
-                        message += `${counter}. *${details.name}* × (${cart[cartKey]}) = ${itemTotal.toLocaleString()} ل.س%0A`;
-                    } else {
-                        message += `${counter}. *${details.name}* × (${cart[cartKey]})%0A`;
-                    }
-                    counter++;
+                    const subtotal = details.price ? details.price * cart[cartKey] : 0;
+                    totalPriceNew += subtotal;
+                    orderItems.push({
+                        name: details.name,
+                        qty: cart[cartKey],
+                        subtotal: subtotal
+                    });
                 }
             });
 
-            if (hasPrice) {
-                const totalPriceOld = totalPriceNew * appSettings.multiplier;
-                message += `%0A*المجموع (بالعملة الجديدة):* ${totalPriceNew.toLocaleString()} ل.س`;
-                message += `%0A*المجموع (بالعملة القديمة):* ${totalPriceOld.toLocaleString()} ليرة قديمة%0A`;
+            const orderId = 'ASASI-' + Math.floor(1000 + Math.random() * 9000);
+            const orderData = {
+                id: orderId,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                items: orderItems,
+                total: totalPriceNew,
+                notes: notes,
+                status: 'pending', // pending, preparing, delivering, completed, canceled
+                time: new Date().toLocaleTimeString('ar-SY', { hour: '2-digit', minute: '2-digit' }),
+                timestamp: Date.now()
+            };
+
+            if (type === 'whatsapp') {
+                let message = `*طلب جديد من ملحمة ومعجنات العسسي:*%0A`;
+                message += `*الاسم:* ${customerName}%0A*الهاتف:* ${customerPhone}%0A%0A`;
+                orderItems.forEach((i, idx) => {
+                    message += `${idx+1}. *${i.name}* (×${i.qty}) = ${i.subtotal.toLocaleString()} ل.س%0A`;
+                });
+                message += `%0A*المجموع الكلي:* ${totalPriceNew.toLocaleString()} ل.س%0A`;
+                if (notes) message += `*الملاحظات:* ${encodeURIComponent(notes)}%0A`;
+                
+                window.open(`https://wa.me/${appSettings.whatsapp}?text=${message}`, '_blank');
             }
 
-            const notes = document.getElementById('orderNotes').value.trim();
-            if (notes) {
-                message += `%0A*ملاحظات/عنوان التوصيل:*%0A${encodeURIComponent(notes)}%0A`;
-            }
-            message += `%0A*يرجى تأكيد الطلب والتجهيز. شكراً لكم!*`;
+            // حفظ الطلب في قاعدة البيانات السحابية لكي يظهر للزبون وللإدارة
+            try {
+                if (currentUser) {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'orders'), orderData);
+                    
+                    // حفظ رقم الطلب في جهاز الزبون ليتمكن من تتبعه حصرياً
+                    let myOrders = JSON.parse(localStorage.getItem('asasi_my_orders') || '[]');
+                    myOrders.push(orderId);
+                    localStorage.setItem('asasi_my_orders', JSON.stringify(myOrders));
 
-            const phone = appSettings.whatsapp || "963942568502";
-            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+                    showToast('تم إرسال طلبك أونلاين بنجاح!');
+                    toggleCartModal();
+                    cart = {};
+                    updateCartSummary();
+                    openTrackerModal();
+                }
+            } catch (err) {
+                console.error("Firestore save error:", err);
+                showToast('تم إرسال الطلب بنجاح عبر الواتساب');
+            }
+        }
+
+        window.openTrackerModal = function() {
+            renderTrackerList();
+            document.getElementById('trackerModal').classList.remove('hidden');
+            document.getElementById('trackerModal').classList.add('flex');
+        }
+
+        window.closeTrackerModal = function() {
+            document.getElementById('trackerModal').classList.add('hidden');
+            document.getElementById('trackerModal').classList.remove('flex');
+        }
+
+        function renderTrackerList() {
+            const container = document.getElementById('trackerListContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let myOrdersIds = JSON.parse(localStorage.getItem('asasi_my_orders') || '[]');
+            const myLiveOrders = liveOrders.filter(o => myOrdersIds.includes(o.id));
+
+            if (myLiveOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fa-solid fa-receipt text-3xl mb-2 text-gray-600"></i>
+                        <p class="text-xs">لا توجد طلبات سابقة قمت بطلبها أونلاين من هذا الجهاز</p>
+                    </div>
+                `;
+                return;
+            }
+
+            myLiveOrders.forEach(order => {
+                const statusMap = {
+                    pending: { text: 'جديد (بانتظار التأكيد)', color: 'text-amber-300 bg-amber-500/20 border-amber-500/40', step: 1 },
+                    preparing: { text: 'قيد التحضير والتجهيز 🔥', color: 'text-blue-300 bg-blue-500/20 border-blue-500/40', step: 2 },
+                    delivering: { text: 'جاري التوصيل إليك 🛵', color: 'text-purple-300 bg-purple-500/20 border-purple-500/40', step: 3 },
+                    completed: { text: 'تم التسليم بنجاح ✅', color: 'text-emerald-300 bg-emerald-500/20 border-emerald-500/40', step: 4 },
+                    canceled: { text: 'تم إلغاء الطلب ❌', color: 'text-red-300 bg-red-500/20 border-red-500/40', step: 0 }
+                };
+                const st = statusMap[order.status] || statusMap.pending;
+
+                let itemsStr = (order.items || []).map(i => `${i.name} (×${i.qty})`).join(', ');
+
+                const card = document.createElement('div');
+                card.className = 'bg-brandDark border border-gold/30 rounded-xl p-3.5 space-y-2.5';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+                        <span class="font-black text-gold text-xs">${order.id}</span>
+                        <span class="text-[10px] text-gray-400">${order.time}</span>
+                    </div>
+                    <div class="text-xs space-y-1">
+                        <p class="text-gray-300"><strong>الأصناف:</strong> ${itemsStr}</p>
+                        <p class="text-emerald-400 font-bold"><strong>المجموع:</strong> ${order.total.toLocaleString()} ل.س</p>
+                    </div>
+                    <div class="pt-2 border-t border-gray-800 flex items-center justify-between">
+                        <span class="text-[11px] px-2.5 py-1 rounded-lg border font-bold ${st.color}">
+                            حالة الطلب: ${st.text}
+                        </span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
         // ================= ADMIN DASHBOARD FUNCTIONS =================
@@ -982,16 +1217,13 @@
         }
 
         function renderAdminStats() {
-            const pendingOrders = liveOrders.filter(o => o.status === 'pending').length;
             const completedOrders = liveOrders.filter(o => o.status === 'completed');
             const totalSalesSum = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
 
-            const statNew = document.getElementById('statNewOrders');
             const statSales = document.getElementById('statTotalSales');
             const statItems = document.getElementById('statTotalItems');
             const statComp = document.getElementById('statCompletedOrders');
 
-            if (statNew) statNew.innerText = pendingOrders;
             if (statSales) statSales.innerText = `${totalSalesSum.toLocaleString()} ل.س`;
             if (statItems) statItems.innerText = menuData.length;
             if (statComp) statComp.innerText = completedOrders.length;
@@ -1005,7 +1237,7 @@
                 container.innerHTML = `
                     <div class="text-center py-10 bg-brandCard rounded-xl border border-gold/20">
                         <i class="fa-solid fa-inbox text-3xl text-gray-600 mb-2"></i>
-                        <p class="text-xs text-gray-400">لا يوجد أي طلبات واردة حالياً</p>
+                        <p class="text-xs text-gray-400">لا يوجد أي طلبات أونلاين واردة حالياً</p>
                     </div>
                 `;
                 return;
@@ -1033,7 +1265,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gold/20 pb-2">
                         <div class="flex items-center gap-2">
                             <span class="font-black text-gold text-sm">${order.id}</span>
-                            <span class="text-xs text-gray-400">(${order.time})</span>
+                            <span class="text-xs text-gray-300 font-bold">(${order.customerName} - ${order.customerPhone})</span>
                         </div>
                         <span class="text-[11px] px-2.5 py-0.5 rounded-full border font-bold ${currentBadge.bg}">
                             ${currentBadge.text}
@@ -1042,7 +1274,7 @@
                     <div class="space-y-1">${itemsHtml}</div>
                     ${order.notes ? `
                         <div class="bg-black/40 p-2 rounded-lg text-xs text-amber-200 border border-gold/10">
-                            <strong>ملاحظات التوصيل:</strong> ${order.notes}
+                            <strong>العنوان وملاحظات التوصيل:</strong> ${order.notes}
                         </div>
                     ` : ''}
                     <div class="flex items-center justify-between pt-2 border-t border-gray-800">
@@ -1055,9 +1287,7 @@
                                 <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>مكتمل</option>
                                 <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>إلغاء</option>
                             </select>
-                            <button onclick="deleteOrder('${order.firebaseKey}')" class="text-red-400 hover:text-red-300 p-1.5 text-xs">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
+                            <button onclick="deleteOrder('${order.firebaseKey}')" class="text-red-400 hover:text-red-300 p-1.5 text-xs"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
@@ -1065,22 +1295,33 @@
             });
         }
 
-        window.updateOrderStatus = function(firebaseKey, newStatus) {
-            showToast('تم تحديث حالة الطلب');
+        window.updateOrderStatus = async function(firebaseKey, newStatus) {
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', firebaseKey), {
+                    status: newStatus
+                });
+                showToast('تم تحديث حالة الطلب للزبون فوراً');
+            } catch (err) {
+                console.error(err);
+            }
         }
 
-        window.deleteOrder = function(firebaseKey) {
-            liveOrders = liveOrders.filter(o => o.firebaseKey !== firebaseKey);
-            renderAdminOrders();
-            renderAdminStats();
-            showToast('تم حذف الطلب');
+        window.deleteOrder = async function(firebaseKey) {
+            if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', firebaseKey));
+                    showToast('تم الحذف');
+                } catch (err) {
+                    console.error(err);
+                }
+            }
         }
 
         window.clearAllOrders = function() {
             if (confirm('هل أنت متأكد من حذف كافة الطلبات؟')) {
-                liveOrders = [];
-                renderAdminOrders();
-                renderAdminStats();
+                liveOrders.forEach(o => {
+                    deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', o.firebaseKey));
+                });
                 showToast('تم تنظيف سجل الطلبات');
             }
         }
@@ -1090,13 +1331,7 @@
             if (!container) return;
             container.innerHTML = '';
             menuData.forEach(item => {
-                let priceText = '';
-                if (item.hasSizes && item.sizes) {
-                    priceText = `صغير: ${getItemPrice(item, 'small')} | وسط: ${getItemPrice(item, 'medium')} | كبير: ${getItemPrice(item, 'large')} ل.س`;
-                } else {
-                    priceText = item.price ? `${item.price.toLocaleString()} ل.س` : 'حسب الاختيار';
-                }
-
+                let priceText = item.hasSizes ? `صغير: ${getItemPrice(item, 'small')} | وسط: ${getItemPrice(item, 'medium')} | كبير: ${getItemPrice(item, 'large')} ل.س` : (item.price ? `${item.price.toLocaleString()} ل.س` : 'حسب الاختيار');
                 let thumbHtml = item.image ? `<div class="w-10 h-10 rounded-lg overflow-hidden border border-gold/30 shrink-0"><img src="${item.image}" class="w-full h-full object-cover"></div>` : `<div class="w-10 h-10 rounded-lg bg-gold/10 border border-gold/30 text-gold flex items-center justify-center shrink-0"><i class="fa-solid ${item.icon || 'fa-utensils'} text-base"></i></div>`;
 
                 const card = document.createElement('div');
@@ -1107,23 +1342,15 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <h4 class="font-bold text-sm text-amber-100">${item.name}</h4>
-                                <span class="text-[10px] ${item.available !== false ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'} px-2 py-0.5 rounded font-bold">
-                                    ${item.available !== false ? 'متوفر' : 'نفذت'}
-                                </span>
+                                <span class="text-[10px] ${item.available !== false ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'} px-2 py-0.5 rounded font-bold">${item.available !== false ? 'متوفر' : 'نفذت'}</span>
                             </div>
                             <span class="text-[11px] text-gold font-semibold block">${priceText}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <button onclick="toggleItemAvailability('${item.id}')" title="توفير/إخفاء" class="w-8 h-8 rounded-lg ${item.available !== false ? 'bg-emerald-600/20 text-emerald-400' : 'bg-red-600/20 text-red-400'} flex items-center justify-center text-xs">
-                            <i class="fa-solid ${item.available !== false ? 'fa-eye' : 'fa-eye-slash'}"></i>
-                        </button>
-                        <button onclick="openEditItemModal('${item.id}')" title="تعديل" class="w-8 h-8 rounded-lg bg-gold/20 text-gold flex items-center justify-center text-xs">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button onclick="deleteMenuItem('${item.id}')" title="حذف" class="w-8 h-8 rounded-lg bg-red-600/20 text-red-400 flex items-center justify-center text-xs">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+                        <button onclick="toggleItemAvailability('${item.id}')" title="توفير/إخفاء" class="w-8 h-8 rounded-lg ${item.available !== false ? 'bg-emerald-600/20 text-emerald-400' : 'bg-red-600/20 text-red-400'} flex items-center justify-center text-xs"><i class="fa-solid ${item.available !== false ? 'fa-eye' : 'fa-eye-slash'}"></i></button>
+                        <button onclick="openEditItemModal('${item.id}')" title="تعديل" class="w-8 h-8 rounded-lg bg-gold/20 text-gold flex items-center justify-center text-xs"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteMenuItem('${item.id}')" title="حذف" class="w-8 h-8 rounded-lg bg-red-600/20 text-red-400 flex items-center justify-center text-xs"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1141,22 +1368,22 @@
         }
 
         window.deleteMenuItem = function(itemId) {
-            if (confirm('هل أنت متأكد من حذف هذه الوجبة من المنيو؟')) {
+            if (confirm('هل أنت متأكد من حذف هذه الوجبة؟')) {
                 menuData = menuData.filter(i => i.id !== itemId);
                 renderMenu();
                 renderAdminMenuItems();
                 renderAdminStats();
-                showToast('تم حذف الوجبة بنجاح');
+                showToast('تم الحذف');
             }
         }
 
         window.restoreDefaultMenu = function() {
-            if (confirm('هل تريد استعادة جميع الوجبات والأسعار إلى الوضع الافتراضي؟')) {
+            if (confirm('استعادة المنيو الافتراضي؟')) {
                 menuData = [...INITIAL_MENU_DATA];
                 renderMenu();
                 renderAdminMenuItems();
                 renderAdminStats();
-                showToast('تمت استعادة المنيو الافتراضي');
+                showToast('تمت الاستعادة');
             }
         }
 
@@ -1268,7 +1495,7 @@
             renderAdminMenuItems();
             renderAdminStats();
             window.closeItemModal();
-            showToast(editId ? 'تم تعديل الوجبة بنجاح' : 'تم إضافة الوجبة الجديدة');
+            showToast('تم الحفظ بنجاح');
         }
 
         window.saveSettings = function() {
@@ -1276,29 +1503,30 @@
             appSettings.whatsapp = document.getElementById('settingWhatsApp').value.trim();
             appSettings.multiplier = parseFloat(document.getElementById('settingCurrencyMultiplier').value) || 100;
             appSettings.adminPin = document.getElementById('settingAdminPin').value.trim() || '1234';
+            appSettings.openTime = document.getElementById('settingOpenTime').value || '10:00';
+            appSettings.closeTime = document.getElementById('settingCloseTime').value || '01:00';
+            appSettings.manualStatus = document.getElementById('settingManualStatus').value;
 
             updateUIFromSettings();
-            showToast('تم حفظ إعدادات المحل بنجاح');
+            checkShopStatus();
+            showToast('تم حفظ الإعدادات');
         }
 
         function updateUIFromSettings() {
             const footerPhone = document.getElementById('footerPhoneLink');
-            const callBtn = document.getElementById('callActionBtn');
-            const sPhone = document.getElementById('settingPhone');
-            const sWa = document.getElementById('settingWhatsApp');
-            const sMult = document.getElementById('settingCurrencyMultiplier');
-            const sPin = document.getElementById('settingAdminPin');
-
             if (footerPhone) {
                 footerPhone.href = `tel:${appSettings.phone}`;
                 footerPhone.innerText = appSettings.phone;
             }
-            if (callBtn) callBtn.href = `tel:${appSettings.phone}`;
-            if (sPhone) sPhone.value = appSettings.phone;
-            if (sWa) sWa.value = appSettings.whatsapp;
-            if (sMult) sMult.value = appSettings.multiplier;
-            if (sPin) sPin.value = appSettings.adminPin;
+            document.getElementById('settingPhone').value = appSettings.phone;
+            document.getElementById('settingWhatsApp').value = appSettings.whatsapp;
+            document.getElementById('settingCurrencyMultiplier').value = appSettings.multiplier;
+            document.getElementById('settingAdminPin').value = appSettings.adminPin;
+            document.getElementById('settingOpenTime').value = appSettings.openTime;
+            document.getElementById('settingCloseTime').value = appSettings.closeTime;
+            document.getElementById('settingManualStatus').value = appSettings.manualStatus;
         }
     </script>
 </body>
 </html>
+```
