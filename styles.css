@@ -1,0 +1,79 @@
+/* ==================== THEME COLORS ==================== */
+:root {
+    --color-gold: #d4af37;
+    --color-gold-hover: #b89528;
+    --color-brand-dark: #120f0e;
+    --color-brand-card: #1e1917;
+    --color-brand-red: #8b1d1d;
+    --color-brand-red-dark: #671212;
+}
+
+/* ==================== SCROLLBAR ==================== */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-brand-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3a322d;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold);
+}
+
+/* ==================== WOOD PATTERN ==================== */
+.wood-pattern {
+    background-color: #181412;
+    background-image: radial-gradient(#261f1c 1px, transparent 0);
+    background-size: 24px 24px;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ==================== UTILITY ==================== */
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* ==================== INPUT FOCUS STYLES ==================== */
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-gold);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
+}
+
+/* ==================== MENU CARD HOVER ==================== */
+.menu-card {
+    transition: all 0.3s ease;
+}
+
+.menu-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
