@@ -88,7 +88,7 @@
                             <!-- Live Status Badge in Header -->
                             <span id="headerStatusBadge" class="text-[9px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border">
                                 <span id="statusDot" class="w-1.5 h-1.5 rounded-full"></span>
-                                <span id="statusText">جاري التحقق...</span>
+                                <span id="statusText">مفتوح الآن</span>
                             </span>
                         </div>
                     </div>
@@ -312,7 +312,7 @@
                 <h3 class="font-black text-sm text-amber-100">تسجيل الدخول للإدارة</h3>
                 <p class="text-[11px] text-gray-400 mt-1">أدخل رمز المرور للوصول إلى لوحة التحكم</p>
             </div>
-            <input type="password" id="adminPinInput" placeholder="رمز المرور" class="w-full bg-brandDark border border-gold/30 rounded-xl px-3 py-2 text-center text-sm text-amber-100 focus:outline-none focus:border-gold">
+            <input type="password" id="adminPinInput" placeholder="رمز المرور (1234)" class="w-full bg-brandDark border border-gold/30 rounded-xl px-3 py-2 text-center text-sm text-amber-100 focus:outline-none focus:border-gold">
             <p id="pinErrorMsg" class="text-xs text-red-400 hidden font-bold">رمز المرور غير صحيح!</p>
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button onclick="closeAdminAuthModal()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs py-2 rounded-xl font-bold transition">إلغاء</button>
@@ -369,7 +369,7 @@
             <!-- Tab 1: Orders -->
             <div id="adminTabOrders" class="admin-tab-content space-y-3">
                 <div class="flex items-center justify-between">
-                    <h3 class="font-black text-xs text-amber-100">الطلبات الواردة المباشرة (تتحدث لحظياً)</h3>
+                    <h3 class="font-black text-xs text-amber-100">الطلبات الواردة أونلاين</h3>
                     <button onclick="clearAllOrders()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white text-[11px] px-2.5 py-1 rounded-lg font-bold transition">حذف سجل الطلبات</button>
                 </div>
                 <div id="adminOrdersContainer" class="space-y-3"></div>
@@ -517,12 +517,8 @@
         </div>
     </div>
 
-    <!-- FIREBASE SDKS -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    <!-- SCRIPT LOGIC -->
+    <script>
         const DEFAULT_ASASI_PIZZA_SIZES = {
             small: { label: 'صغير', price: 500 },
             medium: { label: 'وسط', price: 800 },
@@ -569,9 +565,9 @@
             { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese', available: true, image: '' }
         ];
 
-        let menuData = [...INITIAL_MENU_DATA];
-        let liveOrders = [];
-        let appSettings = {
+        let menuData = JSON.parse(localStorage.getItem('asasi_menu')) || [...INITIAL_MENU_DATA];
+        let liveOrders = JSON.parse(localStorage.getItem('asasi_orders')) || [];
+        let appSettings = JSON.parse(localStorage.getItem('asasi_settings')) || {
             phone: '0942568502',
             whatsapp: '963942568502',
             multiplier: 100,
@@ -584,51 +580,12 @@
         let pizzaSelectedSizes = {};
         let currentCategory = 'all';
         let isAdminLoggedIn = false;
-        let currentUser = null;
 
-        // Firebase Initialization
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'asasi-restaurant-app';
-
-        async function initFirebase() {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                setupOrdersListener();
-            }
-        });
-
-        function setupOrdersListener() {
-            const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
-            onSnapshot(ordersRef, (snapshot) => {
-                liveOrders = [];
-                snapshot.forEach((docSnap) => {
-                    liveOrders.push({ firebaseKey: docSnap.id, ...docSnap.data() });
-                });
-                renderAdminOrders();
-                renderAdminStats();
-                renderTrackerList();
-            }, (error) => {
-                console.error("Error loading orders:", error);
-            });
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initFirebase();
+        document.addEventListener('DOMContentLoaded', () => {
             renderMenu();
             updateUIFromSettings();
             checkShopStatus();
-            setInterval(checkShopStatus, 60000);
+            setInterval(checkShopStatus, 30000);
 
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase();
@@ -661,14 +618,12 @@
             }
 
             const headerBadge = document.getElementById('headerStatusBadge');
-            const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
             const closedNotice = document.getElementById('shopClosedNotice');
             const adminStatusText = document.getElementById('adminLiveStatusText');
 
             if (isOpen) {
                 if (headerBadge) headerBadge.className = "text-[9px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
-                if (statusDot) statusDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse";
                 if (statusText) statusText.innerText = "مفتوح الآن";
                 if (closedNotice) closedNotice.classList.add('hidden');
                 if (adminStatusText) {
@@ -677,7 +632,6 @@
                 }
             } else {
                 if (headerBadge) headerBadge.className = "text-[9px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border bg-red-500/20 text-red-400 border-red-500/40";
-                if (statusDot) statusDot.className = "w-1.5 h-1.5 rounded-full bg-red-400";
                 if (statusText) statusText.innerText = "مغلق حالياً";
                 if (closedNotice) closedNotice.classList.remove('hidden');
                 if (adminStatusText) {
@@ -815,7 +769,7 @@
                     <div class="menu-card bg-brandCard border ${isAvailable ? 'border-gold/20 hover:border-gold/60' : 'border-red-900/40 opacity-70'} rounded-xl p-3 flex flex-col justify-between transition shadow-md" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                ${item.image ? `<div class="w-12 h-12 rounded-lg overflow-hidden border border-gold/30 shrink-0"><img src="${item.image}" class="w-full h-full object-cover"></div>` : `<div class="w-8 h-8 rounded-full bg-gold/10 text-gold flex items-center justify-center"><i class="fa-solid ${item.icon || 'fa-bread-slice'} text-sm"></i></div>`}
+                                ${item.image ? `<div class="w-12 h-12 rounded-lg overflow-hidden border border-gold/30 shrink-0"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover"></div>` : `<div class="w-8 h-8 rounded-full bg-gold/10 text-gold flex items-center justify-center"><i class="fa-solid ${item.icon || 'fa-bread-slice'} text-sm"></i></div>`}
                                 ${statusBadge}
                             </div>
                             <h3 class="font-bold text-sm text-amber-100 mb-1 leading-tight">${item.name}</h3>
@@ -1056,7 +1010,7 @@
             });
         }
 
-        window.submitOnlineOrder = async function(type) {
+        window.submitOnlineOrder = function(type) {
             const cartKeys = Object.keys(cart);
             if (cartKeys.length === 0) {
                 showToast('سلتك فارغة!');
@@ -1107,26 +1061,19 @@
                 window.open(`https://wa.me/${appSettings.whatsapp}?text=${message}`, '_blank');
             }
 
-            // حفظ الطلب في قاعدة البيانات السحابية لكي يظهر للزبون وللإدارة
-            try {
-                if (currentUser) {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'orders'), orderData);
-                    
-                    // حفظ رقم الطلب في جهاز الزبون ليتمكن من تتبعه حصرياً
-                    let myOrders = JSON.parse(localStorage.getItem('asasi_my_orders') || '[]');
-                    myOrders.push(orderId);
-                    localStorage.setItem('asasi_my_orders', JSON.stringify(myOrders));
+            // حفظ الطلب في التخزين المحلي لكي يظهر للزبون وللوحة الإدارة
+            liveOrders.unshift(orderData);
+            localStorage.setItem('asasi_orders', JSON.stringify(liveOrders));
 
-                    showToast('تم إرسال طلبك أونلاين بنجاح!');
-                    toggleCartModal();
-                    cart = {};
-                    updateCartSummary();
-                    openTrackerModal();
-                }
-            } catch (err) {
-                console.error("Firestore save error:", err);
-                showToast('تم إرسال الطلب بنجاح عبر الواتساب');
-            }
+            let myOrders = JSON.parse(localStorage.getItem('asasi_my_orders') || '[]');
+            myOrders.push(orderId);
+            localStorage.setItem('asasi_my_orders', JSON.stringify(myOrders));
+
+            showToast('تم إرسال طلبك بنجاح!');
+            toggleCartModal();
+            cart = {};
+            updateCartSummary();
+            openTrackerModal();
         }
 
         window.openTrackerModal = function() {
@@ -1146,6 +1093,7 @@
             container.innerHTML = '';
 
             let myOrdersIds = JSON.parse(localStorage.getItem('asasi_my_orders') || '[]');
+            liveOrders = JSON.parse(localStorage.getItem('asasi_orders')) || [];
             const myLiveOrders = liveOrders.filter(o => myOrdersIds.includes(o.id));
 
             if (myLiveOrders.length === 0) {
@@ -1160,14 +1108,13 @@
 
             myLiveOrders.forEach(order => {
                 const statusMap = {
-                    pending: { text: 'جديد (بانتظار التأكيد)', color: 'text-amber-300 bg-amber-500/20 border-amber-500/40', step: 1 },
-                    preparing: { text: 'قيد التحضير والتجهيز 🔥', color: 'text-blue-300 bg-blue-500/20 border-blue-500/40', step: 2 },
-                    delivering: { text: 'جاري التوصيل إليك 🛵', color: 'text-purple-300 bg-purple-500/20 border-purple-500/40', step: 3 },
-                    completed: { text: 'تم التسليم بنجاح ✅', color: 'text-emerald-300 bg-emerald-500/20 border-emerald-500/40', step: 4 },
-                    canceled: { text: 'تم إلغاء الطلب ❌', color: 'text-red-300 bg-red-500/20 border-red-500/40', step: 0 }
+                    pending: { text: 'جديد (بانتظار التأكيد ⏳)', color: 'text-amber-300 bg-amber-500/20 border-amber-500/40' },
+                    preparing: { text: 'قيد التحضير والتجهيز 🔥', color: 'text-blue-300 bg-blue-500/20 border-blue-500/40' },
+                    delivering: { text: 'جاري التوصيل إليك 🛵', color: 'text-purple-300 bg-purple-500/20 border-purple-500/40' },
+                    completed: { text: 'تم التسليم بنجاح ✅', color: 'text-emerald-300 bg-emerald-500/20 border-emerald-500/40' },
+                    canceled: { text: 'تم إلغاء الطلب ❌', color: 'text-red-300 bg-red-500/20 border-red-500/40' }
                 };
                 const st = statusMap[order.status] || statusMap.pending;
-
                 let itemsStr = (order.items || []).map(i => `${i.name} (×${i.qty})`).join(', ');
 
                 const card = document.createElement('div');
@@ -1217,6 +1164,7 @@
         }
 
         function renderAdminStats() {
+            liveOrders = JSON.parse(localStorage.getItem('asasi_orders')) || [];
             const completedOrders = liveOrders.filter(o => o.status === 'completed');
             const totalSalesSum = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
 
@@ -1230,6 +1178,7 @@
         }
 
         function renderAdminOrders() {
+            liveOrders = JSON.parse(localStorage.getItem('asasi_orders')) || [];
             const container = document.getElementById('adminOrdersContainer');
             if (!container) return;
             container.innerHTML = '';
@@ -1243,7 +1192,7 @@
                 return;
             }
 
-            liveOrders.forEach(order => {
+            liveOrders.forEach((order, index) => {
                 const statusBadges = {
                     pending: { text: 'جديد بانتظار التأكيد', bg: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
                     preparing: { text: 'قيد التحضير والتجهيز', bg: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
@@ -1280,14 +1229,14 @@
                     <div class="flex items-center justify-between pt-2 border-t border-gray-800">
                         <span class="text-xs font-black text-emerald-400">الإجمالي: ${(order.total || 0).toLocaleString()} ل.س</span>
                         <div class="flex items-center gap-1.5">
-                            <select onchange="updateOrderStatus('${order.firebaseKey}', this.value)" class="bg-black/60 border border-gold/40 text-xs text-gray-200 rounded-lg p-1.5 focus:outline-none">
+                            <select onchange="updateOrderStatus(${index}, this.value)" class="bg-black/60 border border-gold/40 text-xs text-gray-200 rounded-lg p-1.5 focus:outline-none font-bold">
                                 <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>جديد</option>
                                 <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>قيد التحضير</option>
                                 <option value="delivering" ${order.status === 'delivering' ? 'selected' : ''}>جاري التوصيل</option>
                                 <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>مكتمل</option>
                                 <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>إلغاء</option>
                             </select>
-                            <button onclick="deleteOrder('${order.firebaseKey}')" class="text-red-400 hover:text-red-300 p-1.5 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                            <button onclick="deleteOrder(${index})" class="text-red-400 hover:text-red-300 p-1.5 text-xs"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
@@ -1295,33 +1244,34 @@
             });
         }
 
-        window.updateOrderStatus = async function(firebaseKey, newStatus) {
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', firebaseKey), {
-                    status: newStatus
-                });
-                showToast('تم تحديث حالة الطلب للزبون فوراً');
-            } catch (err) {
-                console.error(err);
+        window.updateOrderStatus = function(index, newStatus) {
+            liveOrders = JSON.parse(localStorage.getItem('asasi_orders')) || [];
+            if (liveOrders[index]) {
+                liveOrders[index].status = newStatus;
+                localStorage.setItem('asasi_orders', JSON.stringify(liveOrders));
+                renderAdminOrders();
+                renderAdminStats();
+                showToast('تم تحديث حالة الطلب فوراً');
             }
         }
 
-        window.deleteOrder = async function(firebaseKey) {
+        window.deleteOrder = function(index) {
             if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', firebaseKey));
-                    showToast('تم الحذف');
-                } catch (err) {
-                    console.error(err);
-                }
+                liveOrders = JSON.parse(localStorage.getItem('asasi_orders')) || [];
+                liveOrders.splice(index, 1);
+                localStorage.setItem('asasi_orders', JSON.stringify(liveOrders));
+                renderAdminOrders();
+                renderAdminStats();
+                showToast('تم الحذف');
             }
         }
 
         window.clearAllOrders = function() {
             if (confirm('هل أنت متأكد من حذف كافة الطلبات؟')) {
-                liveOrders.forEach(o => {
-                    deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', o.firebaseKey));
-                });
+                localStorage.removeItem('asasi_orders');
+                liveOrders = [];
+                renderAdminOrders();
+                renderAdminStats();
                 showToast('تم تنظيف سجل الطلبات');
             }
         }
@@ -1361,6 +1311,7 @@
             const idx = menuData.findIndex(i => i.id === itemId);
             if (idx !== -1) {
                 menuData[idx].available = menuData[idx].available === false ? true : false;
+                localStorage.setItem('asasi_menu', JSON.stringify(menuData));
                 renderMenu();
                 renderAdminMenuItems();
                 showToast('تم تحديث حالة توفر الوجبة');
@@ -1370,6 +1321,7 @@
         window.deleteMenuItem = function(itemId) {
             if (confirm('هل أنت متأكد من حذف هذه الوجبة؟')) {
                 menuData = menuData.filter(i => i.id !== itemId);
+                localStorage.setItem('asasi_menu', JSON.stringify(menuData));
                 renderMenu();
                 renderAdminMenuItems();
                 renderAdminStats();
@@ -1380,6 +1332,7 @@
         window.restoreDefaultMenu = function() {
             if (confirm('استعادة المنيو الافتراضي؟')) {
                 menuData = [...INITIAL_MENU_DATA];
+                localStorage.setItem('asasi_menu', JSON.stringify(menuData));
                 renderMenu();
                 renderAdminMenuItems();
                 renderAdminStats();
@@ -1491,6 +1444,7 @@
                 menuData.push(newItemObj);
             }
 
+            localStorage.setItem('asasi_menu', JSON.stringify(menuData));
             renderMenu();
             renderAdminMenuItems();
             renderAdminStats();
@@ -1507,6 +1461,7 @@
             appSettings.closeTime = document.getElementById('settingCloseTime').value || '01:00';
             appSettings.manualStatus = document.getElementById('settingManualStatus').value;
 
+            localStorage.setItem('asasi_settings', JSON.stringify(appSettings));
             updateUIFromSettings();
             checkShopStatus();
             showToast('تم حفظ الإعدادات');
