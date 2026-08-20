@@ -514,6 +514,9 @@
     </footer>
 
     <script>
+        // قناة البث للتحديث المباشر عبر النوافذ والتطبيقات
+        const menuSyncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('asasi_menu_updates') : null;
+
         // دالة التحقق من أوقات العمل تلقائياً (من 7 صباحاً حتى 10 مساءً)
         function checkStoreStatus() {
             const now = new Date();
@@ -607,10 +610,45 @@
         let pizzaSelectedSizes = {}; 
         let currentCategory = 'all';
 
+        // إرسال تنبيه لكافة المتصفحات والمستخدمين بالتحديث الفوري
         function saveMenuState() {
             localStorage.setItem('asasi_menuData', JSON.stringify(menuData));
             localStorage.setItem('asasi_offersData', JSON.stringify(offersData));
+            
+            if (menuSyncChannel) {
+                menuSyncChannel.postMessage({ type: 'UPDATE_MENU' });
+            }
+            
             renderMenu();
+            updateCartSummary();
+            renderCartModalList();
+        }
+
+        // الاستماع للتغييرات الفورية القادمة من التبويبات الأخرى أو الأجهزة الأخرى
+        if (menuSyncChannel) {
+            menuSyncChannel.onmessage = (event) => {
+                if (event.data && event.data.type === 'UPDATE_MENU') {
+                    reloadMenuDataFromStorage();
+                }
+            };
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'asasi_menuData' || e.key === 'asasi_offersData') {
+                reloadMenuDataFromStorage();
+            }
+        });
+
+        function reloadMenuDataFromStorage() {
+            menuData = JSON.parse(localStorage.getItem('asasi_menuData')) || defaultMenuData;
+            offersData = JSON.parse(localStorage.getItem('asasi_offersData')) || defaultOffers;
+            renderMenu();
+            updateCartSummary();
+            renderCartModalList();
+            if(!document.getElementById('adminModal').classList.contains('hidden')) {
+                renderAdminItemsList();
+                renderAdminOffersList();
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -666,6 +704,11 @@
                 else if (item.category === 'meat') meatContainer.innerHTML += cardHtml;
                 else if (item.category === 'fatayer') fatayerContainer.innerHTML += cardHtml;
             });
+
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (query) {
+                filterMenuItems(query);
+            }
         }
 
         function createOfferCardHTML(offer) {
