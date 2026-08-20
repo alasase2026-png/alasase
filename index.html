@@ -5,7 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>العسسي - ملحمة ومعجنات</title>
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+// ===== لوحة الإدارة السريعة =====
+function openAdmin(){
+    const pass = prompt("ادخل كلمة سر الإدارة");
+    if(pass === "Yaser1738"){
+        alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
+    } else if(pass !== null){
+        alert("كلمة السر غير صحيحة");
+    }
+}
+
+</script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Arabic Font (Cairo) -->
@@ -29,7 +40,18 @@
                 }
             }
         }
-    </script>
+    
+// ===== لوحة الإدارة السريعة =====
+function openAdmin(){
+    const pass = prompt("ادخل كلمة سر الإدارة");
+    if(pass === "Yaser1738"){
+        alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
+    } else if(pass !== null){
+        alert("كلمة السر غير صحيحة");
+    }
+}
+
+</script>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -106,10 +128,7 @@
                 <div class="mt-3 w-full max-w-sm bg-black/50 border border-gold/30 rounded-2xl p-3 shadow-inner flex flex-col items-center text-center">
                     <div class="mb-2 flex items-center justify-center gap-2">
                         <div class="h-[1px] w-12 bg-gold/30"></div>
-                        <button onclick="openAdmin()" class="text-gold hover:text-white font-bold text-xs tracking-wider px-3 py-1 bg-gold/10 hover:bg-gold/30 rounded-full border border-gold/25 transition cursor-pointer flex items-center gap-1.5 shadow">
-                            <i class="fa-solid fa-user-gear"></i>
-                            <span>لوحة الإدارة</span>
-                        </button>
+                        <span class="text-gold font-bold text-xs tracking-wider px-2 py-0.5 bg-gold/10 rounded-full border border-gold/25">إدارة</span>
                         <div class="h-[1px] w-12 bg-gold/30"></div>
                     </div>
                     <div class="flex items-center justify-between w-full px-2">
@@ -197,9 +216,6 @@
             <button onclick="filterCategory('all')" class="cat-btn active bg-gold text-brandDark font-black px-5 py-2 rounded-xl text-xs whitespace-nowrap transition shadow-md">
                 <i class="fa-solid fa-utensils ml-1"></i> الكل
             </button>
-            <button onclick="filterCategory('offers')" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
-                <i class="fa-solid fa-tags text-gold ml-1"></i> قسم العروض
-            </button>
             <button onclick="filterCategory('pizza')" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
                 <i class="fa-solid fa-pizza-slice text-gold ml-1"></i> قسم البيتزا
             </button>
@@ -214,18 +230,6 @@
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
-        <!-- Section: Special Offers -->
-        <section id="sec-offers" class="menu-section mb-10">
-            <div class="flex items-center gap-3 mb-5 border-b border-gold/30 pb-3">
-                <div class="w-9 h-9 rounded-xl bg-amber-600 border border-gold/50 flex items-center justify-center text-white shadow">
-                    <i class="fa-solid fa-percent text-lg"></i>
-                </div>
-                <h2 class="text-2xl font-black text-gold tracking-wide">عروض وتخفيضات العسسي</h2>
-                <span class="text-xs text-amber-300/80 font-bold bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-600/40">أقوى العروض الحصرية</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="offers-container"></div>
-        </section>
-
         <!-- Section: Pizza -->
         <section id="sec-pizza" class="menu-section mb-10">
             <div class="flex items-center gap-3 mb-5 border-b border-gold/30 pb-3">
@@ -361,109 +365,6 @@
         </div>
     </div>
 
-    <!-- Admin Panel Modal (لوحة تحكم شاملة) -->
-    <div id="adminModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5 overflow-y-auto">
-        <div class="bg-brandCard border-2 border-gold/50 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl my-auto flex flex-col max-h-[90vh]">
-            <div class="bg-gradient-to-r from-amber-950 via-brandCard to-amber-950 p-4 border-b border-gold/30 flex justify-between items-center">
-                <div class="flex items-center gap-2 text-gold">
-                    <i class="fa-solid fa-sliders text-2xl"></i>
-                    <h3 class="font-black text-xl text-white">لوحة تحكم إدارة مطعم العسسي</h3>
-                </div>
-                <button onclick="closeAdminModal()" class="text-gray-400 hover:text-white p-2 text-xl">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <!-- Admin Tabs Navigation -->
-            <div class="flex border-b border-gold/20 bg-black/50 overflow-x-auto">
-                <button onclick="switchAdminTab('items')" id="tabBtn-items" class="px-5 py-3 text-xs sm:text-sm font-bold text-gold border-b-2 border-gold transition whitespace-nowrap">
-                    <i class="fa-solid fa-list-check ml-1"></i> حالة الأصناف والأسعار
-                </button>
-                <button onclick="switchAdminTab('offers')" id="tabBtn-offers" class="px-5 py-3 text-xs sm:text-sm font-bold text-gray-400 border-b-2 border-transparent hover:text-white transition whitespace-nowrap">
-                    <i class="fa-solid fa-tags ml-1"></i> إدارة قسم العروض
-                </button>
-                <button onclick="switchAdminTab('add')" id="tabBtn-add" class="px-5 py-3 text-xs sm:text-sm font-bold text-gray-400 border-b-2 border-transparent hover:text-white transition whitespace-nowrap">
-                    <i class="fa-solid fa-plus-circle ml-1"></i> إضافة صنف جديد
-                </button>
-            </div>
-
-            <!-- Admin Content Container -->
-            <div class="p-4 sm:p-6 overflow-y-auto flex-grow space-y-6">
-                <!-- Tab 1: Menu Items Control -->
-                <div id="adminTab-items" class="space-y-4">
-                    <p class="text-xs text-amber-200/80 bg-amber-950/40 p-3 rounded-xl border border-amber-500/20">
-                        <i class="fa-solid fa-circle-info ml-1 text-gold"></i> يمكنك التحكم الفوري بتوفر أي صنف أو تعيينه كـ (نفذت)، وتعديل سعره أو إخفائه تماماً، وتظهر التغيرات فوراً للزبائن.
-                    </p>
-                    <div class="space-y-3 max-h-[50vh] overflow-y-auto pr-1" id="adminItemsList"></div>
-                </div>
-
-                <!-- Tab 2: Offers Management -->
-                <div id="adminTab-offers" class="hidden space-y-4">
-                    <div class="bg-black/40 p-4 rounded-2xl border border-gold/20 space-y-3">
-                        <h4 class="font-bold text-sm text-gold">إضافة عرض جديد</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input type="text" id="offerTitle" placeholder="عنوان العرض (مثال: عرض العائلة)" class="bg-black/80 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:border-gold outline-none">
-                            <input type="number" id="offerPrice" placeholder="السعر (ل.س)" class="bg-black/80 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:border-gold outline-none">
-                            <input type="text" id="offerImage" placeholder="مسار الصورة (اختياري)" class="bg-black/80 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:border-gold outline-none sm:col-span-2">
-                            <textarea id="offerDesc" placeholder="تفاصيل العرض والمكونات..." class="bg-black/80 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:border-gold outline-none sm:col-span-2 h-20"></textarea>
-                        </div>
-                        <button onclick="addNewOffer()" class="bg-gold hover:bg-goldHover text-brandDark font-black py-2.5 px-4 rounded-xl text-xs shadow transition">
-                            <i class="fa-solid fa-plus ml-1"></i> نشر العرض مباشرة
-                        </button>
-                    </div>
-
-                    <div class="space-y-3 pt-2">
-                        <h4 class="font-bold text-sm text-amber-100">العروض الحالية</h4>
-                        <div id="adminOffersList" class="space-y-2"></div>
-                    </div>
-                </div>
-
-                <!-- Tab 3: Add New Item -->
-                <div id="adminTab-add" class="hidden space-y-4">
-                    <form id="newItemForm" onsubmit="handleAddNewItem(event)" class="bg-black/40 p-4 rounded-2xl border border-gold/20 space-y-3">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-xs text-gray-300 font-bold block mb-1">اسم الصنف</label>
-                                <input type="text" id="newItemName" required placeholder="مثال: فطيرة جبن وقشقوان" class="w-full bg-black/80 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:border-gold outline-none">
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-300 font-bold block mb-1">القسم</label>
-                                <select id="newItemCategory" class="w-full bg-black/80 border border-gray-700 rounded-xl p-2.5 text-xs text-amber-100 focus:border-gold outline-none">
-                                    <option value="pizza">قسم البيتزا</option>
-                                    <option value="meat">قسم اللحمة (المشاوي)</option>
-                                    <option value="fatayer" selected>قسم الفطائر والمعجنات</option>
-                                </select>
-                            </div>
-                            <div id="singlePriceBox">
-                                <label class="text-xs text-gray-300 font-bold block mb-1">السعر (ل.س)</label>
-                                <input type="number" id="newItemPrice" placeholder="مثال: 45" class="w-full bg-black/80 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:border-gold outline-none">
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-300 font-bold block mb-1">مسار أو اسم الصورة (اختياري)</label>
-                                <input type="text" id="newItemImage" placeholder="image.jpg" class="w-full bg-black/80 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:border-gold outline-none">
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="text-xs text-gray-300 font-bold block mb-1">الوصف التفصيلي</label>
-                                <textarea id="newItemDesc" required placeholder="مكونات الوجبة..." class="w-full bg-black/80 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:border-gold outline-none h-16"></textarea>
-                            </div>
-                        </div>
-                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-5 rounded-xl text-xs shadow transition">
-                            <i class="fa-solid fa-floppy-disk ml-1"></i> حفظ وإضافة للمنيو
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Admin Modal Footer -->
-            <div class="p-4 border-t border-gold/20 bg-black/70 flex justify-between items-center">
-                <span class="text-xs text-gray-400">التغييرات تُحفظ وتظهر فوراً على الواجهة</span>
-                <button onclick="resetMenuDataToDefault()" class="text-xs text-red-400 hover:text-red-300 underline font-bold">
-                    إعادة ضبط المنيو الافتراضي
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- نافذة تكبير الصور -->
     <div id="imageModal" onclick="closeImageModal()">
         <button class="absolute top-6 left-6 text-gold text-2xl bg-black/70 w-11 h-11 rounded-full border border-gold/40 flex items-center justify-center shadow-lg">
@@ -514,9 +415,6 @@
     </footer>
 
     <script>
-        // قناة البث للتحديث المباشر عبر النوافذ والتطبيقات
-        const menuSyncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('asasi_menu_updates') : null;
-
         // دالة التحقق من أوقات العمل تلقائياً (من 7 صباحاً حتى 10 مساءً)
         function checkStoreStatus() {
             const now = new Date();
@@ -539,6 +437,7 @@
             }
         }
 
+        // تشغيل فحص حالة المطعم عند التحميل وكل دقيقة
         setInterval(checkStoreStatus, 60000);
         window.addEventListener('DOMContentLoaded', checkStoreStatus);
 
@@ -556,100 +455,51 @@
             large: { label: 'كبير', price: 1200 }
         };
 
-        const defaultMenuData = [
+        const menuData = [
             // Pizza Section
-            { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك', icon: 'fa-pizza-slice', image: 'IMG_20260725_145819.jpg', hasSizes: true, customSizes: ASASI_PIZZA_SIZES, isAvailable: true },
-            { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true, isAvailable: true },
-            { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة ومميزة', icon: 'fa-pizza-slice', image: 'IMG_20260715_150444.jpg', hasSizes: true, isAvailable: true },
-            { id: 'p4', name: 'بيتزا جبنة مكس', category: 'pizza', desc: 'مزيج فاخر من أجود أنواع الأجبان', icon: 'fa-pizza-slice', hasSizes: true, isAvailable: true },
-            { id: 'p5', name: 'بيتزا دجاج', category: 'pizza', desc: 'قطع دجاج متبلة ومحمّرة مع الفلفل والجبن', icon: 'fa-pizza-slice', hasSizes: true, isAvailable: true },
-            { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice', hasSizes: true, isAvailable: true },
-            { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true, isAvailable: true },
+            { id: 'p1', name: 'بيتزا العسسي (المميزة)', category: 'pizza', desc: 'محشية الأطراف بالجبن الغني، وتأتي بالخضار مع صنف آخر إضافي حسب اختيارك', icon: 'fa-pizza-slice', image: 'IMG_20260725_145819.jpg', hasSizes: true, customSizes: ASASI_PIZZA_SIZES },
+            { id: 'p2', name: 'بيتزا مارغريتا', category: 'pizza', desc: 'جبنة موزاريلا غنية مع صوص الطماطم', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p3', name: 'بيتزا الفصول الأربعة', category: 'pizza', desc: 'تشكيلة أربعة نكهات مختلفة ومميزة', icon: 'fa-pizza-slice', image: 'IMG_20260715_150444.jpg', hasSizes: true },
+            { id: 'p4', name: 'بيتزا جبنة مكس', category: 'pizza', desc: 'مزيج فاخر من أجود أنواع الأجبان', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p5', name: 'بيتزا دجاج', category: 'pizza', desc: 'قطع دجاج متبلة ومحمّرة مع الفلفل والجبن', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice', hasSizes: true },
+            { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true },
 
             // Meat Section
-            { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire', image: 'IMG_20260425_161550_١٢٠٥٣٨.jpg', isAvailable: true },
-            { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات الشرقية', icon: 'fa-fire', isAvailable: true },
-            { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية بعناية', icon: 'fa-fire', image: 'IMG_20260629_215310.jpg', isAvailable: true },
-            { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية على الفحم', icon: 'fa-fire', isAvailable: true },
-            { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire', isAvailable: true },
-            { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire', isAvailable: true },
+            { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire', image: 'IMG_20260425_161550_١٢٠٥٣٨.jpg' },
+            { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات الشرقية', icon: 'fa-fire' },
+            { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية بعناية', icon: 'fa-fire', image: 'IMG_20260629_215310.jpg' },
+            { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية على الفحم', icon: 'fa-fire' },
+            { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire' },
+            { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire' },
 
             // Fatayer Section
-            { id: 'f1', name: 'فطيرة جبنة', price: 15, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice', isAvailable: true },
-            { id: 'f2', name: 'فطيرة محمرة', price: 15, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice', image: 'IMG_20260712_084748.jpg', isAvailable: true },
-            { id: 'f3', name: 'مناقيش زعتر', price: 15, category: 'fatayer', desc: 'زعتر فاخر وزيت زيتون', icon: 'fa-bread-slice', isAvailable: true },
-            { id: 'f4', name: 'فطيرة زيتون أخضر', price: 30, category: 'fatayer', desc: 'شرائح الزيتون الأخضر الشهي', icon: 'fa-bread-slice', isAvailable: true },
-            { id: 'f5', name: 'فطيرة كيري', price: 40, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice', isAvailable: true },
-            { id: 'f6', name: 'فطيرة شوكلا', price: 40, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie', isAvailable: true },
-            { id: 'f7', name: 'صفيحة شاميّة', price: 20, category: 'fatayer', desc: 'صفيحة دجاج بالفرن', icon: 'fa-bread-slice', isAvailable: true },
-            { id: 'f8', name: 'بيتزا سواريه', price: 40, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice', image: 'IMG_20260705_104255.jpg', isAvailable: true },
-            { id: 'f9', name: 'فطيرة سجق', price: 40, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice', image: 'IMG_20260705_100723.jpg', isAvailable: true },
-            { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice', isAvailable: true },
-            { id: 'f11', name: 'فطيرة مرتديلا', price: 30, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice', isAvailable: true },
-            { id: 'f12', name: 'فطيرة سنفورة', price: 40, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice', isAvailable: true },
+            { id: 'f1', name: 'فطيرة جبنة', price: 15, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice' },
+            { id: 'f2', name: 'فطيرة محمرة', price: 15, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice', image: 'IMG_20260712_084748.jpg' },
+            { id: 'f3', name: 'مناقيش زعتر', price: 15, category: 'fatayer', desc: 'زعتر فاخر وزيت زيتون', icon: 'fa-bread-slice' },
+            { id: 'f4', name: 'فطيرة زيتون أخضر', price: 30, category: 'fatayer', desc: 'شرائح الزيتون الأخضر الشهي', icon: 'fa-bread-slice' },
+            { id: 'f5', name: 'فطيرة كيري', price: 40, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice' },
+            { id: 'f6', name: 'فطيرة شوكلا', price: 40, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie' },
+            { id: 'f7', name: 'صفيحة شاميّة', price: 20, category: 'fatayer', desc: 'صفيحة دجاج بالفرن', icon: 'fa-bread-slice' },
+            { id: 'f8', name: 'بيتزا سواريه', price: 40, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice', image: 'IMG_20260705_104255.jpg' },
+            { id: 'f9', name: 'فطيرة سجق', price: 40, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice', image: 'IMG_20260705_100723.jpg' },
+            { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice' },
+            { id: 'f11', name: 'فطيرة مرتديلا', price: 30, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice' },
+            { id: 'f12', name: 'فطيرة سنفورة', price: 40, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice' },
 
             // Fatayer Section (With Kashkaval)
-            { id: 'f13', name: 'فطيرة قشقوان', price: 40, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', image: 'IMG_20260709_095128.jpg', isAvailable: true },
-            { id: 'f14', name: 'محمرة قشقوان', price: 40, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese', isAvailable: true },
-            { id: 'f15', name: 'توشكا', price: 70, category: 'fatayer', desc: 'توشكا غنية بالجبن واللحم المتبل', icon: 'fa-cheese', isAvailable: true },
-            { id: 'f16', name: 'شيش قشقوان', price: 70, category: 'fatayer', desc: 'شيش دجاج محمر مع القشقوان', icon: 'fa-cheese', isAvailable: true },
-            { id: 'f17', name: 'مرتديلا قشقوان', price: 70, category: 'fatayer', desc: 'مرتديلا غنية بجبنة القشقوان', icon: 'fa-cheese', isAvailable: true },
-            { id: 'f18', name: 'زعتر قشقوان', price: 40, category: 'fatayer', desc: 'زعتر فاخر مع جبن قشقوان', icon: 'fa-cheese', isAvailable: true },
-            { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese', isAvailable: true },
+            { id: 'f13', name: 'فطيرة قشقوان', price: 40, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', image: 'IMG_20260709_095128.jpg' },
+            { id: 'f14', name: 'محمرة قشقوان', price: 40, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese' },
+            { id: 'f15', name: 'توشكا', price: 70, category: 'fatayer', desc: 'توشكا غنية بالجبن واللحم المتبل', icon: 'fa-cheese' },
+            { id: 'f16', name: 'شيش قشقوان', price: 70, category: 'fatayer', desc: 'شيش دجاج محمر مع القشقوان', icon: 'fa-cheese' },
+            { id: 'f17', name: 'مرتديلا قشقوان', price: 70, category: 'fatayer', desc: 'مرتديلا غنية بجبنة القشقوان', icon: 'fa-cheese' },
+            { id: 'f18', name: 'زعتر قشقوان', price: 40, category: 'fatayer', desc: 'زعتر فاخر مع جبن قشقوان', icon: 'fa-cheese' },
+            { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese' },
         ];
-
-        const defaultOffers = [
-            { id: 'off1', name: 'عرض المشاوي المشكل', price: 2500, desc: 'كيلو مشاوي مشكل (كباب + شيش + كستا) + فطيرتين محمرة مجاناً', image: '', isAvailable: true },
-            { id: 'off2', name: 'عُصابة البيتزا', price: 1800, desc: 'بيتزا العسسي حجم كبير + بيتزا مارغريتا وسط مجاناً', image: '', isAvailable: true }
-        ];
-
-        let menuData = JSON.parse(localStorage.getItem('asasi_menuData')) || defaultMenuData;
-        let offersData = JSON.parse(localStorage.getItem('asasi_offersData')) || defaultOffers;
 
         let cart = {}; 
         let pizzaSelectedSizes = {}; 
         let currentCategory = 'all';
-
-        // إرسال تنبيه لكافة المتصفحات والمستخدمين بالتحديث الفوري
-        function saveMenuState() {
-            localStorage.setItem('asasi_menuData', JSON.stringify(menuData));
-            localStorage.setItem('asasi_offersData', JSON.stringify(offersData));
-            
-            if (menuSyncChannel) {
-                menuSyncChannel.postMessage({ type: 'UPDATE_MENU' });
-            }
-            
-            renderMenu();
-            updateCartSummary();
-            renderCartModalList();
-        }
-
-        // الاستماع للتغييرات الفورية القادمة من التبويبات الأخرى أو الأجهزة الأخرى
-        if (menuSyncChannel) {
-            menuSyncChannel.onmessage = (event) => {
-                if (event.data && event.data.type === 'UPDATE_MENU') {
-                    reloadMenuDataFromStorage();
-                }
-            };
-        }
-
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'asasi_menuData' || e.key === 'asasi_offersData') {
-                reloadMenuDataFromStorage();
-            }
-        });
-
-        function reloadMenuDataFromStorage() {
-            menuData = JSON.parse(localStorage.getItem('asasi_menuData')) || defaultMenuData;
-            offersData = JSON.parse(localStorage.getItem('asasi_offersData')) || defaultOffers;
-            renderMenu();
-            updateCartSummary();
-            renderCartModalList();
-            if(!document.getElementById('adminModal').classList.contains('hidden')) {
-                renderAdminItemsList();
-                renderAdminOffersList();
-            }
-        }
 
         document.addEventListener('DOMContentLoaded', () => {
             renderMenu();
@@ -683,74 +533,20 @@
             const pizzaContainer = document.getElementById('pizza-container');
             const meatContainer = document.getElementById('meat-container');
             const fatayerContainer = document.getElementById('fatayer-container');
-            const offersContainer = document.getElementById('offers-container');
 
             pizzaContainer.innerHTML = '';
             meatContainer.innerHTML = '';
             fatayerContainer.innerHTML = '';
-            offersContainer.innerHTML = '';
 
-            // Render Special Offers
-            offersData.forEach(offer => {
-                if(offer.isHidden) return;
-                offersContainer.innerHTML += createOfferCardHTML(offer);
-            });
-
-            // Render Menu Items
             menuData.forEach(item => {
-                if(item.isHidden) return;
                 const cardHtml = createCardHTML(item);
                 if (item.category === 'pizza') pizzaContainer.innerHTML += cardHtml;
                 else if (item.category === 'meat') meatContainer.innerHTML += cardHtml;
                 else if (item.category === 'fatayer') fatayerContainer.innerHTML += cardHtml;
             });
-
-            const query = document.getElementById('searchInput').value.trim().toLowerCase();
-            if (query) {
-                filterMenuItems(query);
-            }
-        }
-
-        function createOfferCardHTML(offer) {
-            const isAvail = offer.isAvailable !== false;
-            const qty = cart[offer.id] || 0;
-            const statusBadge = isAvail 
-                ? `<span class="bg-emerald-950/80 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">متوفر</span>`
-                : `<span class="bg-red-950/80 text-red-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-500/30">نفذت الكمية</span>`;
-
-            const opacityClass = isAvail ? '' : 'opacity-60 grayscale-[30%]';
-
-            return `
-                <div class="menu-card bg-gradient-to-br from-amber-950/40 via-brandCard to-brandCard border border-amber-500/30 hover:border-amber-500 rounded-2xl p-4 flex flex-col justify-between transition shadow-xl relative ${opacityClass}" data-id="${offer.id}" data-name="${offer.name}" data-category="offers">
-                    <div class="flex items-start gap-3.5">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-600 to-amber-900 border border-gold/40 flex items-center justify-center text-white shadow-inner shrink-0">
-                            <i class="fa-solid fa-gift text-2xl"></i>
-                        </div>
-                        <div class="flex-grow">
-                            <div class="flex items-center justify-between gap-2 mb-1">
-                                <h3 class="font-black text-base text-gold">${offer.name}</h3>
-                                ${statusBadge}
-                            </div>
-                            <p class="text-xs text-amber-100/90 font-medium leading-relaxed bg-black/40 p-2 rounded-xl border border-gold/10 mb-2">${offer.desc}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between pt-3 border-t border-amber-500/20 mt-2">
-                        <span class="text-sm text-gold font-black">${offer.price ? offer.price.toLocaleString() + ' ل.س' : ''}</span>
-                        <div id="controls-${offer.id}">
-                            ${isAvail ? renderQuantityControls(offer.id, qty) : '<span class="text-xs text-red-400 font-bold">غير متوفر حالياً</span>'}
-                        </div>
-                    </div>
-                </div>
-            `;
         }
 
         function createCardHTML(item) {
-            const isAvail = item.isAvailable !== false;
-            const opacityClass = isAvail ? '' : 'opacity-60 grayscale-[30%]';
-            const statusBadge = isAvail 
-                ? `<span class="bg-emerald-950/80 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">متوفر</span>`
-                : `<span class="bg-red-950/80 text-red-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-500/30">نفذت</span>`;
-
             if (item.hasSizes) {
                 const currentSizeKey = pizzaSelectedSizes[item.id] || 'medium';
                 const price = getPizzaPrice(item, currentSizeKey);
@@ -766,14 +562,11 @@
                     : `<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-950 to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0"><i class="fa-solid ${item.icon} text-2xl"></i></div>`;
 
                 return `
-                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex flex-col justify-between transition shadow-xl ${opacityClass}" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex flex-col justify-between transition shadow-xl" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                         <div class="flex items-start gap-3.5">
                             ${imageHtml}
                             <div class="flex-grow">
-                                <div class="flex items-center justify-between mb-1">
-                                    <h3 class="font-black text-base text-amber-100">${item.name}</h3>
-                                    ${statusBadge}
-                                </div>
+                                <h3 class="font-black text-base text-amber-100 mb-1">${item.name}</h3>
                                 <p class="text-xs text-amber-200/90 font-medium mb-3 leading-relaxed bg-black/30 p-2 rounded-xl border border-gold/10">${item.desc}</p>
                                 
                                 <div class="flex flex-wrap items-center gap-1.5 mb-2 bg-black/50 p-1.5 rounded-xl border border-gold/20 max-w-fit">
@@ -793,7 +586,7 @@
                         <div class="flex items-center justify-between pt-3 border-t border-gray-800/80 mt-2">
                             <span id="price-display-${item.id}" class="text-xs text-gold font-black">${price.toLocaleString()} ل.س</span>
                             <div id="controls-${item.id}">
-                                ${isAvail ? renderQuantityControls(cartKey, qty, item.id) : '<span class="text-xs text-red-400 font-bold">غير متوفر حالياً</span>'}
+                                ${renderQuantityControls(cartKey, qty, item.id)}
                             </div>
                         </div>
                     </div>
@@ -809,19 +602,16 @@
                     : `<div class="w-9 h-9 rounded-xl bg-gold/10 text-gold flex items-center justify-center mb-2.5 border border-gold/20"><i class="fa-solid ${item.icon} text-base"></i></div>`;
 
                 return `
-                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-3.5 flex flex-col justify-between transition shadow-xl relative group ${opacityClass}" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                    <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-3.5 flex flex-col justify-between transition shadow-xl relative group" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                         <div>
                             ${imageHtml}
-                            <div class="flex items-center justify-between mb-1">
-                                <h3 class="font-black text-sm text-amber-100 leading-tight">${item.name}</h3>
-                                ${statusBadge}
-                            </div>
+                            <h3 class="font-black text-sm text-amber-100 mb-1 leading-tight">${item.name}</h3>
                             <p class="text-[11px] text-gray-400 line-clamp-2">${item.desc}</p>
                         </div>
                         <div class="mt-4 pt-2.5 border-t border-gray-800/80 flex items-center justify-between">
                             <span class="text-xs text-gold font-black">${item.price ? item.price.toLocaleString() + ' ل.س' : ''}</span>
                             <div class="flex items-center gap-1.5" id="controls-${item.id}">
-                                ${isAvail ? renderQuantityControls(item.id, qty) : '<span class="text-[10px] text-red-400 font-bold">نفذت</span>'}
+                                ${renderQuantityControls(item.id, qty)}
                             </div>
                         </div>
                     </div>
@@ -833,19 +623,16 @@
                 : `<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-950 to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0"><i class="fa-solid ${item.icon} text-xl"></i></div>`;
 
             return `
-                <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex items-center justify-between transition shadow-xl ${opacityClass}" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
+                <div class="menu-card bg-brandCard border border-gold/20 hover:border-gold/60 rounded-2xl p-4 flex items-center justify-between transition shadow-xl" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}">
                     <div class="flex items-center gap-3.5">
                         ${imageHtml}
                         <div>
-                            <div class="flex items-center gap-2 mb-0.5">
-                                <h3 class="font-black text-base text-amber-100">${item.name}</h3>
-                                ${statusBadge}
-                            </div>
+                            <h3 class="font-black text-base text-amber-100 mb-0.5">${item.name}</h3>
                             <p class="text-xs text-gray-400 leading-relaxed">${item.desc}</p>
                         </div>
                     </div>
                     <div class="shrink-0 mr-2" id="controls-${item.id}">
-                        ${isAvail ? renderQuantityControls(item.id, qty) : '<span class="text-xs text-red-400 font-bold">غير متوفر</span>'}
+                        ${renderQuantityControls(item.id, qty)}
                     </div>
                 </div>
             `;
@@ -866,7 +653,7 @@
 
             const cartKey = `${itemId}_${sizeKey}`;
             const qty = cart[cartKey] || 0;
-            if (controlsContainer && item.isAvailable !== false) {
+            if (controlsContainer) {
                 controlsContainer.innerHTML = renderQuantityControls(cartKey, qty, itemId);
             }
 
@@ -934,16 +721,9 @@
         }
 
         function getItemDetailsFromCartKey(cartKey) {
-            if (cartKey.startsWith('off')) {
-                const offer = offersData.find(o => o.id === cartKey);
-                if (offer) {
-                    return { name: `[عرض] ${offer.name}`, price: offer.price || null, category: 'offers' };
-                }
-            }
             if (cartKey.includes('_')) {
                 const [id, sizeKey] = cartKey.split('_');
                 const item = menuData.find(i => i.id === id);
-                if (!item) return null;
                 const price = getPizzaPrice(item, sizeKey);
                 const sizeLabel = REGULAR_PIZZA_SIZES[sizeKey].label;
                 return {
@@ -953,7 +733,6 @@
                 };
             } else {
                 const item = menuData.find(i => i.id === cartKey);
-                if (!item) return null;
                 return {
                     name: item.name,
                     price: item.price || null,
@@ -999,33 +778,23 @@
             event.currentTarget.classList.remove('bg-brandCard', 'text-gray-300');
             event.currentTarget.classList.add('active', 'bg-gold', 'text-brandDark', 'font-black', 'shadow-md');
 
-            const secOffers = document.getElementById('sec-offers');
             const secPizza = document.getElementById('sec-pizza');
             const secMeat = document.getElementById('sec-meat');
             const secFatayer = document.getElementById('sec-fatayer');
 
             if (cat === 'all') {
-                secOffers.classList.remove('hidden');
                 secPizza.classList.remove('hidden');
                 secMeat.classList.remove('hidden');
                 secFatayer.classList.remove('hidden');
-            } else if (cat === 'offers') {
-                secOffers.classList.remove('hidden');
-                secPizza.classList.add('hidden');
-                secMeat.classList.add('hidden');
-                secFatayer.classList.add('hidden');
             } else if (cat === 'pizza') {
-                secOffers.classList.add('hidden');
                 secPizza.classList.remove('hidden');
                 secMeat.classList.add('hidden');
                 secFatayer.classList.add('hidden');
             } else if (cat === 'meat') {
-                secOffers.classList.add('hidden');
                 secPizza.classList.add('hidden');
                 secMeat.classList.remove('hidden');
                 secFatayer.classList.add('hidden');
             } else if (cat === 'fatayer') {
-                secOffers.classList.add('hidden');
                 secPizza.classList.add('hidden');
                 secMeat.classList.add('hidden');
                 secFatayer.classList.remove('hidden');
@@ -1179,224 +948,17 @@
 
             window.open(whatsappUrl, '_blank');
         }
+    
+// ===== لوحة الإدارة السريعة =====
+function openAdmin(){
+    const pass = prompt("ادخل كلمة سر الإدارة");
+    if(pass === "Yaser1738"){
+        alert("تم الدخول إلى لوحة الإدارة. سيتم ربط التعديل الكامل بقاعدة البيانات في النسخة الأونلاين.");
+    } else if(pass !== null){
+        alert("كلمة السر غير صحيحة");
+    }
+}
 
-        // ===== لوحة الإدارة الشاملة التفاعلية =====
-        function openAdmin(){
-            const pass = prompt("ادخل كلمة سر الإدارة");
-            if(pass === "Yaser1738"){
-                renderAdminItemsList();
-                renderAdminOffersList();
-                document.getElementById('adminModal').classList.remove('hidden');
-                document.getElementById('adminModal').classList.add('flex');
-            } else if(pass !== null){
-                alert("كلمة السر غير صحيحة");
-            }
-        }
-
-        function closeAdminModal(){
-            document.getElementById('adminModal').classList.add('hidden');
-            document.getElementById('adminModal').classList.remove('flex');
-        }
-
-        function switchAdminTab(tabName) {
-            ['items', 'offers', 'add'].forEach(t => {
-                document.getElementById(`adminTab-${t}`).classList.add('hidden');
-                const btn = document.getElementById(`tabBtn-${t}`);
-                btn.classList.remove('text-gold', 'border-gold');
-                btn.classList.add('text-gray-400', 'border-transparent');
-            });
-            document.getElementById(`adminTab-${tabName}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`tabBtn-${tabName}`);
-            activeBtn.classList.remove('text-gray-400', 'border-transparent');
-            activeBtn.classList.add('text-gold', 'border-gold');
-        }
-
-        function renderAdminItemsList() {
-            const list = document.getElementById('adminItemsList');
-            list.innerHTML = '';
-
-            menuData.forEach((item, index) => {
-                const isAvail = item.isAvailable !== false;
-                const priceValue = item.price || '';
-
-                const itemRow = document.createElement('div');
-                itemRow.className = 'bg-black/60 border border-gold/20 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3';
-                itemRow.innerHTML = `
-                    <div class="flex items-center gap-3 w-full sm:w-auto">
-                        <span class="text-xs font-mono text-gold/60 w-5">#${index + 1}</span>
-                        <div>
-                            <p class="font-bold text-sm text-white">${item.name}</p>
-                            <span class="text-[10px] text-gray-400">القسم: ${getCategoryLabel(item.category)}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-                        ${!item.hasSizes ? `
-                            <div class="flex items-center gap-1">
-                                <span class="text-[11px] text-gold">السعر:</span>
-                                <input type="number" value="${priceValue}" onchange="updateItemPrice('${item.id}', this.value)" class="w-20 bg-black border border-gray-700 rounded-lg p-1 text-center text-xs text-white focus:border-gold outline-none">
-                            </div>
-                        ` : '<span class="text-[10px] text-amber-200/60">(بيتزا - أحجام متعددة)</span>'}
-
-                        <button onclick="toggleItemAvailability('${item.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${isAvail ? 'bg-emerald-950/80 text-emerald-400 border-emerald-500/40 hover:bg-emerald-900' : 'bg-red-950/80 text-red-400 border-red-500/40 hover:bg-red-900'}">
-                            ${isAvail ? '<i class="fa-solid fa-check ml-1"></i> متوفر' : '<i class="fa-solid fa-ban ml-1"></i> نفذت'}
-                        </button>
-
-                        <button onclick="toggleHideItem('${item.id}')" class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-gray-800 text-gray-300 border border-gray-600 hover:text-white" title="إخفاء من المنيو">
-                            <i class="fa-solid ${item.isHidden ? 'fa-eye-slash text-red-400' : 'fa-eye'}"></i>
-                        </button>
-                    </div>
-                `;
-                list.appendChild(itemRow);
-            });
-        }
-
-        function getCategoryLabel(cat) {
-            if (cat === 'pizza') return 'البيتزا';
-            if (cat === 'meat') return 'المشاوي';
-            if (cat === 'fatayer') return 'الفطائر';
-            return cat;
-        }
-
-        function toggleItemAvailability(id) {
-            const item = menuData.find(i => i.id === id);
-            if (item) {
-                item.isAvailable = item.isAvailable === false ? true : false;
-                saveMenuState();
-                renderAdminItemsList();
-            }
-        }
-
-        function toggleHideItem(id) {
-            const item = menuData.find(i => i.id === id);
-            if (item) {
-                item.isHidden = !item.isHidden;
-                saveMenuState();
-                renderAdminItemsList();
-            }
-        }
-
-        function updateItemPrice(id, newPrice) {
-            const item = menuData.find(i => i.id === id);
-            if (item) {
-                item.price = parseFloat(newPrice) || 0;
-                saveMenuState();
-            }
-        }
-
-        function renderAdminOffersList() {
-            const list = document.getElementById('adminOffersList');
-            list.innerHTML = '';
-
-            offersData.forEach(offer => {
-                const isAvail = offer.isAvailable !== false;
-                const offerRow = document.createElement('div');
-                offerRow.className = 'bg-black/60 border border-gold/20 rounded-xl p-3 flex items-center justify-between gap-2';
-                offerRow.innerHTML = `
-                    <div>
-                        <p class="font-bold text-xs text-gold">${offer.name}</p>
-                        <p class="text-[10px] text-gray-400">${offer.price ? offer.price + ' ل.س' : ''}</p>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="toggleOfferAvailability('${offer.id}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold border ${isAvail ? 'bg-emerald-950 text-emerald-400 border-emerald-500/40' : 'bg-red-950 text-red-400 border-red-500/40'}">
-                            ${isAvail ? 'متوفر' : 'نفذت'}
-                        </button>
-                        <button onclick="deleteOffer('${offer.id}')" class="text-red-400 hover:text-red-300 p-1 text-xs">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                list.appendChild(offerRow);
-            });
-        }
-
-        function addNewOffer() {
-            const title = document.getElementById('offerTitle').value.trim();
-            const price = parseFloat(document.getElementById('offerPrice').value);
-            const desc = document.getElementById('offerDesc').value.trim();
-            const image = document.getElementById('offerImage').value.trim();
-
-            if (!title || !desc) {
-                alert('يرجى كتابة عنوان العرض والوصف');
-                return;
-            }
-
-            const newOff = {
-                id: 'off_' + Date.now(),
-                name: title,
-                price: price || null,
-                desc: desc,
-                image: image,
-                isAvailable: true
-            };
-
-            offersData.unshift(newOff);
-            saveMenuState();
-            renderAdminOffersList();
-
-            document.getElementById('offerTitle').value = '';
-            document.getElementById('offerPrice').value = '';
-            document.getElementById('offerDesc').value = '';
-            document.getElementById('offerImage').value = '';
-
-            alert('تمت إضافة العرض بنجاح وبات ظاهراً للزبائن الآن!');
-        }
-
-        function toggleOfferAvailability(id) {
-            const offer = offersData.find(o => o.id === id);
-            if (offer) {
-                offer.isAvailable = offer.isAvailable === false ? true : false;
-                saveMenuState();
-                renderAdminOffersList();
-            }
-        }
-
-        function deleteOffer(id) {
-            if (confirm('هل أنت تأكد من حذف هذا العرض؟')) {
-                offersData = offersData.filter(o => o.id !== id);
-                saveMenuState();
-                renderAdminOffersList();
-            }
-        }
-
-        function handleAddNewItem(e) {
-            e.preventDefault();
-            const name = document.getElementById('newItemName').value.trim();
-            const cat = document.getElementById('newItemCategory').value;
-            const price = parseFloat(document.getElementById('newItemPrice').value) || 0;
-            const desc = document.getElementById('newItemDesc').value.trim();
-            const image = document.getElementById('newItemImage').value.trim();
-
-            const newItem = {
-                id: 'custom_' + Date.now(),
-                name: name,
-                category: cat,
-                price: price,
-                desc: desc,
-                image: image,
-                icon: cat === 'pizza' ? 'fa-pizza-slice' : (cat === 'meat' ? 'fa-fire' : 'fa-bread-slice'),
-                isAvailable: true
-            };
-
-            menuData.push(newItem);
-            saveMenuState();
-            renderAdminItemsList();
-            document.getElementById('newItemForm').reset();
-            alert('تمت إضافة الصنف الجديد بنجاح إلى المنيو!');
-        }
-
-        function resetMenuDataToDefault() {
-            if (confirm('هل تريد بالتأكيد إعادة ضبط قائمة الطعام للنسخة الافتراضية؟ سيفقد أي صنف أو عرض جديد قمت بإضافته.')) {
-                localStorage.removeItem('asasi_menuData');
-                localStorage.removeItem('asasi_offersData');
-                menuData = defaultMenuData;
-                offersData = defaultOffers;
-                saveMenuState();
-                renderAdminItemsList();
-                renderAdminOffersList();
-                alert('تمت إعادة الضبط للوضع الافتراضي بنجاح.');
-            }
-        }
-    </script>
+</script>
 </body>
 </html>
