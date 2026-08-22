@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مطعم العسسي - ملحمة ومعجنات طازجة</title>
+  <title>العسسي - ملحمة ومعجنات طازجة</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -11,36 +11,30 @@
   <!-- Firebase SDK Modules -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // إعدادات Firebase الخاصة بمشروع مطعم العسسي
+    // ⚠️ ضع إعدادات Firebase الخاصة بمشروعك هنا
     const firebaseConfig = {
-      apiKey: "AIzaSyAo1YH7Riu1ppzNgUJTdxEtjIFOorAUgKY",
-      authDomain: "al-asase2026.firebaseapp.com",
-      databaseURL: "https://al-asase2026-default-rtdb.firebaseio.com",
-      projectId: "al-asase2026",
-      storageBucket: "al-asase2026.firebasestorage.app",
-      messagingSenderId: "1094218434468",
-      appId: "1:1094218434468:web:734ab80f42c9dc4256e331",
-      measurementId: "G-K3Z65SN43V"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
-    // تهيئة Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const rtdb = getDatabase(app);
 
     window.db = db;
-    window.rtdb = rtdb;
-    window.firebaseUtils = { doc, onSnapshot, setDoc, ref, onValue, set };
+    window.firestoreModule = { doc, setDoc, updateDoc, deleteDoc, collection, onSnapshot };
   </script>
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: { gold: '#e6c567', goldHover: '#f3d57d', brandDark: '#0d0a09', brandCard: '#181311' },
+          colors: { gold: '#e6c567', goldHover: '#f3d57d', brandDark: '#0d0a09', brandCard: '#181311', brandRed: '#7f1d1d' },
           fontFamily: { cairo: ['Cairo', 'sans-serif'] }
         }
       }
@@ -48,33 +42,42 @@
   </script>
   <style>
     body { font-family: 'Cairo', sans-serif; background-color: #0d0a09; color: #f3f4f6; }
-    #adminModal { display: none; position: fixed; z-index: 100; inset: 0; background-color: rgba(0, 0, 0, 0.92); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem; }
-    .status-badge { padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; }
-    .status-open { background-color: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+    #imageModal, #adminModal { display: none; position: fixed; z-index: 100; inset: 0; background-color: rgba(0, 0, 0, 0.92); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem; }
+    #imageModal img { max-width: 90%; max-height: 90vh; border-radius: 16px; border: 2px solid #e6c567; }
+    .store-status { padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 13px; display: inline-block; }
+    .store-status.open { background-color: rgba(212, 237, 218, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+    .store-status.closed { background-color: rgba(248, 215, 218, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
   </style>
 </head>
 <body class="pb-24">
 
-  <!-- الهيدر الرئيسي -->
+  <!-- شريط العروض -->
+  <div id="offerBanner" class="hidden bg-gradient-to-r from-amber-600 via-gold to-amber-600 text-brandDark font-black text-center py-2 px-4 shadow-lg sticky top-0 z-40">
+    <i class="fa-solid fa-bullhorn ml-2 animate-bounce"></i>
+    <span id="offerBannerText"></span>
+  </div>
+
+  <!-- الهيدر -->
   <header class="bg-gradient-to-b from-[#181311] to-[#0d0a09] border-b border-gold/20 p-4 text-center relative flex flex-col items-center">
     <button onclick="openAdmin()" class="absolute left-4 top-4 bg-gold/10 hover:bg-gold/20 text-gold border border-gold/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1">
-      <i class="fa-solid fa-user-gear"></i> الإدارة
+      <i class="fa-solid fa-user-gear"></i> إدارة
     </button>
 
-    <h1 id="restaurantTitle" class="text-3xl font-black text-gold">مطعم العسسي</h1>
+    <div class="w-24 h-24 mb-2 rounded-full border-2 border-gold p-1 bg-black/60 shadow-lg cursor-pointer hover:scale-105 transition" onclick="openImageModal('IMG-20260617-WA0083_٠٥٢١٠٢.jpg')">
+      <img src="IMG-20260617-WA0083_٠٥٢١٠٢.jpg" alt="شعار المطعم" class="w-full h-full object-cover rounded-full">
+    </div>
+
+    <h1 id="restaurantTitleHeader" class="text-3xl font-black text-gold">العسسي</h1>
     <p class="text-xs text-amber-100/70 font-semibold mt-1">ملحمة ومعجنات طازجة</p>
 
-    <div class="mt-2">
-      <span class="status-badge status-open"><i class="fa-solid fa-circle text-[8px] ml-1"></i> متصل بـ Firebase</span>
+    <div id="store-status-badge" class="store-status open mt-2">جاري التحقق...</div>
+
+    <div class="text-xs text-gray-300 space-y-1 mt-2">
+      <p class="font-bold text-amber-200">إدارة: أبو أيمن الفران | أبو النور اللحام</p>
+      <p><i class="fa-solid fa-truck-fast text-gold ml-1"></i> جاهزون لتلبية طلباتكم - يوجد توصيل</p>
+      <p class="font-bold text-gold"><i class="fa-solid fa-phone ml-1"></i> <span id="restaurantPhoneHeader" dir="ltr">0942 568 502</span></p>
     </div>
 
-    <div class="text-xs text-gray-300 space-y-1 mt-3">
-      <p class="font-bold text-amber-200">تحت إشراف: أبو أيمن الفران | أبو النور اللحام</p>
-      <p><i class="fa-solid fa-truck-fast text-gold ml-1"></i> تتوفر خدمة التوصيل</p>
-      <p class="font-bold text-gold"><i class="fa-solid fa-phone ml-1"></i> <span id="restaurantPhone" dir="ltr">0942 568 502</span></p>
-    </div>
-
-    <!-- شام كاش -->
     <div class="mt-3 bg-black/40 border border-gold/30 rounded-xl p-2 inline-flex items-center gap-2">
       <div>
         <span class="text-[11px] text-amber-200 font-bold block">حساب شام كاش:</span>
@@ -86,26 +89,33 @@
     </div>
   </header>
 
-  <!-- لوحة الإدارة (Firebase Modal) -->
-  <div id="adminModal">
-    <div class="bg-brandCard border border-gold/50 rounded-2xl w-full max-w-md p-5 shadow-2xl">
+  <!-- محتوى المنيو -->
+  <main class="max-w-4xl mx-auto p-4">
+    <div class="relative my-4">
+      <input type="text" id="searchInput" placeholder="ابحث عن وجبتك المفضلة..." class="w-full bg-brandCard border border-gold/30 rounded-xl py-2.5 px-4 pr-10 text-sm text-white focus:outline-none focus:border-gold">
+      <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-gray-400 text-sm"></i>
+    </div>
+
+    <!-- الأصناف -->
+    <section id="sec-pizza" class="mb-8"><h2 class="font-black text-lg text-gold mb-3 border-r-4 border-gold pr-2">قسم البيتزا</h2><div id="pizza-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div></section>
+    <section id="sec-meat" class="mb-8"><h2 class="font-black text-lg text-gold mb-3 border-r-4 border-gold pr-2">قسم اللحمة المشوية</h2><div id="meat-container" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div></section>
+    <section id="sec-fatayer" class="mb-8"><h2 class="font-black text-lg text-gold mb-3 border-r-4 border-gold pr-2">قسم الفطائر والمعجنات</h2><div id="fatayer-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div></section>
+  </main>
+
+  <!-- لوحة الإدارة Modal -->
+  <div id="adminModal" class="hidden">
+    <div class="bg-brandCard border border-gold/50 rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col p-4">
       <div class="flex justify-between items-center mb-4 border-b border-gold/20 pb-2">
-        <h3 class="font-black text-gold flex items-center gap-2"><i class="fa-solid fa-fire text-amber-500"></i> التحكم المباشر (Firebase)</h3>
-        <button onclick="closeAdmin()" class="text-gray-400 text-xl hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <h3 class="font-black text-gold">لوحة الإدارة (متصل بـ Firebase)</h3>
+        <button onclick="closeAdmin()" class="text-gray-400 text-xl"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-amber-200 mb-1 font-bold">اسم المطعم:</label>
-          <input type="text" id="adminNameInput" value="مطعم العسسي" class="w-full bg-brandDark border border-gold/30 p-2 rounded-lg text-white focus:outline-none focus:border-gold">
+      <div class="overflow-y-auto space-y-4 text-xs">
+        <div class="bg-black/40 p-3 rounded-xl border border-gold/20">
+          <h4 class="font-bold text-amber-200 mb-2">تحديث إعدادات المطعم</h4>
+          <input type="text" id="adminName" placeholder="اسم المطعم" class="w-full bg-brandDark border border-gold/20 p-2 rounded mb-2 text-white">
+          <input type="text" id="adminPhone" placeholder="رقم الهاتف" class="w-full bg-brandDark border border-gold/20 p-2 rounded mb-2 text-white">
+          <button onclick="saveFirebaseConfig()" class="w-full bg-gold text-brandDark font-bold p-2 rounded">حفظ في Firebase</button>
         </div>
-        <div>
-          <label class="block text-amber-200 mb-1 font-bold">رقم الهاتف:</label>
-          <input type="text" id="adminPhoneInput" value="0942 568 502" class="w-full bg-brandDark border border-gold/30 p-2 rounded-lg text-white focus:outline-none focus:border-gold">
-        </div>
-        <button onclick="updateFirebaseData()" class="w-full bg-gold hover:bg-goldHover text-brandDark font-bold py-2.5 rounded-xl transition mt-2">
-          حفظ التغييرات في السحابة
-        </button>
       </div>
     </div>
   </div>
@@ -113,44 +123,35 @@
   <script>
     function copyShamCash() {
       navigator.clipboard.writeText("99d44072c6a3c3b1f926e0571e9c416c");
-      alert("تم نسخ رقم حساب شام كاش بنجاح!");
+      alert("تم نسخ رقم حساب شام كاش!");
     }
 
     function openAdmin() { document.getElementById('adminModal').style.display = 'flex'; }
     function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; }
 
-    // الاستماع للتغييرات الفورية من Firestore عند فتح الصفحة
+    // مزامنة البيانات المباشرة مع Firestore
     window.addEventListener('load', () => {
-      let interval = setInterval(() => {
-        if (window.db && window.firebaseUtils) {
-          clearInterval(interval);
-          const { doc, onSnapshot } = window.firebaseUtils;
+      if (!window.db) return;
+      const { doc, onSnapshot } = window.firestoreModule;
 
-          // الربط المباشر مع مستند الإعدادات
-          onSnapshot(doc(window.db, "settings", "general"), (docSnap) => {
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-              if (data.name) document.getElementById('restaurantTitle').innerText = data.name;
-              if (data.phone) document.getElementById('restaurantPhone').innerText = data.phone;
-            }
-          });
+      // الاستماع لتغييرات بيانات المطعم في الوقت الفعلي
+      onSnapshot(doc(window.db, "settings", "general"), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.name) document.getElementById('restaurantTitleHeader').innerText = data.name;
+          if (data.phone) document.getElementById('restaurantPhoneHeader').innerText = data.phone;
         }
-      }, 200);
+      });
     });
 
-    // حفظ التعديلات مباشرة إلى Cloud Firestore
-    async function updateFirebaseData() {
-      const { doc, setDoc } = window.firebaseUtils;
-      const name = document.getElementById('adminNameInput').value;
-      const phone = document.getElementById('adminPhoneInput').value;
+    async function saveFirebaseConfig() {
+      const { doc, setDoc } = window.firestoreModule;
+      const name = document.getElementById('adminName').value;
+      const phone = document.getElementById('adminPhone').value;
 
-      try {
-        await setDoc(doc(window.db, "settings", "general"), { name, phone }, { merge: true });
-        alert("تم تحديث البيانات لحظياً على جميع الأجهزة!");
-        closeAdmin();
-      } catch (e) {
-        alert("حدث خطأ أثناء الحفظ: " + e.message);
-      }
+      await setDoc(doc(window.db, "settings", "general"), { name, phone }, { merge: true });
+      alert("تم الحفظ وسيتحدث المنيو تلقائياً لدى جميع الزبائن!");
+      closeAdmin();
     }
   </script>
 </body>
