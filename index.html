@@ -48,11 +48,17 @@
   </div>
 
   <!-- الهيدر والمعلومات -->
-  <header class="lux-bg border-b border-gold/20 p-4 text-center relative">
+  <header class="lux-bg border-b border-gold/20 p-4 text-center relative flex flex-col items-center">
     <button onclick="openAdmin()" class="absolute left-4 top-4 bg-gold/10 hover:bg-gold/20 text-gold border border-gold/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1">
       <i class="fa-solid fa-user-gear"></i> إدارة
     </button>
-    <h1 class="text-3xl font-black text-gold tracking-wide">العسسي</h1>
+    
+    <!-- شعار المطعم -->
+    <div class="w-24 h-24 mb-2 rounded-full border-2 border-gold p-1 bg-black/60 shadow-lg cursor-pointer hover:scale-105 transition duration-300" onclick="openImageModal('IMG-20260617-WA0083_٠٥٢١٠٢.jpg')">
+      <img src="IMG-20260617-WA0083_٠٥٢١٠٢.jpg" alt="شعار المطعم" class="w-full h-full object-cover rounded-full">
+    </div>
+
+    <h1 id="restaurantTitleHeader" class="text-3xl font-black text-gold tracking-wide">العسسي</h1>
     <p class="text-xs text-amber-100/70 font-semibold mt-1">ملحمة ومعجنات طازجة</p>
     
     <div id="store-status-badge" class="store-status open">جاري التحقق من حالة المطعم...</div>
@@ -60,14 +66,19 @@
     <div class="text-xs text-gray-300 space-y-1 mt-2">
       <p class="font-bold text-amber-200">إدارة: أبو أيمن الفران | أبو النور اللحام</p>
       <p><i class="fa-solid fa-truck-fast text-gold ml-1"></i> جاهزون لتلبية طلباتكم والحفلات - يوجد توصيل طلبات</p>
-      <p class="font-bold text-gold"><i class="fa-solid fa-phone ml-1"></i> 0942 568 502</p>
+      <p class="font-bold text-gold"><i class="fa-solid fa-phone ml-1"></i> <span id="restaurantPhoneHeader" dir="ltr" class="inline-block">0942 568 502</span></p>
       <p class="text-[11px] text-gray-400">يتوفر الدفع النقدي أو عن طريق شام كاش.</p>
     </div>
 
     <!-- شام كاش -->
-    <div class="mt-3 bg-black/40 border border-gold/30 rounded-xl p-2 inline-block max-w-full">
-      <span class="text-[11px] text-amber-200 font-bold block mb-1">حساب شام كاش:</span>
-      <code class="text-xs text-gold font-mono break-all bg-black/60 px-2 py-1 rounded border border-gold/20">99d44072c6a3c3b1f926e0571e9c416c</code>
+    <div class="mt-3 bg-black/40 border border-gold/30 rounded-xl p-2 inline-flex items-center gap-2 max-w-full">
+      <div>
+        <span class="text-[11px] text-amber-200 font-bold block">حساب شام كاش:</span>
+        <code id="shamCashHeaderCode" class="text-xs text-gold font-mono break-all bg-black/60 px-2 py-0.5 rounded border border-gold/20">99d44072c6a3c3b1f926e0571e9c416c</code>
+      </div>
+      <button onclick="copyShamCash()" class="bg-gold/20 hover:bg-gold/40 text-gold border border-gold/40 px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0">
+        <i class="fa-regular fa-copy"></i> نسخ
+      </button>
     </div>
   </header>
 
@@ -164,18 +175,30 @@
         <div class="flex justify-between text-gray-400"><span>المجموع (ليرة قديمة):</span><span id="modalTotalOldCurrency">0 ليرة قديمة</span></div>
         <div class="mt-3 pt-2 border-t border-gray-800">
           <label class="block text-gray-300 mb-1 font-bold">طريقة الدفع المفضلة:</label>
-          <select id="paymentMethod" class="w-full bg-brandDark border border-gold/30 rounded-xl p-2 text-white font-bold text-xs focus:outline-none">
+          <select id="paymentMethod" onchange="toggleShamCashCartInfo()" class="w-full bg-brandDark border border-gold/30 rounded-xl p-2 text-white font-bold text-xs focus:outline-none">
             <option value="cash">💵 نقداً عند الاستلام</option>
             <option value="shamcash">📱 شام كاش</option>
           </select>
         </div>
+
+        <!-- معلومات حساب شام كاش المخصصة داخل السلة -->
+        <div id="shamCashCartBox" class="hidden bg-black/60 border border-gold/30 rounded-xl p-2.5 mt-2 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-amber-200 font-bold block">رقم حساب شام كاش للتحويل:</span>
+            <code class="text-xs text-gold font-mono break-all">99d44072c6a3c3b1f926e0571e9c416c</code>
+          </div>
+          <button onclick="copyShamCash()" class="bg-gold/20 hover:bg-gold/40 text-gold border border-gold/40 px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0">
+            <i class="fa-regular fa-copy"></i> نسخ
+          </button>
+        </div>
+
         <div>
           <label class="block text-gray-300 mb-1 font-bold">ملاحظات أو تفاصيل التوصيل (اختياري):</label>
           <textarea id="orderNotes" rows="2" class="w-full bg-brandDark border border-gold/30 rounded-xl p-2 text-white text-xs focus:outline-none" placeholder="اكتب عنوانك بالتفصيل أو أي ملاحظة خاصة بالوجبة..."></textarea>
         </div>
         <div class="flex gap-2 pt-2">
           <button onclick="sendOrderWhatsApp()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-center flex items-center justify-center gap-1.5"><i class="fa-brands fa-whatsapp"></i> إرسال الطلب للواتساب</button>
-          <a href="tel:0942568502" class="bg-gold hover:bg-goldHover text-brandDark font-black px-4 py-2.5 rounded-xl flex items-center justify-center gap-1"><i class="fa-solid fa-phone"></i> اتصال بالهاتف</a>
+          <a id="modalPhoneCallBtn" href="tel:0942568502" class="bg-gold hover:bg-goldHover text-brandDark font-black px-4 py-2.5 rounded-xl flex items-center justify-center gap-1"><i class="fa-solid fa-phone"></i> اتصال بالهاتف</a>
         </div>
       </div>
     </div>
@@ -196,6 +219,26 @@
 
       <div class="p-4 overflow-y-auto space-y-6 text-xs">
         
+        <!-- قسم الإعدادات العامة (اسم المطعم، الرقم، كلمة السر) -->
+        <div class="bg-black/40 border border-gold/30 p-3 rounded-xl">
+          <h4 class="font-bold text-amber-200 text-sm mb-2"><i class="fa-solid fa-gear text-gold ml-1"></i> إعدادات المطعم والحساب</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div>
+              <label class="block text-gray-400 mb-1">اسم المطعم:</label>
+              <input type="text" id="adminRestaurantName" class="w-full bg-brandDark border border-gold/20 p-2 rounded-xl text-white">
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-1">رقم الهاتف:</label>
+              <input type="text" id="adminRestaurantPhone" dir="ltr" class="w-full bg-brandDark border border-gold/20 p-2 rounded-xl text-white">
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-1">كلمة السر الجديدة:</label>
+              <input type="text" id="adminPasswordInput" class="w-full bg-brandDark border border-gold/20 p-2 rounded-xl text-white">
+            </div>
+          </div>
+          <button onclick="saveGeneralSettings()" class="mt-3 w-full bg-gold text-brandDark font-black p-2 rounded-xl">حفظ التغييرات العامة</button>
+        </div>
+
         <!-- قسم العروض المباشرة -->
         <div class="bg-black/40 border border-gold/30 p-3 rounded-xl">
           <h4 class="font-bold text-amber-200 text-sm mb-2"><i class="fa-solid fa-bullhorn text-gold ml-1"></i> إدارة العروض المباشرة</h4>
@@ -234,10 +277,36 @@
   </div>
 
   <footer class="text-center py-6 border-t border-gray-800 text-xs text-gray-500 mb-12">
-    <p>العسسي - ملحمة ومعجنات طازجة يومياً</p>
+    <p id="restaurantFooterText">العسسي - ملحمة ومعجنات طازجة يومياً</p>
   </footer>
 
   <script>
+    // ===== المتغيرات والإعدادات العامة =====
+    let restaurantConfig = {
+      name: "العسسي",
+      phone: "0942 568 502",
+      adminPass: "Yaser1738"
+    };
+
+    function copyShamCash() {
+      const code = "99d44072c6a3c3b1f926e0571e9c416c";
+      navigator.clipboard.writeText(code).then(() => {
+        alert("تم نسخ رقم حساب شام كاش بنجاح!");
+      }).catch(() => {
+        alert("رمز حساب شام كاش هو: " + code);
+      });
+    }
+
+    function toggleShamCashCartInfo() {
+      const select = document.getElementById('paymentMethod');
+      const box = document.getElementById('shamCashCartBox');
+      if (select && select.value === 'shamcash') {
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
     // ===== دالة التحقق من أوقات العمل تلقائياً =====
     function checkStoreStatus() {
       const now = new Date();
@@ -716,7 +785,7 @@
         return;
       }
 
-      let message = `*طلب جديد من منيو العسسي الإلكتروني:*%0A%0A`;
+      let message = `*طلب جديد من منيو ${restaurantConfig.name} الإلكتروني:*%0A%0A`;
       let counter = 1;
       let totalPriceNew = 0;
       let hasPrice = false;
@@ -759,15 +828,19 @@
 
       message += `%0A*يرجى تأكيد الطلب والتجهيز. شكراً لكم!*`;
 
-      const phone = "963942568502";
-      const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+      const cleanPhone = restaurantConfig.phone.replace(/\s+/g, '').replace(/^0/, '963');
+      const whatsappUrl = `https://wa.me/${cleanPhone}?text=${message}`;
       window.open(whatsappUrl, '_blank');
     }
 
     // ===== لوحة الإدارة التفاعلية =====
     function openAdmin() {
       const pass = prompt("ادخل كلمة سر الإدارة");
-      if (pass === "Yaser1738") {
+      if (pass === restaurantConfig.adminPass) {
+        document.getElementById('adminRestaurantName').value = restaurantConfig.name;
+        document.getElementById('adminRestaurantPhone').value = restaurantConfig.phone;
+        document.getElementById('adminPasswordInput').value = restaurantConfig.adminPass;
+
         renderAdminItems();
         const modal = document.getElementById('adminModal');
         modal.style.display = 'flex';
@@ -778,6 +851,29 @@
 
     function closeAdmin() {
       document.getElementById('adminModal').style.display = 'none';
+    }
+
+    function saveGeneralSettings() {
+      const newName = document.getElementById('adminRestaurantName').value.trim();
+      const newPhone = document.getElementById('adminRestaurantPhone').value.trim();
+      const newPass = document.getElementById('adminPasswordInput').value.trim();
+
+      if (!newName || !newPhone || !newPass) {
+        alert("يرجى ملء كافة الخانات وتوفير قيم صالحة.");
+        return;
+      }
+
+      restaurantConfig.name = newName;
+      restaurantConfig.phone = newPhone;
+      restaurantConfig.adminPass = newPass;
+
+      // تحديث العناوين والهاتف في الواجهة
+      document.getElementById('restaurantTitleHeader').innerText = newName;
+      document.getElementById('restaurantPhoneHeader').innerText = newPhone;
+      document.getElementById('restaurantFooterText').innerText = `${newName} - ملحمة ومعجنات طازجة يومياً`;
+      document.getElementById('modalPhoneCallBtn').href = `tel:${newPhone.replace(/\s+/g, '')}`;
+
+      alert("تمت تحديث إعدادات المطعم وكلمة السر بنجاح!");
     }
 
     function renderAdminItems() {
