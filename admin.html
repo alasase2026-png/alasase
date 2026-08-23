@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المنيو - مطعم العسسي</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; background: #007bff; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>تعديل الأسعار والوجبات</h2>
+
+    <div class="form-group">
+        <label>اسم الوجبة (مثلاً: بيتزا):</label>
+        <input type="text" id="itemName" placeholder="أدخل اسم الوجبة">
+    </div>
+
+    <div class="form-group">
+        <label>السعر الجديد (ل.س):</label>
+        <input type="number" id="itemPrice" placeholder="أدخل السعر">
+    </div>
+
+    <button onclick="saveItem()">تحديث / إضافة الوجبة فوراً</button>
+
+    <h3 style="margin-top: 30px;">الوجبات الحالية:</h3>
+    <div id="admin-items-list"></div>
+</div>
+
+<!-- مكتبات Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<script>
+  // 🔴 ضع نفس بيانات firebaseConfig الخاصة بك هنا أيضاً
+  const firebaseConfig = {
+    apiKey: "ضع_مفتاح_API_هنا",
+    authDomain: "PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "PROJECT_ID",
+    storageBucket: "PROJECT_ID.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abc123def"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+  // حفظ أو تغيير السعر
+  function saveItem() {
+    const name = document.getElementById('itemName').value;
+    const price = document.getElementById('itemPrice').value;
+
+    if (!name || !price) {
+      alert('يرجى كتابة الاسم والسعر');
+      return;
+    }
+
+    // تنظيف الاسم لاستخدامه كـ ID في قاعدة البيانات
+    const itemId = name.trim().replace(/\s+/g, '_');
+
+    database.ref('menu/' + itemId).set({
+      name: name,
+      price: price
+    }).then(() => {
+      alert('تم تحديث السعر بنجاح وظهر للزبائن فوراً!');
+      document.getElementById('itemName').value = '';
+      document.getElementById('itemPrice').value = '';
+    });
+  }
+
+  // عرض القائمة الحالية في لوحة التحكم
+  database.ref('menu').on('value', (snapshot) => {
+    const data = snapshot.val();
+    const list = document.getElementById('admin-items-list');
+    list.innerHTML = '';
+
+    if (data) {
+      for (let key in data) {
+        const item = data[key];
+        list.innerHTML += `
+          <div class="item-row">
+            <span><strong>${item.name}</strong>: ${item.price} ل.س</span>
+          </div>
+        `;
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
