@@ -335,6 +335,15 @@
                         <option value="cash">💵 نقداً عند الاستلام</option>
                         <option value="shamcash">📱 شام كاش</option>
                     </select>
+                    <div class="mt-2 bg-black/60 border border-gold/20 rounded-xl p-2 text-center">
+                        <div class="text-[11px] text-amber-100 mb-1">حساب شام كاش</div>
+                        <div class="flex items-center gap-2 justify-center">
+                            <span id="cartShamCashAccount" class="text-[10px] text-gray-300 font-mono break-all" dir="ltr">-</span>
+                            <button onclick="copyShamCash()" class="bg-gold hover:bg-goldHover text-brandDark text-[10px] font-black px-2.5 py-1 rounded-lg">
+                                <i class="fa-solid fa-copy"></i> نسخ
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
                 <div>
@@ -700,6 +709,8 @@
             document.getElementById('footerPhone').innerText = siteSettings.phone;
 
             document.getElementById('shamCashAccountDisplay').innerText = siteSettings.shamCashAccount;
+            const cartSham = document.getElementById('cartShamCashAccount');
+            if (cartSham) cartSham.innerText = siteSettings.shamCashAccount;
             if (siteSettings.logoImg) document.getElementById('logoDisplay').src = siteSettings.logoImg;
             if (siteSettings.shamCashQr) document.getElementById('shamCashQrDisplay').src = siteSettings.shamCashQr;
 
@@ -1489,6 +1500,13 @@
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = error => reject(error);
                 reader.readAsDataURL(file);
+            });
+        }
+
+        function copyShamCash() {
+            const account = siteSettings.shamCashAccount || document.getElementById('shamCashAccountDisplay').innerText.trim();
+            navigator.clipboard.writeText(account).then(() => {
+                alert('تم نسخ حساب شام كاش');
             });
         }
 
