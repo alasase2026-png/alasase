@@ -415,6 +415,20 @@ window.firebaseDB = db;
                     </select>
                 </div>
                 
+
+                <div class="bg-black/70 p-3 rounded-2xl border border-gold/30 space-y-2">
+                    <label class="text-xs text-gold font-bold block">خيار الاستلام:</label>
+                    <select id="deliveryType" class="w-full bg-black/70 border border-gold/30 rounded-xl p-2.5 text-xs text-amber-100">
+                        <option value="delivery">🛵 توصيل إلى موقعي</option>
+                        <option value="pickup">🏪 استلام من المطعم</option>
+                    </select>
+                    <button onclick="getCustomerLocation()" class="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 rounded-xl text-xs">
+                        <i class="fa-solid fa-location-crosshairs"></i> تحديد موقعي من الخريطة
+                    </button>
+                    <input id="customerLocation" type="text" readonly placeholder="لم يتم تحديد الموقع بعد"
+                    class="w-full mt-2 bg-black border border-gray-700 rounded-xl p-2 text-xs text-gray-300">
+                </div>
+
                 <div>
                     <label class="text-xs text-gray-400 block mb-1.5">ملاحظات أو تفاصيل التوصيل (اختياري):</label>
                     <input type="text" id="orderNotes" placeholder="مثال: بدون بصل / العنوان بالتفصيل..." class="w-full bg-black/70 border border-gray-700 rounded-xl p-2.5 text-xs text-gray-200 focus:outline-none focus:border-gold">
@@ -1511,6 +1525,33 @@ function startFirebaseSync(){
             });
         }
 
+
+        let customerMapLocation = "";
+
+        function getCustomerLocation() {
+            if (!navigator.geolocation) {
+                showToast("المتصفح لا يدعم تحديد الموقع", "error");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    customerMapLocation = `https://maps.google.com/?q=${lat},${lng}`;
+
+                    const input = document.getElementById("customerLocation");
+                    if (input) input.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+                    showToast("تم تحديد موقعك بنجاح");
+                },
+                function() {
+                    showToast("يرجى السماح بالوصول إلى الموقع", "error");
+                },
+                {enableHighAccuracy:true}
+            );
+        }
+
         function sendOrderWhatsApp() {
             const cartKeys = Object.keys(cart);
             if (cartKeys.length === 0) {
@@ -1553,6 +1594,18 @@ function startFirebaseSync(){
                 message += `*معرّف الحساب:* \`${s.shamcashCode || '99d44072c6a3c3b1f926e0571e9c416c'}\`%0A`;
             } else {
                 message += `%0A*طريقة الدفع المطلوبة:* 💵 نقداً عند الاستلام%0A`;
+            }
+
+            const deliveryType = document.getElementById('deliveryType');
+            if (deliveryType && deliveryType.value === "delivery") {
+                message += `%0A*طريقة الاستلام:* 🛵 توصيل%0A`;
+                if (customerMapLocation) {
+                    message += `*موقع الزبون على الخريطة:* ${encodeURIComponent(customerMapLocation)}%0A`;
+                } else {
+                    message += `*الموقع:* لم يتم تحديده%0A`;
+                }
+            } else {
+                message += `%0A*طريقة الاستلام:* 🏪 استلام من المطعم%0A`;
             }
 
             const notes = document.getElementById('orderNotes').value.trim();
