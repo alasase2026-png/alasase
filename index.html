@@ -278,25 +278,64 @@
             #adminPanelModal .admin-panel-content { padding: 9px !important; }
         }
 
-    </style>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+        /* ===== تطوير العسسي - واجهة أسرع وأجمل ===== */
+        html { scroll-behavior: smooth; }
+        body { -webkit-tap-highlight-color: transparent; }
+        .menu-card { content-visibility: auto; contain-intrinsic-size: 180px; }
+        .menu-card:active { transform: scale(.992); }
+        .quick-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; max-width:640px; margin:14px auto 0; }
+        .quick-action { display:flex; align-items:center; justify-content:center; gap:7px; min-height:44px; padding:8px 10px; border-radius:14px; background:rgba(0,0,0,.52); border:1px solid rgba(230,197,103,.24); color:#f6e7b1; font-size:11px; font-weight:900; transition:.18s ease; }
+        .quick-action:hover,.quick-action:active { background:rgba(230,197,103,.14); border-color:rgba(230,197,103,.55); transform:translateY(-1px); }
+        .quick-action i { color:#e6c567; }
+        .section-count { margin-right:auto; padding:4px 9px; border-radius:999px; background:rgba(230,197,103,.08); border:1px solid rgba(230,197,103,.18); color:#cfcfcf; font-size:9px; font-weight:800; white-space:nowrap; }
+        .cart-pulse { animation:cartPulse .35s ease; }
+        @keyframes cartPulse { 50% { transform:scale(1.08); } }
+        .empty-offers { grid-column:1/-1; padding:30px 16px; text-align:center; border:1px dashed rgba(230,197,103,.2); border-radius:18px; color:#777; background:rgba(0,0,0,.2); }
+        .professional-offer-card{position:relative;overflow:hidden;border:1px solid rgba(230,197,103,.38);border-radius:24px;background:linear-gradient(145deg,#241817,#120e0d 72%);box-shadow:0 18px 45px rgba(0,0,0,.38);transition:.25s ease}
+        .professional-offer-card:hover{transform:translateY(-3px);border-color:rgba(230,197,103,.75);box-shadow:0 22px 55px rgba(0,0,0,.5)}
+        .professional-offer-image{width:100%;height:230px;object-fit:cover;display:block}
+        .professional-offer-noimage{height:230px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,#4a1919,#17100f 65%);color:#e6c567}
+        .offer-discount-ribbon{position:absolute;top:14px;right:14px;background:linear-gradient(135deg,#ef4444,#991b1b);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:900;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+        .offer-price-old{text-decoration:line-through;color:#9ca3af;font-size:13px}
+        .offer-price-new{color:#e6c567;font-size:25px;font-weight:900;line-height:1}
+        .offer-order-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;border-radius:15px;background:linear-gradient(135deg,#e6c567,#b88719);color:#0d0a09;font-size:13px;font-weight:900;box-shadow:0 10px 24px rgba(230,197,103,.18);transition:.2s ease}
+        .offer-order-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+        .offer-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+        @media(max-width:640px){.offer-countdown{font-size:9px;padding:5px 8px}.professional-offer-image,.professional-offer-noimage{height:205px}.professional-offer-card{border-radius:20px}.offer-price-new{font-size:23px}}
+        .back-top { position:fixed; right:15px; bottom:92px; z-index:38; width:42px; height:42px; border-radius:14px; display:none; align-items:center; justify-content:center; background:#181311; color:#e6c567; border:1px solid rgba(230,197,103,.4); box-shadow:0 10px 28px rgba(0,0,0,.45); }
+        .back-top.show { display:flex; }
+        @media(max-width:640px){
+            header{padding-top:18px!important;padding-bottom:14px!important}
+            #header-logo-img{width:88px!important;height:88px!important}
+            #header-title{font-size:30px!important}
+            main{padding-left:10px!important;padding-right:10px!important;padding-top:16px!important}
+            nav{padding-top:8px!important;padding-bottom:8px!important}
+            #categoryTabs{justify-content:flex-start!important}
+            #categoryTabs .cat-btn{padding:9px 13px!important;font-size:10px!important}
+            .menu-section{margin-bottom:24px!important}
+            .menu-section>div:first-child{gap:7px!important;margin-bottom:10px!important}
+            .menu-section h2{font-size:17px!important}
+            .menu-section .text-xs{font-size:9px!important}
+            #pizza-container,#meat-container{grid-template-columns:1fr!important;gap:9px!important}
+            #fatayer-container{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+            .menu-card{padding:10px!important;border-radius:16px!important}
+            .menu-card h3{font-size:13px!important}
+            #cartBar{padding:8px!important}
+            #cartBar .max-w-4xl{gap:7px}
+            #cartBar .w-12{width:42px!important;height:42px!important}
+            #cartBar button{font-size:10px!important;padding:9px 10px!important}
+            #cartBar .flex.items-center.gap-3{gap:8px!important}
+            #cartBar .text-sm{font-size:11px!important}
+            #cartBar .text-xs{font-size:9px!important}
+            #announcement-image-card{margin-top:10px}
+            .quick-actions{grid-template-columns:1fr 1fr 1fr;padding:0 2px;}
+            .quick-action{font-size:9px;padding:7px 4px;}
+            .section-count{font-size:8px;}
+        }
+        @media(max-width:380px){ .quick-action span{display:none;} .quick-action i{font-size:16px;} }
+</style>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBQtbW3AD2nVvmbb7igq8k38c9LZvM3V0k",
-  authDomain: "alasase-f65bb.firebaseapp.com",
-  projectId: "alasase-f65bb",
-  storageBucket: "alasase-f65bb.firebasestorage.app",
-  messagingSenderId: "915628891136",
-  appId: "1:915628891136:web:1b7195f5503b74af3e4ce5",
-  measurementId: "G-4RGCR5R0E7"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-window.firebaseDB = db;
-</script>
 </head>
 <body class="min-h-screen pb-28 text-gray-100 flex flex-col justify-between select-none">
 
@@ -318,9 +357,10 @@ window.firebaseDB = db;
                 <i class="fa-solid fa-bell text-gold"></i>
             </div>
             <h3 id="announcement-modal-title" class="text-xl font-black text-gold mb-2">إشعار هام</h3>
-            <p id="announcement-modal-body" class="text-sm text-amber-100 leading-relaxed mb-6 bg-black/50 p-4 rounded-2xl border border-gold/20">
+            <p id="announcement-modal-body" class="text-sm text-amber-100 leading-relaxed mb-4 bg-black/50 p-4 rounded-2xl border border-gold/20">
                 مرحباً بكم في مطعم ومعجنات العسسي!
             </p>
+            <img id="announcement-modal-image" src="" alt="صورة العرض" class="hidden w-full max-h-64 object-cover rounded-2xl border border-gold/30 mb-5">
             <button onclick="closeAnnouncementModal()" class="w-full bg-gold hover:bg-goldHover text-brandDark font-black py-3 rounded-xl text-sm shadow-lg transition">
                 فهمت ذلك، إغلاق
             </button>
@@ -442,6 +482,17 @@ window.firebaseDB = db;
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
+
+            <!-- Quick actions -->
+            <div id="announcement-image-card" class="hidden max-w-md mx-auto mt-4 rounded-2xl overflow-hidden border border-gold/40 bg-black/50 shadow-xl">
+                <img id="announcement-image-card-img" src="" alt="العرض" class="w-full max-h-64 object-cover cursor-pointer" onclick="triggerImageZoom(this.src)">
+            </div>
+
+            <div class="quick-actions" aria-label="اختصارات الموقع">
+                <button class="quick-action" onclick="filterCategory('offers')"><i class="fa-solid fa-fire"></i><span>العروض</span></button>
+                <button class="quick-action" onclick="scrollToSection('sec-pizza')"><i class="fa-solid fa-pizza-slice"></i><span>البيتزا</span></button>
+                <button class="quick-action" onclick="toggleCartModal()"><i class="fa-solid fa-bag-shopping"></i><span>السلة</span></button>
+            </div>
         </div>
     </header>
 
@@ -488,6 +539,7 @@ window.firebaseDB = db;
                 </div>
                 <h2 class="text-2xl font-black text-gold tracking-wide">قسم البيتزا</h2>
                 <span class="text-xs text-gray-400 font-normal">متوفرة بأحجام متعدده</span>
+                <span id="pizza-count" class="section-count">0 صنف</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="pizza-container"></div>
         </section>
@@ -500,6 +552,7 @@ window.firebaseDB = db;
                 </div>
                 <h2 class="text-2xl font-black text-gold tracking-wide">قسم اللحمة (المشاوي)</h2>
                 <span class="text-xs text-gray-400 font-normal">لحوم طازجة مشوية عالفحم</span>
+                <span id="meat-count" class="section-count">0 صنف</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="meat-container"></div>
         </section>
@@ -512,6 +565,7 @@ window.firebaseDB = db;
                 </div>
                 <h2 class="text-2xl font-black text-gold tracking-wide">قسم الفطائر والمعجنات</h2>
                 <span class="text-xs text-gray-400 font-normal">فطائر الفرن الساخنة</span>
+                <span id="fatayer-count" class="section-count">0 صنف</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5" id="fatayer-container"></div>
         </section>
@@ -522,6 +576,8 @@ window.firebaseDB = db;
             <button onclick="resetSearch()" class="mt-3 text-xs text-gold underline hover:text-amber-200">عرض جميع الوجبات</button>
         </div>
     </main>
+
+    <button id="backTopBtn" class="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="العودة للأعلى"><i class="fa-solid fa-arrow-up"></i></button>
 
     <!-- Bottom Cart Bar -->
     <div id="cartBar" class="fixed bottom-0 left-0 right-0 z-40 bg-brandCard/95 border-t border-gold/30 p-3.5 shadow-2xl backdrop-blur-md">
@@ -790,9 +846,28 @@ window.firebaseDB = db;
                             </label>
 
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="item-input-isOffer" class="w-4 h-4 accent-amber-500 rounded">
+                                <input type="checkbox" id="item-input-isOffer" onchange="toggleProfessionalOfferFields()" class="w-4 h-4 accent-amber-500 rounded">
                                 <span class="text-xs font-bold text-amber-400">إضافة للقسم الخاص بالعروض المميزة🔥</span>
                             </label>
+                        </div>
+
+                        <!-- Professional Offer Settings -->
+                        <div id="professional-offer-settings" class="hidden bg-gradient-to-br from-red-950/60 to-black/60 p-3 rounded-2xl border border-amber-500/30 space-y-3">
+                            <div class="flex items-center gap-2 text-amber-400 font-black text-xs"><i class="fa-solid fa-fire"></i><span>إعدادات العرض الاحترافي</span></div>
+                            <div class="admin-mobile-stack grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div><label class="text-xs text-gray-300 block mb-1">السعر القديم:</label><input type="number" id="item-input-offerOldPrice" min="0" class="w-full bg-black border border-red-500/30 rounded-xl p-2.5 text-xs text-gray-200" placeholder="مثال: 600"></div>
+                                <div><label class="text-xs text-gray-300 block mb-1">السعر الجديد:</label><input type="number" id="item-input-offerNewPrice" min="0" class="w-full bg-black border border-gold/40 rounded-xl p-2.5 text-xs text-gold font-black" placeholder="مثال: 450"></div>
+                            </div>
+                            <div><label class="text-xs text-gray-300 block mb-1">نسبة الخصم (%): <span class="text-amber-400">تحسب تلقائياً إذا تركتها فارغة</span></label><input type="number" id="item-input-offerDiscount" min="0" max="100" class="w-full bg-black border border-amber-500/30 rounded-xl p-2.5 text-xs text-amber-400 font-black" placeholder="مثال: 25"></div>
+                            <div class="bg-black/50 border border-red-500/20 rounded-xl p-3 space-y-2">
+                                <label class="text-xs text-gray-300 font-bold block">تاريخ ووقت انتهاء العرض:</label>
+                                <input type="datetime-local" id="item-input-offerExpiry" class="w-full bg-black border border-red-500/30 rounded-xl p-2.5 text-xs text-red-300" dir="ltr">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-[10px] text-gray-500">عند انتهاء الوقت يختفي العرض تلقائياً من قسم العروض.</span>
+                                    <button type="button" onclick="clearOfferExpiry()" class="text-[10px] text-red-300 hover:text-white bg-red-900/30 px-2 py-1 rounded-lg">بدون انتهاء</button>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-gray-500">يمكنك أيضاً ترك الأسعار فارغة إذا كان العرض إعلانياً فقط.</p>
                         </div>
 
                         <!-- Has Sizes Toggle -->
@@ -941,6 +1016,15 @@ window.firebaseDB = db;
                     <div>
                         <label class="text-xs text-gray-300 font-bold block mb-1">نص الإعلان أو التنبيه التفصيلي:</label>
                         <textarea id="adm-announcementMessage" rows="3" placeholder="اكتب التفاصيل هنا..." class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white"></textarea>
+                    </div>
+
+                    <div class="bg-black/50 p-4 rounded-2xl border border-gold/30 space-y-3">
+                        <label class="text-xs text-gold font-bold block">صورة العرض / الإعلان:</label>
+                        <input type="file" id="adm-announcementImageFile" accept="image/*" onchange="handleFileUpload(event, 'adm-announcementImage')" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2 text-xs text-gray-300">
+                        <input type="text" id="adm-announcementImage" placeholder="أو ضع رابط الصورة هنا" class="w-full bg-black/60 border border-gray-700 rounded-xl p-2 text-[10px] text-gray-400 font-mono" dir="ltr">
+                        <div id="adm-announcementImagePreviewWrap" class="hidden text-center">
+                            <img id="adm-announcementImagePreview" src="" alt="معاينة صورة العرض" class="max-h-44 max-w-full mx-auto rounded-2xl border border-gold/30 object-contain">
+                        </div>
                     </div>
 
                     <button onclick="saveAnnouncementSettings()" class="admin-action-btn bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-6 rounded-xl text-xs shadow-lg transition">
@@ -1106,6 +1190,7 @@ function startFirebaseSync(){
             announcementType: "both",
             announcementTitle: "تنبيه هام من إدارة العسسي",
             announcementMessage: "أهلاً وسهلاً بكم! يسعدنا تقديم أشهى المأكولات الطازجة يومياً.",
+            announcementImage: "",
             statusMode: "auto",
             workingHoursText: "من 7 صباحاً إلى 10 مساءً",
             adminPassword: "Yaser1738"
@@ -1255,6 +1340,8 @@ function startFirebaseSync(){
                 if ((s.announcementType === 'popup' || s.announcementType === 'both') && !sessionStorage.getItem('announcementSeen')) {
                     document.getElementById('announcement-modal-title').innerText = s.announcementTitle;
                     document.getElementById('announcement-modal-body').innerText = s.announcementMessage;
+                    const modalImg = document.getElementById('announcement-modal-image');
+                    if (modalImg) { modalImg.src = s.announcementImage || ''; modalImg.classList.toggle('hidden', !s.announcementImage); }
                     document.getElementById('announcementModal').classList.remove('hidden');
                     document.getElementById('announcementModal').classList.add('flex');
                 }
@@ -1262,6 +1349,12 @@ function startFirebaseSync(){
                 annBar.classList.add('hidden');
             }
 
+            const offerImgCard = document.getElementById('announcement-image-card');
+            const offerImg = document.getElementById('announcement-image-card-img');
+            if (offerImgCard && offerImg) {
+                offerImg.src = s.announcementImage || '';
+                offerImgCard.classList.toggle('hidden', !(s.announcementActive && s.announcementImage));
+            }
             checkStoreStatus();
         }
 
@@ -1306,6 +1399,7 @@ function startFirebaseSync(){
         }
 
         setInterval(checkStoreStatus, 60000);
+        setInterval(updateOfferCountdowns, 1000);
 
         function getPizzaPrice(item, sizeKey) {
             if (item.customSizes && item.customSizes[sizeKey]) {
@@ -1331,14 +1425,90 @@ function startFirebaseSync(){
             menuData.forEach(item => {
                 const cardHtml = createCardHTML(item);
                 
-                if (item.isOffer && offersContainer) {
-                    offersContainer.innerHTML += cardHtml;
+                if (item.isOffer && !isOfferExpired(item) && offersContainer) {
+                    offersContainer.innerHTML += createProfessionalOfferHTML(item);
                 }
 
                 if (item.category === 'pizza') pizzaContainer.innerHTML += cardHtml;
                 else if (item.category === 'meat') meatContainer.innerHTML += cardHtml;
                 else if (item.category === 'fatayer') fatayerContainer.innerHTML += cardHtml;
             });
+        }
+
+        function isOfferExpired(item) {
+            if (!item || !item.offerExpiry) return false;
+            const expiry = new Date(item.offerExpiry);
+            return !Number.isNaN(expiry.getTime()) && Date.now() >= expiry.getTime();
+        }
+
+        function clearOfferExpiry() {
+            const input = document.getElementById('item-input-offerExpiry');
+            if (input) input.value = '';
+        }
+
+        function formatOfferCountdown(ms) {
+            const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+            const days = Math.floor(totalSeconds / 86400);
+            const hours = Math.floor((totalSeconds % 86400) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const hh = String(hours).padStart(2, '0');
+            const mm = String(minutes).padStart(2, '0');
+            const ss = String(seconds).padStart(2, '0');
+            return days > 0 ? `${days} يوم ${hh}:${mm}:${ss}` : `${hh}:${mm}:${ss}`;
+        }
+
+        function updateOfferCountdowns() {
+            let expiredFound = false;
+            document.querySelectorAll('[data-offer-expiry]').forEach(el => {
+                const expiry = new Date(el.dataset.offerExpiry);
+                if (Number.isNaN(expiry.getTime())) return;
+                const remaining = expiry.getTime() - Date.now();
+                if (remaining <= 0) {
+                    expiredFound = true;
+                    return;
+                }
+                el.textContent = `ينتهي خلال ${formatOfferCountdown(remaining)}`;
+            });
+            if (expiredFound) renderMenu();
+        }
+
+        function calculateOfferDiscount(oldPrice, newPrice, explicit) {
+            const o = Number(oldPrice) || 0, n = Number(newPrice) || 0;
+            const d = Number(explicit) || 0;
+            return d > 0 ? Math.min(100, d) : (o > 0 && n >= 0 && n < o ? Math.round(((o - n) / o) * 100) : 0);
+        }
+
+        function createProfessionalOfferHTML(item) {
+            const available = item.isAvailable !== false;
+            const oldPrice = Number(item.offerOldPrice) || 0;
+            let newPrice = Number(item.offerNewPrice) || 0;
+            if (!newPrice) newPrice = item.hasSizes ? getPizzaPrice(item, 'medium') : (Number(item.price) || 0);
+            const discount = calculateOfferDiscount(oldPrice, newPrice, item.offerDiscount);
+            const image = item.image ? `<img src="${item.image}" alt="${item.name}" class="professional-offer-image" onclick="triggerImageZoom('${item.image}')" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : '';
+            const fallback = `<div class="professional-offer-noimage" style="${image ? 'display:none' : ''}"><i class="fa-solid ${item.icon || 'fa-tags'} text-6xl"></i></div>`;
+            const prices = oldPrice > 0 ? `<div><div class="offer-price-old">${oldPrice.toLocaleString()} ل.س</div><div class="offer-price-new">${newPrice.toLocaleString()} <span class="text-sm">ل.س</span></div></div>` : `<div class="offer-price-new">${newPrice ? newPrice.toLocaleString()+' ل.س' : 'عرض خاص'}</div>`;
+            return `<article class="professional-offer-card" data-id="${item.id}" data-name="${item.name}" data-category="${item.category}" data-offer="true">
+                ${image}${fallback}${discount ? `<div class="offer-discount-ribbon">خصم ${discount}% 🔥</div>` : '<div class="offer-discount-ribbon">عرض خاص 🔥</div>'}
+                ${item.offerExpiry ? `<div class="offer-countdown absolute left-3 top-3 bg-black/75 border border-red-400/40 text-red-200 rounded-xl px-3 py-1.5 text-[10px] font-black backdrop-blur" data-offer-expiry="${item.offerExpiry}">ينتهي خلال...</div>` : ''}
+                <div class="p-4 sm:p-5">
+                    <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-full px-2.5 py-1">عرض مميز</span>${!available ? '<span class="out-of-stock-badge">نفذت الكمية</span>' : ''}</div>
+                    <h3 class="text-xl font-black text-amber-100 mt-2">${item.name}</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed mt-1 min-h-[38px]">${item.desc || 'استفد من العرض لفترة محدودة'}</p>
+                    <div class="offer-meta"><div class="text-[11px] text-gray-500">السعر قبل العرض / بعد الخصم</div>${prices}</div>
+                    <button class="offer-order-btn mt-4" ${!available ? 'disabled style="opacity:.45;cursor:not-allowed"' : ''} onclick="orderOffer('${item.id}')"><i class="fa-solid fa-bag-shopping"></i><span>${available ? 'اطلب الآن' : 'غير متوفر حالياً'}</span></button>
+                </div>
+            </article>`;
+        }
+
+        function orderOffer(itemId) {
+            const item = menuData.find(i => i.id === itemId);
+            if (!item || item.isAvailable === false) { showToast('هذا العرض غير متوفر حالياً', 'error'); return; }
+            const key = item.hasSizes ? `${item.id}_medium` : item.id;
+            cart[key] = (cart[key] || 0) + 1;
+            if (item.hasSizes) pizzaSelectedSizes[item.id] = 'medium';
+            persistCart(); updateCartSummary(); renderCartModalList(); renderMenu();
+            showToast(`تمت إضافة «${item.name}» إلى السلة`);
         }
 
         function createCardHTML(item) {
@@ -1955,6 +2125,10 @@ function startFirebaseSync(){
             document.getElementById('adm-announcementType').value = s.announcementType || 'both';
             document.getElementById('adm-announcementTitle').value = s.announcementTitle || '';
             document.getElementById('adm-announcementMessage').value = s.announcementMessage || '';
+            const offerBox = document.getElementById('professional-offer-settings');
+            if (offerBox) offerBox.classList.toggle('hidden', !document.getElementById('item-input-isOffer')?.checked);
+            document.getElementById('adm-announcementImage').value = s.announcementImage || '';
+            updateAnnouncementImagePreview();
 
             document.getElementById('adm-statusMode').value = s.statusMode || 'auto';
             document.getElementById('adm-workingHoursText').value = s.workingHoursText || 'من 7 صباحاً إلى 10 مساءً';
@@ -1985,13 +2159,26 @@ function startFirebaseSync(){
             showToast('تم حفظ كافة الإعدادات بنجاح!');
         }
 
+        function updateAnnouncementImagePreview(){
+            const input=document.getElementById('adm-announcementImage');
+            const wrap=document.getElementById('adm-announcementImagePreviewWrap');
+            const img=document.getElementById('adm-announcementImagePreview');
+            if(!input||!wrap||!img)return;
+            const src=input.value.trim();
+            img.src=src;
+            wrap.classList.toggle('hidden',!src);
+        }
+
+        document.addEventListener('input',e=>{if(e.target.id==='adm-announcementImage')updateAnnouncementImagePreview();});
+
         function saveAnnouncementSettings() {
             dynamicSettings = {
                 ...dynamicSettings,
                 announcementActive: document.getElementById('adm-announcementActive').checked,
                 announcementType: document.getElementById('adm-announcementType').value,
                 announcementTitle: document.getElementById('adm-announcementTitle').value.trim(),
-                announcementMessage: document.getElementById('adm-announcementMessage').value.trim()
+                announcementMessage: document.getElementById('adm-announcementMessage').value.trim(),
+                announcementImage: document.getElementById('adm-announcementImage').value.trim()
             };
 
             sessionStorage.removeItem('announcementSeen');
@@ -2118,6 +2305,11 @@ function startFirebaseSync(){
             document.getElementById('item-input-icon').value = 'fa-pizza-slice';
             document.getElementById('item-input-isAvailable').checked = true;
             document.getElementById('item-input-isOffer').checked = false;
+            document.getElementById('item-input-offerOldPrice').value = '';
+            document.getElementById('item-input-offerNewPrice').value = '';
+            document.getElementById('item-input-offerDiscount').value = '';
+            document.getElementById('item-input-offerExpiry').value = '';
+            document.getElementById('professional-offer-settings').classList.add('hidden');
             document.getElementById('item-input-hasSizes').checked = false;
             document.getElementById('item-input-price').value = '';
             document.getElementById('item-input-price-small').value = '300';
@@ -2142,6 +2334,11 @@ function startFirebaseSync(){
             document.getElementById('item-input-icon').value = item.icon || 'fa-utensils';
             document.getElementById('item-input-isAvailable').checked = (item.isAvailable !== false);
             document.getElementById('item-input-isOffer').checked = !!item.isOffer;
+            document.getElementById('item-input-offerOldPrice').value = item.offerOldPrice || '';
+            document.getElementById('item-input-offerNewPrice').value = item.offerNewPrice || '';
+            document.getElementById('item-input-offerDiscount').value = item.offerDiscount || '';
+            document.getElementById('item-input-offerExpiry').value = item.offerExpiry || '';
+            document.getElementById('professional-offer-settings').classList.toggle('hidden', !item.isOffer);
             
             const hasSizes = !!item.hasSizes;
             document.getElementById('item-input-hasSizes').checked = hasSizes;
@@ -2159,6 +2356,12 @@ function startFirebaseSync(){
 
         function hideMealForm() {
             document.getElementById('adm-meal-form-box').classList.add('hidden');
+        }
+
+        function toggleProfessionalOfferFields() {
+            const box = document.getElementById('professional-offer-settings');
+            const check = document.getElementById('item-input-isOffer');
+            if (box && check) box.classList.toggle('hidden', !check.checked);
         }
 
         function toggleSizesInputFields() {
@@ -2199,7 +2402,11 @@ function startFirebaseSync(){
                 icon,
                 isAvailable,
                 isOffer,
-                hasSizes
+                hasSizes,
+                offerOldPrice: isOffer ? (parseFloat(document.getElementById('item-input-offerOldPrice').value) || 0) : 0,
+                offerNewPrice: isOffer ? (parseFloat(document.getElementById('item-input-offerNewPrice').value) || 0) : 0,
+                offerDiscount: isOffer ? (parseFloat(document.getElementById('item-input-offerDiscount').value) || 0) : 0,
+                offerExpiry: isOffer ? (document.getElementById('item-input-offerExpiry').value || '') : ''
             };
 
             if (hasSizes) {
@@ -2237,6 +2444,26 @@ function startFirebaseSync(){
             renderAdminMenuList();
             showToast('تم حذف الوجبة بنجاح!');
         }
+
+
+        // ===== إضافات التطوير =====
+        const CART_STORAGE_KEY = 'alassi_cart_v2';
+        const CART_OPTIONS_KEY = 'alassi_order_options_v1';
+        function persistCart(){ try{localStorage.setItem(CART_STORAGE_KEY,JSON.stringify(cart));}catch(e){} }
+        function restoreCart(){ try{const saved=localStorage.getItem(CART_STORAGE_KEY);if(saved)cart=JSON.parse(saved)||{};const o=JSON.parse(localStorage.getItem(CART_OPTIONS_KEY)||'{}');if(o.payment)document.getElementById('paymentMethod').value=o.payment;if(o.delivery)document.getElementById('deliveryType').value=o.delivery;if(o.notes)document.getElementById('orderNotes').value=o.notes;}catch(e){cart={};} }
+        function persistOrderOptions(){try{localStorage.setItem(CART_OPTIONS_KEY,JSON.stringify({payment:document.getElementById('paymentMethod')?.value||'cash',delivery:document.getElementById('deliveryType')?.value||'delivery',notes:document.getElementById('orderNotes')?.value||''}));}catch(e){}}
+        function scrollToSection(id){const el=document.getElementById(id);if(!el)return;currentCategory='all';document.querySelectorAll('#categoryTabs .cat-btn').forEach(b=>{b.classList.remove('active','bg-gold','text-brandDark','font-black','shadow-md');b.classList.add('bg-brandCard','text-gray-300','font-bold');});const all=document.querySelector('#categoryTabs .cat-btn');if(all){all.classList.remove('bg-brandCard','text-gray-300');all.classList.add('active','bg-gold','text-brandDark','font-black','shadow-md');}document.getElementById('sec-offers')?.classList.add('hidden');['sec-pizza','sec-meat','sec-fatayer'].forEach(x=>document.getElementById(x)?.classList.remove('hidden'));document.getElementById('searchInput').value='';document.getElementById('clearSearch').classList.add('hidden');setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),20);}
+        function updateSectionCounts(){const c={pizza:0,meat:0,fatayer:0};menuData.forEach(i=>{if(c[i.category]!==undefined)c[i.category]++;});Object.keys(c).forEach(k=>{const e=document.getElementById(k+'-count');if(e)e.textContent=c[k]+' صنف';});}
+        function enhanceOfferEmptyState(){const c=document.getElementById('offers-container');if(c&&!c.children.length)c.innerHTML='<div class="empty-offers"><i class="fa-solid fa-tags text-3xl mb-2"></i><p class="font-bold">لا توجد عروض مميزة حالياً</p><p class="text-[10px] mt-1">تابعونا لمعرفة العروض الجديدة 🔥</p></div>';}
+        const _updateQtyOriginal=updateQty; updateQty=function(k,ch,id){_updateQtyOriginal(k,ch,id);persistCart();const bag=document.querySelector('#cartBar .fa-bag-shopping');if(bag){bag.classList.remove('cart-pulse');void bag.offsetWidth;bag.classList.add('cart-pulse');}};
+        const _renderMenuOriginal=renderMenu; renderMenu=function(){_renderMenuOriginal();updateSectionCounts();enhanceOfferEmptyState();};
+        document.addEventListener('change',e=>{if(['paymentMethod','deliveryType'].includes(e.target.id))persistOrderOptions();});
+        document.addEventListener('input',e=>{if(e.target.id==='orderNotes')persistOrderOptions();});
+        function clearCart(){if(!Object.keys(cart).length){showToast('السلة فارغة حالياً','error');return;}if(!confirm('هل تريد إفراغ السلة بالكامل؟'))return;cart={};persistCart();updateCartSummary();renderCartModalList();renderMenu();showToast('تم إفراغ السلة');}
+        copyShamCashCode=async function(){const code=document.getElementById('shamcash-code')?.innerText.trim()||'';try{await navigator.clipboard.writeText(code);showToast('تم نسخ رمز شام كاش بنجاح!');}catch(e){const ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('تم نسخ رمز شام كاش بنجاح!');}catch(_){showToast('تعذر النسخ تلقائياً، اضغط مطولاً على الرمز','error');}ta.remove();}};
+        const _sendOrderOriginal=sendOrderWhatsApp; sendOrderWhatsApp=function(){if(!Object.keys(cart).length){_sendOrderOriginal();return;}const delivery=document.getElementById('deliveryType')?.value;const notes=document.getElementById('orderNotes')?.value.trim()||'';if(delivery==='delivery'&&!customerMapLocation&&!notes){showToast('للتوصيل: حدّد موقعك أو اكتب العنوان بالتفصيل','error');if(document.getElementById('cartModal').classList.contains('hidden'))toggleCartModal();document.getElementById('orderNotes')?.focus();return;}persistOrderOptions();_sendOrderOriginal();};
+        window.addEventListener('scroll',()=>document.getElementById('backTopBtn')?.classList.toggle('show',window.scrollY>500),{passive:true});
+        document.addEventListener('DOMContentLoaded',()=>{restoreCart();setTimeout(()=>{updateCartSummary();renderMenu();updateOfferCountdowns();},100);});
     </script>
 </body>
 </html>
