@@ -643,26 +643,44 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="text-xs text-gold font-bold block mb-1.5">طريقة الدفع المفضلة:</label>
+                <div class="bg-black/70 p-3 rounded-2xl border border-gold/30 space-y-2">
+                    <label class="text-xs text-gold font-bold block mb-1.5">طريقة الدفع:</label>
                     <select id="paymentMethod" class="w-full bg-black/70 border border-gold/30 rounded-xl p-2.5 text-xs text-amber-100 focus:outline-none focus:border-gold">
+                        <option value="" disabled selected>اختر طريقة الدفع</option>
                         <option value="cash">💵 نقداً عند الاستلام</option>
                         <option value="shamcash">📱 شام كاش</option>
                     </select>
+
+                    <div id="cartShamCashBox" class="hidden mt-2 p-2.5 rounded-xl border border-gold/30 bg-black/80">
+                        <div class="flex items-center gap-2">
+                            <div class="bg-white p-1 rounded-lg shrink-0">
+                                <img id="cart-shamcash-qr-img" src="IMG-20260729-WA0025.jpg" alt="شام كاش" class="w-16 h-16 object-contain rounded-md">
+                            </div>
+                            <div class="min-w-0 flex-1 text-right">
+                                <p class="text-amber-100 text-[10px] font-bold mb-1">رمز حساب شام كاش:</p>
+                                <p id="cart-shamcash-code" class="text-[10px] text-gold font-mono break-all bg-black/80 p-1.5 rounded-lg border border-gold/20" dir="ltr">99d44072c6a3c3b1f926e0571e9c416c</p>
+                                <button type="button" onclick="copyCartShamCashCode()" class="mt-1.5 bg-gold hover:bg-goldHover text-brandDark font-black text-[10px] px-2.5 py-1.5 rounded-lg">
+                                    <i class="fa-solid fa-copy"></i> نسخ الرمز
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
 
                 <div class="bg-black/70 p-3 rounded-2xl border border-gold/30 space-y-2">
-                    <label class="text-xs text-gold font-bold block">خيار الاستلام:</label>
+                    <label class="text-xs text-gold font-bold block">طريقة الاستلام:</label>
                     <select id="deliveryType" class="w-full bg-black/70 border border-gold/30 rounded-xl p-2.5 text-xs text-amber-100">
+                        <option value="" disabled selected>اختر طريقة الاستلام</option>
                         <option value="delivery">🛵 توصيل إلى موقعي</option>
                         <option value="pickup">🏪 استلام من المطعم</option>
                     </select>
-                    <button onclick="getCustomerLocation()" class="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 rounded-xl text-xs">
-                        <i class="fa-solid fa-location-crosshairs"></i> تحديد موقعي من الخريطة
-                    </button>
-                    <input id="customerLocation" type="text" readonly placeholder="لم يتم تحديد الموقع بعد"
-                    class="w-full mt-2 bg-black border border-gray-700 rounded-xl p-2 text-xs text-gray-300">
+                    <div id="cartLocationBox">
+                        <button type="button" onclick="getCustomerLocation()" class="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 rounded-xl text-xs">
+                            <i class="fa-solid fa-location-crosshairs"></i> تحديد موقعي بضغطة واحدة
+                        </button>
+                        <input id="customerLocation" type="text" readonly placeholder="لم يتم تحديد الموقع بعد"
+                        class="w-full mt-2 bg-black border border-gray-700 rounded-xl p-2 text-xs text-gray-300">
+                    </div>
                 </div>
 
                 <div>
@@ -1926,23 +1944,50 @@ function startFirebaseSync(){
                 showToast("المتصفح لا يدعم تحديد الموقع", "error");
                 return;
             }
+            const button = document.querySelector('#cartLocationBox button');
+            if (button) { button.disabled = true; button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> تحديد سريع...'; }
+            const setLocation = (position) => {
+                const lat = position.coords.latitude, lng = position.coords.longitude;
+                customerMapLocation = `https://maps.google.com/?q=${lat},${lng}`;
+                const input = document.getElementById("customerLocation");
+                if (input) input.value = `تم تحديد الموقع ✓ (${lat.toFixed(6)}, ${lng.toFixed(6)})`;
+                if (button) { button.disabled = false; button.innerHTML = '<i class="fa-solid fa-location-dot"></i> تم تحديد موقعي ✓'; }
+                showToast("تم تحديد موقعك بنجاح");
+            };
+            const locationError = (error) => {
+                if (button) { button.disabled = false; button.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> تحديد موقعي بضغطة واحدة'; }
+                showToast(error && error.code === 1 ? "يرجى السماح بالوصول إلى الموقع" : "تعذر تحديد موقعك، حاول مرة أخرى", "error");
+            };
+            navigator.geolocation.getCurrentPosition(setLocation, function() {
+                navigator.geolocation.getCurrentPosition(setLocation, locationError, {enableHighAccuracy:false, timeout:5000, maximumAge:60000});
+            }, {enableHighAccuracy:false, timeout:1500, maximumAge:300000});
+        }
 
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    customerMapLocation = `https://maps.google.com/?q=${lat},${lng}`;
+        function updateCartOrderChoices() {
+            const payment = document.getElementById('paymentMethod')?.value || 'cash';
+            const delivery = document.getElementById('deliveryType')?.value || 'delivery';
+            const payBox = document.getElementById('cartShamCashBox');
+            const locBox = document.getElementById('cartLocationBox');
+            if (payBox) payBox.classList.toggle('hidden', payment !== 'shamcash');
+            if (locBox) locBox.classList.toggle('hidden', delivery !== 'delivery');
+            const code = document.getElementById('shamcash-code')?.innerText?.trim();
+            const cartCode = document.getElementById('cart-shamcash-code');
+            if (cartCode && code) cartCode.textContent = code;
+            const qr = document.getElementById('shamcash-qr-img')?.src;
+            const cartQr = document.getElementById('cart-shamcash-qr-img');
+            if (cartQr && qr) cartQr.src = qr;
+        }
 
-                    const input = document.getElementById("customerLocation");
-                    if (input) input.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-
-                    showToast("تم تحديد موقعك بنجاح");
-                },
-                function() {
-                    showToast("يرجى السماح بالوصول إلى الموقع", "error");
-                },
-                {enableHighAccuracy:true}
-            );
+        function copyCartShamCashCode() {
+            const code = document.getElementById('cart-shamcash-code')?.innerText.trim() || '';
+            if (!code) return;
+            if (navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(code).then(() => showToast('تم نسخ رمز شام كاش بنجاح!')).catch(() => showToast('تعذر النسخ تلقائياً', 'error'));
+            } else {
+                const ta = document.createElement('textarea'); ta.value = code; document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); showToast('تم نسخ رمز شام كاش بنجاح!'); } catch(e) { showToast('تعذر النسخ تلقائياً', 'error'); }
+                ta.remove();
+            }
         }
 
         function sendOrderWhatsApp() {
@@ -2451,19 +2496,19 @@ function startFirebaseSync(){
         const CART_OPTIONS_KEY = 'alassi_order_options_v1';
         function persistCart(){ try{localStorage.setItem(CART_STORAGE_KEY,JSON.stringify(cart));}catch(e){} }
         function restoreCart(){ try{const saved=localStorage.getItem(CART_STORAGE_KEY);if(saved)cart=JSON.parse(saved)||{};const o=JSON.parse(localStorage.getItem(CART_OPTIONS_KEY)||'{}');if(o.payment)document.getElementById('paymentMethod').value=o.payment;if(o.delivery)document.getElementById('deliveryType').value=o.delivery;if(o.notes)document.getElementById('orderNotes').value=o.notes;}catch(e){cart={};} }
-        function persistOrderOptions(){try{localStorage.setItem(CART_OPTIONS_KEY,JSON.stringify({payment:document.getElementById('paymentMethod')?.value||'cash',delivery:document.getElementById('deliveryType')?.value||'delivery',notes:document.getElementById('orderNotes')?.value||''}));}catch(e){}}
+        function persistOrderOptions(){try{localStorage.setItem(CART_OPTIONS_KEY,JSON.stringify({payment:document.getElementById('paymentMethod')?.value||'',delivery:document.getElementById('deliveryType')?.value||'',notes:document.getElementById('orderNotes')?.value||''}));}catch(e){}}
         function scrollToSection(id){const el=document.getElementById(id);if(!el)return;currentCategory='all';document.querySelectorAll('#categoryTabs .cat-btn').forEach(b=>{b.classList.remove('active','bg-gold','text-brandDark','font-black','shadow-md');b.classList.add('bg-brandCard','text-gray-300','font-bold');});const all=document.querySelector('#categoryTabs .cat-btn');if(all){all.classList.remove('bg-brandCard','text-gray-300');all.classList.add('active','bg-gold','text-brandDark','font-black','shadow-md');}document.getElementById('sec-offers')?.classList.add('hidden');['sec-pizza','sec-meat','sec-fatayer'].forEach(x=>document.getElementById(x)?.classList.remove('hidden'));document.getElementById('searchInput').value='';document.getElementById('clearSearch').classList.add('hidden');setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),20);}
         function updateSectionCounts(){const c={pizza:0,meat:0,fatayer:0};menuData.forEach(i=>{if(c[i.category]!==undefined)c[i.category]++;});Object.keys(c).forEach(k=>{const e=document.getElementById(k+'-count');if(e)e.textContent=c[k]+' صنف';});}
         function enhanceOfferEmptyState(){const c=document.getElementById('offers-container');if(c&&!c.children.length)c.innerHTML='<div class="empty-offers"><i class="fa-solid fa-tags text-3xl mb-2"></i><p class="font-bold">لا توجد عروض مميزة حالياً</p><p class="text-[10px] mt-1">تابعونا لمعرفة العروض الجديدة 🔥</p></div>';}
         const _updateQtyOriginal=updateQty; updateQty=function(k,ch,id){_updateQtyOriginal(k,ch,id);persistCart();const bag=document.querySelector('#cartBar .fa-bag-shopping');if(bag){bag.classList.remove('cart-pulse');void bag.offsetWidth;bag.classList.add('cart-pulse');}};
         const _renderMenuOriginal=renderMenu; renderMenu=function(){_renderMenuOriginal();updateSectionCounts();enhanceOfferEmptyState();};
-        document.addEventListener('change',e=>{if(['paymentMethod','deliveryType'].includes(e.target.id))persistOrderOptions();});
+        document.addEventListener('change',e=>{if(['paymentMethod','deliveryType'].includes(e.target.id)){persistOrderOptions();updateCartOrderChoices();}});
         document.addEventListener('input',e=>{if(e.target.id==='orderNotes')persistOrderOptions();});
         function clearCart(){if(!Object.keys(cart).length){showToast('السلة فارغة حالياً','error');return;}if(!confirm('هل تريد إفراغ السلة بالكامل؟'))return;cart={};persistCart();updateCartSummary();renderCartModalList();renderMenu();showToast('تم إفراغ السلة');}
         copyShamCashCode=async function(){const code=document.getElementById('shamcash-code')?.innerText.trim()||'';try{await navigator.clipboard.writeText(code);showToast('تم نسخ رمز شام كاش بنجاح!');}catch(e){const ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('تم نسخ رمز شام كاش بنجاح!');}catch(_){showToast('تعذر النسخ تلقائياً، اضغط مطولاً على الرمز','error');}ta.remove();}};
         const _sendOrderOriginal=sendOrderWhatsApp; sendOrderWhatsApp=function(){if(!Object.keys(cart).length){_sendOrderOriginal();return;}const delivery=document.getElementById('deliveryType')?.value;const notes=document.getElementById('orderNotes')?.value.trim()||'';if(delivery==='delivery'&&!customerMapLocation&&!notes){showToast('للتوصيل: حدّد موقعك أو اكتب العنوان بالتفصيل','error');if(document.getElementById('cartModal').classList.contains('hidden'))toggleCartModal();document.getElementById('orderNotes')?.focus();return;}persistOrderOptions();_sendOrderOriginal();};
         window.addEventListener('scroll',()=>document.getElementById('backTopBtn')?.classList.toggle('show',window.scrollY>500),{passive:true});
-        document.addEventListener('DOMContentLoaded',()=>{restoreCart();setTimeout(()=>{updateCartSummary();renderMenu();updateOfferCountdowns();},100);});
+        document.addEventListener('DOMContentLoaded',()=>{restoreCart();updateCartOrderChoices();setTimeout(()=>{updateCartSummary();renderMenu();updateOfferCountdowns();updateCartOrderChoices();},100);});
     </script>
 </body>
 </html>
