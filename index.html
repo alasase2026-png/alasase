@@ -87,15 +87,6 @@
             padding: 2px 8px;
             border-radius: 8px;
         }
-        .offer-badge {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #000;
-            font-weight: 900;
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         #cartModal .flex-grow { min-height: 0; }
         #cartItemsList { display: block !important; visibility: visible !important; }
@@ -117,14 +108,11 @@
         .professional-offer-card{position:relative;overflow:hidden;border:1px solid rgba(230,197,103,.38);border-radius:24px;background:linear-gradient(145deg,#241817,#120e0d 72%);box-shadow:0 18px 45px rgba(0,0,0,.38);transition:.25s ease}
         .professional-offer-card:hover{transform:translateY(-3px);border-color:rgba(230,197,103,.75);box-shadow:0 22px 55px rgba(0,0,0,.5)}
         .professional-offer-image{width:100%;height:230px;object-fit:cover;display:block}
-        .professional-offer-noimage{height:230px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,#4a1919,#17100f 65%);color:#e6c567}
         .offer-discount-ribbon{position:absolute;top:14px;right:14px;background:linear-gradient(135deg,#ef4444,#991b1b);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:900;box-shadow:0 8px 20px rgba(0,0,0,.35)}
         .offer-price-old{text-decoration:line-through;color:#9ca3af;font-size:13px}
         .offer-price-new{color:#e6c567;font-size:25px;font-weight:900;line-height:1}
         .offer-order-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;border-radius:15px;background:linear-gradient(135deg,#e6c567,#b88719);color:#0d0a09;font-size:13px;font-weight:900;box-shadow:0 10px 24px rgba(230,197,103,.18);transition:.2s ease}
         .offer-order-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
-        .offer-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
-        @media(max-width:640px){.offer-countdown{font-size:9px;padding:5px 8px}.professional-offer-image,.professional-offer-noimage{height:205px}.professional-offer-card{border-radius:20px}.offer-price-new{font-size:23px}}
         .back-top { position:fixed; right:15px; bottom:92px; z-index:38; width:42px; height:42px; border-radius:14px; display:none; align-items:center; justify-content:center; background:#181311; color:#e6c567; border:1px solid rgba(230,197,103,.4); box-shadow:0 10px 28px rgba(0,0,0,.45); }
         .back-top.show { display:flex; }
         @media(max-width:640px){
@@ -150,7 +138,6 @@
             #cartBar .flex.items-center.gap-3{gap:8px!important}
             #cartBar .text-sm{font-size:11px!important}
             #cartBar .text-xs{font-size:9px!important}
-            #announcement-image-card{margin-top:10px}
             .quick-actions{grid-template-columns:1fr 1fr 1fr;padding:0 2px;}
             .quick-action{font-size:9px;padding:7px 4px;}
             .section-count{font-size:8px;}
@@ -200,7 +187,7 @@
                 <p id="header-subtitle" class="text-xs text-amber-200/80 font-bold tracking-widest mt-1 uppercase">ملحمة ومعجنات طازجة</p>
                 
                 <div class="flex flex-col items-center gap-1 my-2">
-                    <div id="store-status-badge" class="store-status">جاري التحقق من حالة المطعم...</div>
+                    <div id="store-status-badge" class="store-status open">المطعم مفتوح الآن</div>
                     <span id="store-hours-display" class="text-[11px] text-gray-400 font-bold block">مواعيد العمل: من 7 صباحاً إلى 10 مساءً</span>
                 </div>
 
@@ -279,10 +266,10 @@
 
             <!-- Search Bar -->
             <div class="relative max-w-md mx-auto mt-4">
-                <input type="text" id="searchInput" placeholder="ابحث عن وجبتك المفضلة..." 
+                <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="ابحث عن وجبتك المفضلة..." 
                     class="w-full bg-black/60 border border-gold/30 rounded-2xl py-3 px-11 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-gold transition shadow-inner">
                 <i class="fa-solid fa-magnifying-glass absolute right-4 top-4 text-gold/70 text-sm"></i>
-                <button id="clearSearch" class="hidden absolute left-4 top-3.5 text-gray-400 hover:text-white text-sm">
+                <button id="clearSearch" onclick="resetSearch()" class="hidden absolute left-4 top-3.5 text-gray-400 hover:text-white text-sm">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -449,7 +436,7 @@
 
                 <div class="bg-black/70 p-3 rounded-2xl border border-gold/30 space-y-2">
                     <label class="text-xs text-gold font-bold block mb-1.5">طريقة الدفع:</label>
-                    <select id="paymentMethod" class="w-full bg-black/70 border border-gold/30 rounded-xl p-2.5 text-xs text-amber-100 focus:outline-none focus:border-gold">
+                    <select id="paymentMethod" onchange="toggleShamcashBox()" class="w-full bg-black/70 border border-gold/30 rounded-xl p-2.5 text-xs text-amber-100 focus:outline-none focus:border-gold">
                         <option value="" disabled selected>اختر طريقة الدفع</option>
                         <option value="cash">💵 نقداً عند الاستلام</option>
                         <option value="shamcash">📱 شام كاش</option>
@@ -551,6 +538,296 @@
             <a id="footer-phone" href="tel:0942568502" class="text-gold font-mono font-bold hover:underline inline-block" dir="ltr">&lrm;0942 568 502</a>
         </p>
     </footer>
+
+<!-- Application Logic & Data -->
+<script>
+    // 1. البيانات والإعدادات الافتراضية
+    let dynamicSettings = {
+        logoUrl: 'IMG-20260617-WA0083_٠٥٢١٠٢.jpg',
+        shamcashQr: 'IMG-20260729-WA0025.jpg',
+        shamcashCode: '99d44072c6a3c3b1f926e0571e9c416c',
+        whatsappPhone: '963942568502'
+    };
+
+    let menuData = {
+        offers: [
+            { id: 'off_1', name: "عرض الصفيحة العائلية", price: 100000, oldPrice: 120000, desc: "كيلو صفيحة شامية جاهز للتقديم مع التوصيل مجاناً", image: "https://placehold.co/600x400/181311/e6c567?text=عرض+الصفيحة", available: true }
+        ],
+        pizza: [
+            { id: 'p_1', name: "بيتزا مارغريتا", price: 25000, desc: "صوص طماطم طازج مع جبنة موزاريلا فاخرة", image: "https://placehold.co/400x300/181311/e6c567?text=بيتزا+مارغريتا", available: true },
+            { id: 'p_2', name: "بيتزا خضار", price: 28000, desc: "فلفل، فطر، زيتون، طماطم، موزاريلا", image: "https://placehold.co/400x300/181311/e6c567?text=بيتزا+خضار", available: true }
+        ],
+        meat: [
+            { id: 'm_1', name: "كباب غنم (كيلو)", price: 90000, desc: "لحم غنم طازج مشوي على الفحم", image: "https://placehold.co/400x300/181311/e6c567?text=كباب+غنم", available: true },
+            { id: 'm_2', name: "شقف لحمة (كيلو)", price: 95000, desc: "قطع لحم غنم متبلة ومشويه", image: "https://placehold.co/400x300/181311/e6c567?text=شقف+لحم", available: true }
+        ],
+        fatayer: [
+            { id: 'f_1', name: "فطيرة جبنة قشقوان", price: 10000, desc: "جبنة قشقوان المحمرة بالفرن", image: "https://placehold.co/300x200/181311/e6c567?text=فطيرة+قشقوان", available: true },
+            { id: 'f_2', name: "صفيحة شامية", price: 12000, desc: "لحم بعجين طازج بالفرن", image: "https://placehold.co/300x200/181311/e6c567?text=صفيحة", available: true }
+        ]
+    };
+
+    let cart = [];
+    let customerCoords = "";
+
+    // 2. دالة رسم قائمة الطعام بالكامل
+    function renderMenu(filterText = "") {
+        // العروض
+        const offersContainer = document.getElementById('offers-container');
+        if (offersContainer) {
+            const offersList = (menuData.offers || []).filter(item => matchFilter(item, filterText));
+            if (offersList.length > 0) {
+                document.getElementById('sec-offers').classList.remove('hidden');
+                offersContainer.innerHTML = offersList.map(item => `
+                    <div class="professional-offer-card p-4">
+                        <span class="offer-discount-ribbon">عرض خاص 🔥</span>
+                        <img src="${item.image}" alt="${item.name}" class="professional-offer-image rounded-xl mb-3" onerror="this.src='https://placehold.co/600x400/181311/e6c567?text=عرض'">
+                        <h3 class="text-xl font-bold text-gold">${item.name}</h3>
+                        <p class="text-xs text-gray-300 my-2">${item.desc || ''}</p>
+                        <div class="flex items-center justify-between my-3">
+                            <div>
+                                <span class="offer-price-old block">${item.oldPrice ? item.oldPrice.toLocaleString() + ' ل.س' : ''}</span>
+                                <span class="offer-price-new">${item.price.toLocaleString()} ل.س</span>
+                            </div>
+                        </div>
+                        <button onclick="addToCart('${item.id}', '${item.name}', ${item.price})" class="offer-order-btn">
+                            <i class="fa-solid fa-cart-plus"></i> إضافة للعرض
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('sec-offers').classList.add('hidden');
+            }
+        }
+
+        // باقي الأقسام
+        ['pizza', 'meat', 'fatayer'].forEach(cat => {
+            const container = document.getElementById(`${cat}-container`);
+            const countElem = document.getElementById(`${cat}-count`);
+            if (!container) return;
+
+            const items = (menuData[cat] || []).filter(item => matchFilter(item, filterText));
+            if (countElem) countElem.innerText = `${items.length} صنف`;
+
+            if (items.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-xs text-center col-span-full py-4">لا توجد أصناف متاحة</p>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="menu-card bg-brandCard border border-gold/20 rounded-2xl p-3 flex flex-col justify-between shadow-lg">
+                    <img src="${item.image}" alt="${item.name}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://placehold.co/300x200/181311/e6c567?text=صورة'">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-gold text-sm">${item.name}</h3>
+                            ${!item.available ? '<span class="out-of-stock-badge">غير متوفر</span>' : ''}
+                        </div>
+                        <p class="text-gray-400 text-xs my-1">${item.desc || ''}</p>
+                    </div>
+                    <div class="flex items-center justify-between mt-3 pt-2 border-t border-gold/10">
+                        <span class="text-white font-black text-xs">${item.price.toLocaleString()} ل.س</span>
+                        <button onclick="addToCart('${item.id}', '${item.name}', ${item.price})" ${!item.available ? 'disabled class="bg-gray-700 text-gray-400 text-xs px-3 py-1.5 rounded-lg cursor-not-allowed"' : 'class="bg-gold hover:bg-goldHover text-brandDark font-bold text-xs px-3 py-1.5 rounded-lg transition active:scale-95"'}>
+                            إضافة +
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        });
+
+        checkNoResults();
+    }
+
+    function matchFilter(item, filterText) {
+        if (!filterText) return true;
+        return item.name.toLowerCase().includes(filterText.toLowerCase()) || 
+               (item.desc && item.desc.toLowerCase().includes(filterText.toLowerCase()));
+    }
+
+    function checkNoResults() {
+        const hasVisible = Array.from(document.querySelectorAll('.menu-section')).some(s => !s.classList.contains('hidden'));
+        const noRes = document.getElementById('noResults');
+        if (noRes) noRes.classList.toggle('hidden', hasVisible);
+    }
+
+    // 3. إدارة السلة والطلبات
+    function addToCart(id, name, price) {
+        const exist = cart.find(i => i.id === id);
+        if (exist) {
+            exist.qty += 1;
+        } else {
+            cart.push({ id, name, price, qty: 1 });
+        }
+        updateCartUI();
+    }
+
+    function updateCartQty(id, delta) {
+        const item = cart.find(i => i.id === id);
+        if (item) {
+            item.qty += delta;
+            if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+        }
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+        const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+        document.getElementById('cartBadge').innerText = totalItems;
+        document.getElementById('cartCountText').innerText = `${totalItems} صنف`;
+        document.getElementById('modalTotalItemsCount').innerText = `${totalItems} قطعة`;
+        document.getElementById('modalTotalNewCurrency').innerText = `${totalPrice.toLocaleString()} ل.س`;
+        document.getElementById('modalTotalOldCurrency').innerText = `${(totalPrice * 50).toLocaleString()} ليرة قديمة`;
+
+        const cartList = document.getElementById('cartItemsList');
+        const emptyView = document.getElementById('emptyCartView');
+
+        if (cart.length === 0) {
+            emptyView.classList.remove('hidden');
+            cartList.innerHTML = '';
+        } else {
+            emptyView.classList.add('hidden');
+            cartList.innerHTML = cart.map(item => `
+                <div class="flex items-center justify-between py-2 border-b border-gray-800">
+                    <div>
+                        <h4 class="font-bold text-gold text-xs">${item.name}</h4>
+                        <span class="text-[10px] text-gray-400">${item.price.toLocaleString()} ل.س</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="updateCartQty('${item.id}', -1)" class="w-6 h-6 bg-red-900/60 text-white rounded-md text-xs font-bold flex items-center justify-center">-</button>
+                        <span class="text-xs font-bold text-white px-1">${item.qty}</span>
+                        <button onclick="updateCartQty('${item.id}', 1)" class="w-6 h-6 bg-emerald-800/60 text-white rounded-md text-xs font-bold flex items-center justify-center">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    function toggleCartModal() {
+        const modal = document.getElementById('cartModal');
+        modal.classList.toggle('hidden');
+        modal.classList.toggle('flex');
+    }
+
+    function toggleShamcashBox() {
+        const payMethod = document.getElementById('paymentMethod').value;
+        const box = document.getElementById('cartShamCashBox');
+        box.classList.toggle('hidden', payMethod !== 'shamcash');
+    }
+
+    function copyShamCashCode() {
+        const code = document.getElementById('shamcash-code').innerText.trim();
+        navigator.clipboard.writeText(code);
+        alert('تم نسخ رقم حساب شام كاش');
+    }
+
+    function copyCartShamCashCode() {
+        const code = document.getElementById('cart-shamcash-code').innerText.trim();
+        navigator.clipboard.writeText(code);
+        alert('تم نسخ رقم حساب شام كاش');
+    }
+
+    function getCustomerLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    customerCoords = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    document.getElementById('customerLocation').value = "تم تحديد موقعك بنجاح ✅";
+                },
+                err => {
+                    alert('تعذر تحديد الموقع تلقائياً. يمكنك كتابة العنوان في الملاحظات.');
+                }
+            );
+        }
+    }
+
+    function sendOrderWhatsApp() {
+        if (cart.length === 0) {
+            alert('سلتك فارغة!');
+            return;
+        }
+
+        const pay = document.getElementById('paymentMethod').value;
+        const del = document.getElementById('deliveryType').value;
+        const notes = document.getElementById('orderNotes').value;
+
+        let msg = `*طلب جديد من مطعم العسسي* 🍴\n\n`;
+        cart.forEach(i => {
+            msg += `• ${i.name} (${i.qty}) = ${(i.price * i.qty).toLocaleString()} ل.س\n`;
+        });
+
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+        msg += `\n*المجموع:* ${total.toLocaleString()} ل.س\n`;
+        if (pay) msg += `*طريقة الدفع:* ${pay === 'shamcash' ? 'شام كاش' : 'نقداً'}\n`;
+        if (del) msg += `*طريقة الاستلام:* ${del === 'delivery' ? 'توصيل' : 'استلام من المطعم'}\n`;
+        if (customerCoords) msg += `*الموقع:* ${customerCoords}\n`;
+        if (notes) msg += `*ملاحظات:* ${notes}\n`;
+
+        const targetPhone = dynamicSettings.whatsappPhone || '963942568502';
+        window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // 4. البحث والفلترة
+    function handleSearch(val) {
+        document.getElementById('clearSearch').classList.toggle('hidden', !val);
+        renderMenu(val);
+    }
+
+    function resetSearch() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('clearSearch').classList.add('hidden');
+        renderMenu('');
+    }
+
+    function filterCategory(cat) {
+        document.querySelectorAll('.cat-btn').forEach(b => {
+            b.classList.remove('bg-gold', 'text-brandDark');
+            b.classList.add('bg-brandCard', 'text-gray-300');
+        });
+        event.currentTarget.classList.add('bg-gold', 'text-brandDark');
+
+        if (cat === 'all') {
+            document.querySelectorAll('.menu-section').forEach(s => s.classList.remove('hidden'));
+        } else {
+            document.querySelectorAll('.menu-section').forEach(s => s.classList.add('hidden'));
+            const target = document.getElementById(`sec-${cat}`);
+            if (target) target.classList.remove('hidden');
+        }
+    }
+
+    function scrollToSection(id) {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function triggerImageZoom(src) {
+        if (!src) return;
+        document.getElementById('modalImageSrc').src = src;
+        document.getElementById('imageModal').style.display = 'flex';
+    }
+
+    function closeImageModal() {
+        document.getElementById('imageModal').style.display = 'none';
+    }
+
+    function applySettingsToUI() {
+        if (dynamicSettings.logoUrl) document.getElementById('header-logo-img').src = dynamicSettings.logoUrl;
+        if (dynamicSettings.shamcashQr) {
+            document.getElementById('shamcash-qr-img').src = dynamicSettings.shamcashQr;
+            document.getElementById('cart-shamcash-qr-img').src = dynamicSettings.shamcashQr;
+        }
+        if (dynamicSettings.shamcashCode) {
+            document.getElementById('shamcash-code').innerText = dynamicSettings.shamcashCode;
+            document.getElementById('cart-shamcash-code').innerText = dynamicSettings.shamcashCode;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderMenu();
+        window.addEventListener('scroll', () => {
+            document.getElementById('backTopBtn').classList.toggle('show', window.scrollY > 300);
+        });
+    });
+</script>
 
 <!-- Firebase Sync -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
