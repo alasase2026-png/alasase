@@ -325,56 +325,9 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 }
 .daily-offer i{font-size:12px}
 @keyframes alassiTicker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-#most-ordered-section{
-  margin:18px auto 8px;
-  width:min(100%,900px);
-}
-.most-ordered-title{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  margin-bottom:10px;
-  color:#e6c567;
-  font-size:16px;
-  font-weight:900;
-}
-.most-ordered-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px;
-}
-.most-ordered-card{
-  position:relative;
-  overflow:hidden;
-  border:1px solid rgba(230,197,103,.18);
-  border-radius:18px;
-  background:rgba(23,18,16,.92);
-  padding:12px;
-  box-shadow:0 8px 25px rgba(0,0,0,.18);
-  transition:.2s;
-}
-.most-ordered-card:hover{transform:translateY(-3px);border-color:rgba(230,197,103,.4)}
-.most-ordered-rank{
-  position:absolute;
-  top:8px;
-  right:8px;
-  width:25px;height:25px;border-radius:50%;
-  display:grid;place-items:center;
-  background:rgba(230,197,103,.14);
-  border:1px solid rgba(230,197,103,.3);
-  color:#e6c567;font-size:11px;font-weight:900;
-}
-.most-ordered-card img{
-  width:100%;height:105px;object-fit:cover;border-radius:13px;margin-bottom:8px;
-}
-.most-ordered-name{color:#fff;font-size:13px;font-weight:900}
-.most-ordered-price{color:#e6c567;font-size:11px;font-weight:800;margin-top:4px}
 @media(max-width:640px){
   #daily-offers-bar{margin-top:10px;border-radius:14px}
   .daily-offer{font-size:11px;padding:9px 14px}
-  .most-ordered-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .most-ordered-card img{height:90px}
 }
 @media(prefers-reduced-motion:reduce){#daily-offers-track{animation:none}}
 </style>
@@ -538,16 +491,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
     <div class="daily-offer"><i class="fa-solid fa-motorcycle"></i><span>مستعدون لتوصيل الطلبات في أي مكان في المليحة</span></div>
   </div>
 </div>
-
-<!-- Most ordered -->
-<section id="most-ordered-section" aria-label="الأكثر طلباً">
-  <div class="most-ordered-title">
-    <i class="fa-solid fa-crown"></i>
-    <span>الأكثر طلباً</span>
-  </div>
-  <div id="most-ordered-grid" class="most-ordered-grid"></div>
-</section>
-
 
     <!-- Navigation Tabs -->
     <nav class="sticky top-0 z-30 bg-brandDark/95 backdrop-blur-md border-y border-gold/20 py-3 px-3 shadow-xl">
@@ -2366,47 +2309,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
   }
   document.addEventListener('DOMContentLoaded',()=>{addTools();setTimeout(()=>{restoreCartSafe();wrapExistingFunctions()},500)});
   window.addEventListener('beforeunload',saveCartSafe);
-})();
-</script>
-
-
-<script id="alassi-most-ordered">
-(function(){
-  function esc(v){
-    return String(v ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-  }
-  function renderMostOrdered(){
-    const grid=document.getElementById('most-ordered-grid');
-    if(!grid || typeof window.getAlassiMenuData!=='function') return;
-    const data=window.getAlassiMenuData();
-    if(!Array.isArray(data)) return;
-    const candidates=data.filter(i=>i && i.isAvailable!==false).slice(0,6);
-    if(!candidates.length){document.getElementById('most-ordered-section')?.classList.add('hidden');return;}
-    document.getElementById('most-ordered-section')?.classList.remove('hidden');
-    grid.innerHTML=candidates.slice(0,6).map((item,index)=>{
-      const image=item.image || '';
-      let price='';
-      if(item.hasSizes && item.customSizes){
-        const vals=Object.values(item.customSizes).map(x=>Number(x?.price)||0).filter(x=>x>0);
-        if(vals.length) price='من '+Math.min(...vals).toLocaleString()+' ل.س';
-      } else if(Number(item.price)>0){
-        price=Number(item.price).toLocaleString()+' ل.س';
-      }
-      return `<article class="most-ordered-card">
-        <div class="most-ordered-rank">${index+1}</div>
-        ${image ? `<img src="${esc(image)}" alt="${esc(item.name)}" loading="lazy">` : `<div class="h-[105px] rounded-[13px] mb-2 bg-black/40 grid place-items-center text-gold text-3xl"><i class="fa-solid ${esc(item.icon||'fa-utensils')}"></i></div>`}
-        <div class="most-ordered-name">${esc(item.name)}</div>
-        ${price ? `<div class="most-ordered-price">${price}</div>` : ''}
-      </article>`;
-    }).join('');
-  }
-  const oldRender=window.renderMenu;
-  if(typeof oldRender==='function' && !window.__mostOrderedWrapped){
-    window.renderMenu=function(){const r=oldRender.apply(this,arguments);setTimeout(renderMostOrdered,0);return r;};
-    window.__mostOrderedWrapped=true;
-  }
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(renderMostOrdered,700));
-  window.addEventListener('load',()=>setTimeout(renderMostOrdered,1200));
 })();
 </script>
 
