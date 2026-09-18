@@ -495,19 +495,19 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
     <!-- Navigation Tabs -->
     <nav class="sticky top-0 z-30 bg-brandDark/95 backdrop-blur-md border-y border-gold/20 py-3 px-3 shadow-xl">
         <div class="max-w-4xl mx-auto flex items-center justify-start md:justify-center gap-2 overflow-x-auto no-scrollbar scroll-smooth px-1" id="categoryTabs">
-            <button onclick="filterCategory('all')" class="cat-btn active bg-gold text-brandDark font-black px-5 py-2 rounded-xl text-xs whitespace-nowrap transition shadow-md">
+            <button onclick="filterCategory('all', this)" class="cat-btn active bg-gold text-brandDark font-black px-5 py-2 rounded-xl text-xs whitespace-nowrap transition shadow-md">
                 <i class="fa-solid fa-utensils ml-1"></i> الكل
             </button>
-            <button onclick="filterCategory('offers')" class="cat-btn bg-brandCard hover:bg-black/60 text-amber-400 font-bold border border-amber-500/30 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
+            <button onclick="filterCategory('offers', this)" class="cat-btn bg-brandCard hover:bg-black/60 text-amber-400 font-bold border border-amber-500/30 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
                 <i class="fa-solid fa-tags text-amber-400 ml-1"></i> العروض المميزة 🔥
             </button>
-            <button onclick="filterCategory('pizza')" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
+            <button onclick="filterCategory('pizza', this)" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
                 <i class="fa-solid fa-pizza-slice text-gold ml-1"></i> قسم البيتزا
             </button>
-            <button onclick="filterCategory('meat')" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
+            <button onclick="filterCategory('meat', this)" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
                 <i class="fa-solid fa-fire text-gold ml-1"></i> قسم المشاوي
             </button>
-            <button onclick="filterCategory('fatayer')" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
+            <button onclick="filterCategory('fatayer', this)" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
                 <i class="fa-solid fa-bread-slice text-gold ml-1"></i> قسم الفطائر
             </button>
         </div>
@@ -606,7 +606,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                     <i class="fa-solid fa-receipt text-xl"></i>
                     <h3 class="font-black text-lg text-white">تفاصيل سلة الطلبات</h3>
                 </div>
-                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-white p-1.5">
+                <button type="button" data-close-cart onclick="closeCartModal()" class="text-gray-400 hover:text-white p-1.5">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
@@ -1090,6 +1090,18 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         </p>
     </footer>
 <!-- Main JS Application Logic -->
+
+    <!-- Supabase connection -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://zkijtzwoccmxepxfkbiu.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpraWp0endvY2NteGVweGZrYml1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1OTg4MzIsImV4cCI6MjEwNTE3NDgzMn0.7IgDCNqBQccKD-pSL8SSG3ibMSsqgvDXzh3DGzWarYM';
+        const { createClient } = supabase;
+        const alassiSupabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        window.alassiSupabase = alassiSupabase;
+        window.alassiCloudReady = true;
+    </script>
+
     <script>
         const OLD_CURRENCY_MULTIPLIER = 100;
         let cart = {}; 
@@ -1166,10 +1178,11 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
         window.getAlassiMenuData = () => menuData;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             loadLocalData();
             renderMenu();
             applySettingsToUI();
+            bootCloudData();
 
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase();
@@ -1182,25 +1195,328 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             document.getElementById('clearSearch').addEventListener('click', resetSearch);
         });
 
-        function loadLocalData() {
-            try {
-                const savedMenu = localStorage.getItem('asasi_menu_data');
-                if (savedMenu) menuData = JSON.parse(savedMenu);
-
-                const savedSettings = localStorage.getItem('asasi_settings');
-                if (savedSettings) dynamicSettings = JSON.parse(savedSettings);
-            } catch (e) {
-                console.log("Error loading local data");
-            }
-        }
+        // ===== CLOUD DATA (Supabase) =====
+        let cloudSyncReady = false;
+        let cloudSettingsRow = null;
 
         function saveLocalData() {
+            // احتفاظ بنسخة محلية للسلة/العمل دون اتصال، لكن المصدر الرئيسي هو Supabase.
             try {
                 localStorage.setItem('asasi_menu_data', JSON.stringify(menuData));
                 localStorage.setItem('asasi_settings', JSON.stringify(dynamicSettings));
-            } catch (e) {
-                console.log("Error saving local data");
+            } catch (e) {}
+        }
+
+        function loadLocalData() {
+            // تحميل احتياطي سريع فقط حتى يظهر الموقع فوراً، ثم يتم استبداله ببيانات Supabase.
+            try {
+                const savedMenu = localStorage.getItem('asasi_menu_data');
+                if (savedMenu) {
+                    const parsed = JSON.parse(savedMenu);
+                    if (Array.isArray(parsed) && parsed.length) menuData = parsed;
+                }
+                const savedSettings = localStorage.getItem('asasi_settings');
+                if (savedSettings) dynamicSettings = { ...defaultSettings, ...JSON.parse(savedSettings) };
+            } catch (e) {}
+        }
+
+        function cloudColumn(row, candidates, fallback = null) {
+            if (!row) return fallback;
+            for (const c of candidates) if (Object.prototype.hasOwnProperty.call(row, c)) return row[c];
+            return fallback;
+        }
+
+        function normalizeCategory(value) {
+            const v = String(value ?? '').trim().toLowerCase();
+            if (['pizza','بيتزا','قسم البيتزا','pizzas'].includes(v)) return 'pizza';
+            if (['meat','مشاوي','المشاوي','لحمة','لحم','قسم المشاوي','قسم اللحمة','قسم اللحمة (المشاوي)'].includes(v)) return 'meat';
+            if (['fatayer','فطائر','الفطائر','معجنات','قسم الفطائر','قسم الفطائر والمعجنات'].includes(v)) return 'fatayer';
+            return v === 'pizza' || v === 'meat' ? v : 'fatayer';
+        }
+
+        function normalizeCloudItem(row) {
+            const custom = cloudColumn(row, ['custom_sizes','customSizes','sizes'], null);
+            const normalizedCustom = typeof custom === 'string'
+                ? (() => { try { return JSON.parse(custom); } catch(e) { return null; } })()
+                : custom;
+
+            const item = {
+                ...row,
+                id: String(cloudColumn(row, ['id','item_id'], '')),
+                name: cloudColumn(row, ['name','item_name','title'], ''),
+                category: (() => {
+                    const c = String(cloudColumn(row, ['category','section','type'], 'fatayer')).toLowerCase().trim();
+                    if (['pizza','بيتزا','قسم البيتزا'].includes(c)) return 'pizza';
+                    if (['meat','grill','مشاوي','مشاوي','لحمة','قسم اللحمة المشوية'].includes(c)) return 'meat';
+                    if (['fatayer','pastry','pastries','فطائر','فطيرة','قسم الفطائر'].includes(c)) return 'fatayer';
+                    return c || 'fatayer';
+                })(),
+                desc: cloudColumn(row, ['desc','description','item_desc'], ''),
+                image: cloudColumn(row, ['image','image_url','imageUrl'], ''),
+                icon: cloudColumn(row, ['icon','icon_name'], 'fa-utensils'),
+                price: Number(cloudColumn(row, ['price','unit_price'], 0)) || 0,
+                isAvailable: cloudColumn(row, ['is_available','isAvailable','available'], true) !== false,
+                isOffer: cloudColumn(row, ['is_offer','isOffer','offer'], false) === true,
+                hasSizes: cloudColumn(row, ['has_sizes','hasSizes'], false) === true,
+                customSizes: normalizedCustom || undefined
+            };
+
+            // بعض قواعد البيانات تستخدم custom_sizes كـ JSON وفيه أسعار الأحجام.
+            if (item.customSizes) {
+                for (const key of ['small','medium','large']) {
+                    if (item.customSizes[key]) item.customSizes[key].price = Number(item.customSizes[key].price) || 0;
+                }
             }
+            return item;
+        }
+
+        function cloudItemPayload(item, existingRow = null) {
+            const row = existingRow || {};
+            const payload = {};
+
+            const set = (candidates, value) => {
+                for (const c of candidates) {
+                    if (Object.prototype.hasOwnProperty.call(row, c)) {
+                        payload[c] = value;
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            set(['name','item_name','title'], item.name);
+            set(['category','section','type'], item.category);
+            set(['desc','description','item_desc'], item.desc || '');
+            set(['image','image_url','imageUrl'], item.image || '');
+            set(['icon','icon_name'], item.icon || 'fa-utensils');
+            set(['price','unit_price'], item.price || 0);
+            set(['is_available','isAvailable','available'], item.isAvailable !== false);
+            set(['is_offer','isOffer','offer'], !!item.isOffer);
+            set(['has_sizes','hasSizes'], !!item.hasSizes);
+            set(['custom_sizes','customSizes','sizes'], item.hasSizes ? (item.customSizes || null) : null);
+
+            return payload;
+        }
+
+        function cloudSettingsFromRow(row) {
+            if (!row) return null;
+
+            // يدعم شكل settings: أعمدة مباشرة، أو key/value، أو settings JSON.
+            let source = { ...row };
+            const jsonValue = cloudColumn(row, ['settings','data','config','value'], null);
+            if (jsonValue && typeof jsonValue === 'string') {
+                try {
+                    const parsed = JSON.parse(jsonValue);
+                    if (parsed && typeof parsed === 'object') source = { ...source, ...parsed };
+                } catch(e) {}
+            } else if (jsonValue && typeof jsonValue === 'object') {
+                source = { ...source, ...jsonValue };
+            }
+
+            const aliases = {
+                restaurantName:['restaurantName','restaurant_name','name','title'],
+                restaurantSubtitle:['restaurantSubtitle','restaurant_subtitle','subtitle'],
+                logoUrl:['logoUrl','logo_url','logo'],
+                phone:['phone','phone_number'],
+                whatsapp:['whatsapp','whatsapp_number'],
+                manager1:['manager1','manager_1'],
+                manager2:['manager2','manager_2'],
+                shamcashCode:['shamcashCode','shamcash_code'],
+                shamcashQr:['shamcashQr','shamcash_qr','shamcash_qr_url'],
+                deliveryNote:['deliveryNote','delivery_note'],
+                facebookUrl:['facebookUrl','facebook_url'],
+                instagramUrl:['instagramUrl','instagram_url'],
+                whatsappChannelUrl:['whatsappChannelUrl','whatsapp_channel_url'],
+                mapsUrl:['mapsUrl','maps_url'],
+                announcementActive:['announcementActive','announcement_active'],
+                announcementType:['announcementType','announcement_type'],
+                announcementTitle:['announcementTitle','announcement_title'],
+                announcementMessage:['announcementMessage','announcement_message'],
+                statusMode:['statusMode','status_mode'],
+                workingHoursText:['workingHoursText','working_hours_text'],
+                adminPassword:['adminPassword','admin_password']
+            };
+
+            const out = {};
+            for (const [key, names] of Object.entries(aliases)) {
+                for (const name of names) {
+                    if (Object.prototype.hasOwnProperty.call(source, name) && source[name] !== null && source[name] !== undefined) {
+                        out[key] = source[name];
+                        break;
+                    }
+                }
+            }
+            return Object.keys(out).length ? out : null;
+        }
+
+        function cloudSettingsPayload(settings, row) {
+            const payload = {};
+            const existing = row || {};
+            const aliases = {
+                restaurantName:['restaurantName','restaurant_name','name','title'],
+                restaurantSubtitle:['restaurantSubtitle','restaurant_subtitle','subtitle'],
+                logoUrl:['logoUrl','logo_url','logo'],
+                phone:['phone','phone_number'],
+                whatsapp:['whatsapp','whatsapp_number'],
+                manager1:['manager1','manager_1'],
+                manager2:['manager2','manager_2'],
+                shamcashCode:['shamcashCode','shamcash_code'],
+                shamcashQr:['shamcashQr','shamcash_qr','shamcash_qr_url'],
+                deliveryNote:['deliveryNote','delivery_note'],
+                facebookUrl:['facebookUrl','facebook_url'],
+                instagramUrl:['instagramUrl','instagram_url'],
+                whatsappChannelUrl:['whatsappChannelUrl','whatsapp_channel_url'],
+                mapsUrl:['mapsUrl','maps_url'],
+                announcementActive:['announcementActive','announcement_active'],
+                announcementType:['announcementType','announcement_type'],
+                announcementTitle:['announcementTitle','announcement_title'],
+                announcementMessage:['announcementMessage','announcement_message'],
+                statusMode:['statusMode','status_mode'],
+                workingHoursText:['workingHoursText','working_hours_text'],
+                adminPassword:['adminPassword','admin_password']
+            };
+
+            let wroteDirect = false;
+            for (const [key, names] of Object.entries(aliases)) {
+                for (const name of names) {
+                    if (Object.prototype.hasOwnProperty.call(existing, name)) {
+                        payload[name] = settings[key];
+                        wroteDirect = true;
+                        break;
+                    }
+                }
+            }
+
+            // إذا كان الجدول key/value أو value JSON.
+            if (!wroteDirect) {
+                const valueKey = Object.prototype.hasOwnProperty.call(existing,'value') ? 'value' :
+                                 Object.prototype.hasOwnProperty.call(existing,'data') ? 'data' :
+                                 Object.prototype.hasOwnProperty.call(existing,'settings') ? 'settings' : null;
+                if (valueKey) payload[valueKey] = settings;
+            }
+            return payload;
+        }
+
+        async function loadCloudData(showError = false) {
+            if (!window.alassiSupabase) return false;
+            try {
+                const { data: rows, error } = await alassiSupabase.from('menu_items').select('*');
+                if (error) throw error;
+                if (Array.isArray(rows) && rows.length) {
+                    const cloudItems = rows.map(normalizeCloudItem).filter(x => x.id && x.name);
+                    if (cloudItems.length) menuData = cloudItems;
+                }
+
+                const { data: settingsRows, error: settingsError } =
+                    await alassiSupabase.from('restaurant_settings').select('*').limit(1);
+                if (!settingsError && settingsRows && settingsRows.length) {
+                    cloudSettingsRow = settingsRows[0];
+                    const cloudSettings = cloudSettingsFromRow(settingsRows[0]);
+                    if (cloudSettings) dynamicSettings = { ...defaultSettings, ...dynamicSettings, ...cloudSettings };
+                }
+
+                cloudSyncReady = true;
+                saveLocalData();
+                return true;
+            } catch (e) {
+                console.warn('Supabase load failed:', e);
+                if (showError) showToast('تعذر الاتصال بالسحابة، تم استخدام النسخة المحلية', 'error');
+                return false;
+            }
+        }
+
+        async function saveMenuItemToCloud(item, oldId = null) {
+            if (!window.alassiSupabase) throw new Error('Supabase غير متاح');
+
+            let existingRow = null;
+            if (oldId) {
+                const { data } = await alassiSupabase.from('menu_items').select('*').eq('id', oldId).maybeSingle();
+                existingRow = data || null;
+            }
+
+            const payload = cloudItemPayload(item, existingRow);
+            if (oldId) {
+                const { error } = await alassiSupabase.from('menu_items').update(payload).eq('id', oldId);
+                if (error) throw error;
+            } else {
+                // عند الإضافة نرسل الأعمدة التي يعرفها الجدول من أول صف موجود، مع id إذا كان مدعوماً.
+                const template = menuData.find(x => x.id !== item.id) || null;
+                const templateRow = template ? (await alassiSupabase.from('menu_items').select('*').limit(1)).data?.[0] : null;
+                if (templateRow) {
+                    const p = cloudItemPayload(item, templateRow);
+                    if (Object.prototype.hasOwnProperty.call(templateRow,'id')) p.id = item.id;
+                    const { error } = await alassiSupabase.from('menu_items').insert(p);
+                    if (error) throw error;
+                } else {
+                    // جدول فارغ: نحاول بأسماء الأعمدة القياسية.
+                    const { error } = await alassiSupabase.from('menu_items').insert({
+                        id:item.id, name:item.name, category:item.category, desc:item.desc || '',
+                        image:item.image || '', icon:item.icon || 'fa-utensils',
+                        price:item.price || 0, is_available:item.isAvailable !== false,
+                        is_offer:!!item.isOffer, has_sizes:!!item.hasSizes,
+                        custom_sizes:item.hasSizes ? (item.customSizes || null) : null
+                    });
+                    if (error) throw error;
+                }
+            }
+        }
+
+        async function saveSettingsToCloud() {
+            if (!window.alassiSupabase) throw new Error('Supabase غير متاح');
+            let row = cloudSettingsRow;
+
+            if (!row) {
+                const { data } = await alassiSupabase.from('restaurant_settings').select('*').limit(1);
+                row = data?.[0] || null;
+                cloudSettingsRow = row;
+            }
+
+            if (row) {
+                const payload = cloudSettingsPayload(dynamicSettings, row);
+                if (!Object.keys(payload).length) throw new Error('تعذر معرفة أعمدة restaurant_settings');
+                const idKey = Object.prototype.hasOwnProperty.call(row,'id') ? 'id' : null;
+                const query = idKey
+                    ? alassiSupabase.from('restaurant_settings').update(payload).eq('id', row.id)
+                    : alassiSupabase.from('restaurant_settings').update(payload).limit(1);
+                const { error } = await query;
+                if (error) throw error;
+            } else {
+                // لا ننشئ صفاً عشوائياً إذا لم نعرف مخطط الجدول.
+                throw new Error('جدول restaurant_settings فارغ؛ أضف صف الإعدادات الأول من Supabase ثم أعد المحاولة.');
+            }
+        }
+
+        function setupSupabaseRealtime() {
+            if (!window.alassiSupabase) return;
+
+            alassiSupabase
+                .channel('alassi-live-menu')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, async () => {
+                    await loadCloudData(false);
+                    renderMenu();
+                    renderAdminMenuList();
+                    applySettingsToUI();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'restaurant_settings' }, async () => {
+                    await loadCloudData(false);
+                    applySettingsToUI();
+                    populateAdminInputs();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'offers' }, async () => {
+                    await loadCloudData(false);
+                    renderMenu();
+                })
+                .subscribe((status) => {
+                    console.log('Supabase Realtime:', status);
+                });
+        }
+
+        async function bootCloudData() {
+            const ok = await loadCloudData(true);
+            renderMenu();
+            applySettingsToUI();
+            setupSupabaseRealtime();
+            return ok;
         }
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -1384,13 +1700,13 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                                 <p class="text-xs text-amber-200/90 font-medium mb-3 leading-relaxed bg-black/30 p-2 rounded-xl border border-gold/10">${item.desc || ''}</p>
                                 
                                 <div class="flex flex-wrap items-center gap-1.5 mb-2 bg-black/50 p-1.5 rounded-xl border border-gold/20 max-w-fit">
-                                    <button onclick="selectPizzaSize('${item.id}', 'small')" class="size-btn-${item.id} text-[11px] font-bold px-2.5 py-1 rounded-lg transition ${currentSizeKey === 'small' ? 'bg-gold text-brandDark shadow' : 'text-gray-400 hover:text-white'}" ${!isAvailable ? 'disabled' : ''}>
+                                    <button onclick="selectPizzaSize('${item.id}', 'small', this)" class="size-btn-${item.id} text-[11px] font-bold px-2.5 py-1 rounded-lg transition ${currentSizeKey === 'small' ? 'bg-gold text-brandDark shadow' : 'text-gray-400 hover:text-white'}" ${!isAvailable ? 'disabled' : ''}>
                                         صغير (${pSmall})
                                     </button>
-                                    <button onclick="selectPizzaSize('${item.id}', 'medium')" class="size-btn-${item.id} text-[11px] font-bold px-2.5 py-1 rounded-lg transition ${currentSizeKey === 'medium' ? 'bg-gold text-brandDark shadow' : 'text-gray-400 hover:text-white'}" ${!isAvailable ? 'disabled' : ''}>
+                                    <button onclick="selectPizzaSize('${item.id}', 'medium', this)" class="size-btn-${item.id} text-[11px] font-bold px-2.5 py-1 rounded-lg transition ${currentSizeKey === 'medium' ? 'bg-gold text-brandDark shadow' : 'text-gray-400 hover:text-white'}" ${!isAvailable ? 'disabled' : ''}>
                                         وسط (${pMed})
                                     </button>
-                                    <button onclick="selectPizzaSize('${item.id}', 'large')" class="size-btn-${item.id} text-[11px] font-bold px-2.5 py-1 rounded-lg transition ${currentSizeKey === 'large' ? 'bg-gold text-brandDark shadow' : 'text-gray-400 hover:text-white'}" ${!isAvailable ? 'disabled' : ''}>
+                                    <button onclick="selectPizzaSize('${item.id}', 'large', this)" class="size-btn-${item.id} text-[11px] font-bold px-2.5 py-1 rounded-lg transition ${currentSizeKey === 'large' ? 'bg-gold text-brandDark shadow' : 'text-gray-400 hover:text-white'}" ${!isAvailable ? 'disabled' : ''}>
                                         كبير (${pLrg})
                                     </button>
                                 </div>
@@ -1460,7 +1776,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             `;
         }
 
-        function selectPizzaSize(itemId, sizeKey) {
+        function selectPizzaSize(itemId, sizeKey, clickedButton) {
             pizzaSelectedSizes[itemId] = sizeKey;
             
             const item = menuData.find(i => i.id === itemId);
@@ -1485,8 +1801,11 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 btn.classList.remove('bg-gold', 'text-brandDark', 'shadow');
                 btn.classList.add('text-gray-400');
             });
-            event.currentTarget.classList.remove('text-gray-400');
-            event.currentTarget.classList.add('bg-gold', 'text-brandDark', 'shadow');
+            const activeSizeButton = clickedButton;
+            if (activeSizeButton) {
+                activeSizeButton.classList.remove('text-gray-400');
+                activeSizeButton.classList.add('bg-gold', 'text-brandDark', 'shadow');
+            }
         }
 
         function triggerImageZoom(imgSrc) {
@@ -1601,7 +1920,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             document.getElementById('modalTotalOldCurrency').innerText = `${totalPriceOld.toLocaleString()} ليرة قديمة`;
         }
 
-        function filterCategory(cat) {
+        function filterCategory(cat, clickedButton) {
             currentCategory = cat;
 
             document.querySelectorAll('#categoryTabs .cat-btn').forEach(btn => {
@@ -1609,8 +1928,11 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 btn.classList.add('bg-brandCard', 'text-gray-300', 'font-bold');
             });
 
-            event.currentTarget.classList.remove('bg-brandCard', 'text-gray-300');
-            event.currentTarget.classList.add('active', 'bg-gold', 'text-brandDark', 'font-black', 'shadow-md');
+            const activeButton = clickedButton || document.querySelector(`#categoryTabs .cat-btn[onclick*="filterCategory('${cat}'"]`);
+            if (activeButton) {
+                activeButton.classList.remove('bg-brandCard', 'text-gray-300');
+                activeButton.classList.add('active', 'bg-gold', 'text-brandDark', 'font-black', 'shadow-md');
+            }
 
             const secOffers = document.getElementById('sec-offers');
             const secPizza = document.getElementById('sec-pizza');
@@ -1690,17 +2012,55 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
         function toggleCartModal() {
             const modal = document.getElementById('cartModal');
+            if (!modal) return;
             if (modal.classList.contains('hidden')) {
                 renderCartModalList();
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
+                document.body.classList.add('overflow-hidden');
             } else {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+                document.body.classList.remove('overflow-hidden');
             }
         }
 
         window.toggleCartModal = toggleCartModal;
+
+        // إصلاح فتح/إغلاق السلة على الهاتف
+        function closeCartModal() {
+            const modal = document.getElementById('cartModal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('cartModal');
+            if (!modal || modal.__alassiCartBound) return;
+            modal.__alassiCartBound = true;
+
+            // الضغط على الخلفية يغلق السلة، والضغط داخل الصندوق لا يغلقها.
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeCartModal();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeCartModal();
+            });
+        });
+
+        window.closeCartModal = closeCartModal;
+
+        // إغلاق السلة بشكل موثوق على الهاتف والكمبيوتر
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('cartModal');
+            if (!modal || modal.classList.contains('hidden')) return;
+            if (e.target === modal) closeCartModal();
+            if (e.target.closest && e.target.closest('#cartModal [data-close-cart]')) closeCartModal();
+        });
+
 
         function renderCartModalList() {
             const container = document.getElementById('cartItemsList');
@@ -1899,10 +2259,14 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         }
 
         function openAdminAuthModal() {
-            document.getElementById('adminAuthModal').classList.remove('hidden');
-            document.getElementById('adminAuthModal').classList.add('flex');
-            document.getElementById('adminPasswordInput').focus();
+            const modal = document.getElementById('adminAuthModal');
+            const input = document.getElementById('adminPasswordInput');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (input) setTimeout(() => input.focus(), 50);
         }
+        window.openAdminAuthModal = openAdminAuthModal;
 
         function closeAdminAuthModal() {
             document.getElementById('adminAuthModal').classList.add('hidden');
@@ -1994,7 +2358,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             document.getElementById('adm-workingHoursText').value = s.workingHoursText || 'من 7 صباحاً إلى 10 مساءً';
         }
 
-        function saveGeneralSettings() {
+        async function saveGeneralSettings() {
             dynamicSettings = {
                 ...dynamicSettings,
                 restaurantName: document.getElementById('adm-restaurantName').value.trim(),
@@ -2013,13 +2377,18 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 mapsUrl: document.getElementById('adm-mapsUrl').value.trim()
             };
 
-            saveLocalData();
-
-            applySettingsToUI();
-            showToast('تم حفظ كافة الإعدادات بنجاح!');
+            try {
+                await saveSettingsToCloud();
+                saveLocalData();
+                applySettingsToUI();
+                showToast('تم حفظ الإعدادات ونشرها للزبائن مباشرة ✓');
+            } catch (e) {
+                console.error(e);
+                showToast('لم يتم الحفظ على السحابة: ' + (e.message || 'خطأ غير معروف'), 'error');
+            }
         }
 
-        function saveAnnouncementSettings() {
+        async function saveAnnouncementSettings() {
             dynamicSettings = {
                 ...dynamicSettings,
                 announcementActive: document.getElementById('adm-announcementActive').checked,
@@ -2029,22 +2398,32 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             };
 
             sessionStorage.removeItem('announcementSeen');
-            saveLocalData();
-
-            applySettingsToUI();
-            showToast('تم تحديث ونشر الإعلان فوراً!');
+            try {
+                await saveSettingsToCloud();
+                saveLocalData();
+                applySettingsToUI();
+                showToast('تم نشر الإعلان للزبائن مباشرة ✓');
+            } catch (e) {
+                console.error(e);
+                showToast('تعذر نشر الإعلان على السحابة', 'error');
+            }
         }
 
-        function saveStatusSettings() {
+        async function saveStatusSettings() {
             dynamicSettings.statusMode = document.getElementById('adm-statusMode').value;
             dynamicSettings.workingHoursText = document.getElementById('adm-workingHoursText').value.trim();
-            saveLocalData();
-
-            applySettingsToUI();
-            showToast('تم تحديث حالة ومواعيد العمل بنجاح!');
+            try {
+                await saveSettingsToCloud();
+                saveLocalData();
+                applySettingsToUI();
+                showToast('تم تحديث الدوام ونشره مباشرة ✓');
+            } catch (e) {
+                console.error(e);
+                showToast('تعذر حفظ الدوام على السحابة', 'error');
+            }
         }
 
-        function changeAdminPassword() {
+        async function changeAdminPassword() {
             const curr = document.getElementById('adm-currPass').value;
             const newP = document.getElementById('adm-newPass').value;
             const conf = document.getElementById('adm-confirmPass').value;
@@ -2067,7 +2446,13 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             }
 
             dynamicSettings.adminPassword = newP;
-            saveLocalData();
+            try {
+                await saveSettingsToCloud();
+                saveLocalData();
+            } catch (e) {
+                showToast('تعذر حفظ كلمة السر على السحابة', 'error');
+                return;
+            }
 
             document.getElementById('adm-currPass').value = '';
             document.getElementById('adm-newPass').value = '';
@@ -2128,16 +2513,24 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             });
         }
 
-        function toggleItemAvailability(id) {
+        async function toggleItemAvailability(id) {
             const item = menuData.find(i => i.id === id);
             if (!item) return;
 
-            item.isAvailable = (item.isAvailable === false) ? true : false;
-            saveLocalData();
+            const previous = item.isAvailable !== false;
+            item.isAvailable = !previous;
 
-            renderMenu();
-            renderAdminMenuList();
-            showToast(item.isAvailable ? `تمت الإشارة إلى "${item.name}" كـ متوفر` : `تمت الإشارة إلى "${item.name}" كـ غير متوفر (نفذت)`);
+            try {
+                await saveMenuItemToCloud(item, item.id);
+                saveLocalData();
+                renderMenu();
+                renderAdminMenuList();
+                showToast(item.isAvailable ? `تم نشر "${item.name}" كـ متوفر ✓` : `تم نشر "${item.name}" كـ نفذت الكمية ✓`);
+            } catch (e) {
+                item.isAvailable = previous;
+                console.error(e);
+                showToast('تعذر تحديث حالة الصنف على السحابة', 'error');
+            }
         }
 
         function openAddItemForm() {
@@ -2205,7 +2598,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             }
         }
 
-        function saveMenuItem() {
+        async function saveMenuItem() {
             const editId = document.getElementById('edit-item-id').value;
             const name = document.getElementById('item-input-name').value.trim();
             if (!name) {
@@ -2246,29 +2639,40 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             }
 
             const existingIdx = menuData.findIndex(i => i.id === itemId);
-            if (existingIdx >= 0) {
-                menuData[existingIdx] = newItem;
-            } else {
-                menuData.push(newItem);
+
+            try {
+                await saveMenuItemToCloud(newItem, existingIdx >= 0 ? itemId : null);
+
+                if (existingIdx >= 0) menuData[existingIdx] = newItem;
+                else menuData.push(newItem);
+
+                saveLocalData();
+                renderMenu();
+                renderAdminMenuList();
+                hideMealForm();
+                showToast('تم حفظ الوجبة ونشر التعديل للزبائن مباشرة ✓');
+            } catch (e) {
+                console.error(e);
+                showToast('تعذر حفظ الوجبة على السحابة: ' + (e.message || 'خطأ'), 'error');
             }
-
-            saveLocalData();
-
-            renderMenu();
-            renderAdminMenuList();
-            hideMealForm();
-            showToast('تم حفظ وتحديث الوجبة بنجاح!');
         }
 
-        function deleteMenuItem(id) {
+        async function deleteMenuItem(id) {
             if (!confirm('هل أنت تأكد من إزالة هذه الوجبة؟')) return;
 
-            menuData = menuData.filter(i => i.id !== id);
-            saveLocalData();
+            try {
+                const { error } = await alassiSupabase.from('menu_items').delete().eq('id', id);
+                if (error) throw error;
 
-            renderMenu();
-            renderAdminMenuList();
-            showToast('تم حذف الوجبة بنجاح!');
+                menuData = menuData.filter(i => i.id !== id);
+                saveLocalData();
+                renderMenu();
+                renderAdminMenuList();
+                showToast('تم حذف الوجبة ونشر الحذف للزبائن مباشرة ✓');
+            } catch (e) {
+                console.error(e);
+                showToast('تعذر حذف الوجبة من السحابة', 'error');
+            }
         }
     </script>
 
