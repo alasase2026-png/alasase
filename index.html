@@ -504,9 +504,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             <button onclick="filterCategory('pizza', this)" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
                 <i class="fa-solid fa-pizza-slice text-gold ml-1"></i> قسم البيتزا
             </button>
-            <button onclick="filterCategory('meat', this)" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
-                <i class="fa-solid fa-fire text-gold ml-1"></i> قسم المشاوي
-            </button>
             <button onclick="filterCategory('fatayer', this)" class="cat-btn bg-brandCard hover:bg-black/60 text-gray-300 font-bold border border-gold/20 px-5 py-2 rounded-xl text-xs whitespace-nowrap transition">
                 <i class="fa-solid fa-bread-slice text-gold ml-1"></i> قسم الفطائر
             </button>
@@ -537,18 +534,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 <span class="text-xs text-gray-400 font-normal">متوفرة بأحجام متعدده</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="pizza-container"></div>
-        </section>
-
-        <!-- Section: Meat / Grills -->
-        <section id="sec-meat" class="menu-section mb-10">
-            <div class="flex items-center gap-3 mb-5 border-b border-gold/30 pb-3">
-                <div class="w-9 h-9 rounded-xl bg-brandRed border border-gold/50 flex items-center justify-center text-gold shadow">
-                    <i class="fa-solid fa-fire text-lg"></i>
-                </div>
-                <h2 class="text-2xl font-black text-gold tracking-wide">قسم اللحمة (المشاوي)</h2>
-                <span class="text-xs text-gray-400 font-normal">لحوم طازجة مشوية عالفحم</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="meat-container"></div>
         </section>
 
         <!-- Section: Fatayer -->
@@ -806,7 +791,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                                 <label class="text-xs text-gray-300 block mb-1">القسم / التصنيف:</label>
                                 <select id="item-input-category" class="w-full bg-black border border-gold/30 rounded-xl p-2.5 text-xs text-gold">
                                     <option value="pizza">قسم البيتزا</option>
-                                    <option value="meat">قسم المشاوي واللحمة</option>
                                     <option value="fatayer">قسم الفطائر والمعجنات</option>
                                 </select>
                             </div>
@@ -1146,34 +1130,26 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             { id: 'p6', name: 'بيتزا لحم', category: 'pizza', desc: 'لحم بلدي طازج ومفروم مع الخضار', icon: 'fa-pizza-slice', hasSizes: true, customSizes: { small: { label: 'صغير', price: 300 }, medium: { label: 'وسط', price: 600 }, large: { label: 'كبير', price: 1200 } }, isAvailable: true, isOffer: false },
             { id: 'p7', name: 'بيتزا سجق', category: 'pizza', desc: 'شرائح السجق المتبل الشهي مع الجبن', icon: 'fa-pizza-slice', hasSizes: true, customSizes: { small: { label: 'صغير', price: 300 }, medium: { label: 'وسط', price: 600 }, large: { label: 'كبير', price: 1200 } }, isAvailable: true, isOffer: false },
 
-            // Meat Section
-            { id: 'm1', name: 'كباب فروج', category: 'meat', desc: 'أسياخ كباب دجاج مشوي على الفحم', icon: 'fa-fire', image: 'IMG_20260425_161550_١٢٠٥٣٨.jpg', isAvailable: true, isOffer: false },
-            { id: 'm2', name: 'كباب لحم', category: 'meat', desc: 'كباب لحم غنم طازج متبل بالبهارات الشرقية', icon: 'fa-fire', isAvailable: true, isOffer: false },
-            { id: 'm3', name: 'شيش طاووق', category: 'meat', desc: 'قطع دجاج طرية متبلة ومشوية بعناية', icon: 'fa-fire', image: 'IMG_20260629_215310.jpg', isAvailable: true, isOffer: true },
-            { id: 'm4', name: 'كستا', category: 'meat', desc: 'كستا طازجة ومشوية على الفحم', icon: 'fa-fire', isAvailable: true, isOffer: false },
-            { id: 'm5', name: 'شقف لحم', category: 'meat', desc: 'قطع لحم بلدي طازجة مشوية', icon: 'fa-fire', isAvailable: true, isOffer: false },
-            { id: 'm6', name: 'كباب بقشقوان', category: 'meat', desc: 'كباب محشو ومغطى بجبنة القشقوان الذائبة', icon: 'fa-fire', isAvailable: true, isOffer: false },
-
             // Fatayer Section
-            { id: 'f1', name: 'فطيرة جبنة', price: 15, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
-            { id: 'f2', name: 'فطيرة محمرة', price: 15, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice', image: 'IMG_20260712_084748.jpg', isAvailable: true, isOffer: false },
-            { id: 'f3', name: 'مناقيش زعتر', price: 15, category: 'fatayer', desc: 'زعتر فاخر وزيت زيتون', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
-            { id: 'f4', name: 'فطيرة زيتون أخضر', price: 30, category: 'fatayer', desc: 'شرائح الزيتون الأخضر الشهي', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
-            { id: 'f5', name: 'فطيرة كيري', price: 40, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
-            { id: 'f6', name: 'فطيرة شوكلا', price: 40, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie', isAvailable: true, isOffer: false },
+            { id: 'f1', name: 'فطيرة جبنة', price: 20, category: 'fatayer', desc: 'جبنة طازجة محمرة بالفرن', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
+            { id: 'f2', name: 'فطيرة محمرة', price: 20, category: 'fatayer', desc: 'محمرة شاميّة أصيلة ومتبلة', icon: 'fa-bread-slice', image: 'IMG_20260712_084748.jpg', isAvailable: true, isOffer: false },
+            { id: 'f3', name: 'مناقيش زعتر', price: 20, category: 'fatayer', desc: 'زعتر فاخر وزيت زيتون', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
+            { id: 'f4', name: 'فطيرة زيتون أخضر', price: 40, category: 'fatayer', desc: 'شرائح الزيتون الأخضر الشهي', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
+            { id: 'f5', name: 'فطيرة كيري', price: 50, category: 'fatayer', desc: 'جبنة كيري غنية ومحمصة', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
+            { id: 'f6', name: 'فطيرة شوكلا', price: 50, category: 'fatayer', desc: 'شوكولاتة ناعمة وساخنة', icon: 'fa-cookie', isAvailable: true, isOffer: false },
             { id: 'f7', name: 'صفيحة شاميّة', price: 20, category: 'fatayer', desc: 'صفيحة دجاج بالفرن', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
-            { id: 'f8', name: 'بيتزا سواريه', price: 40, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice', image: 'IMG_20260705_104255.jpg', isAvailable: true, isOffer: true },
-            { id: 'f9', name: 'فطيرة سجق', price: 40, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice', image: 'IMG_20260705_100723.jpg', isAvailable: true, isOffer: false },
+            { id: 'f8', name: 'بيتزا سواريه', price: 50, category: 'fatayer', desc: 'قطع بيتزا صغيرة ومناسبة للمناسبات', icon: 'fa-pizza-slice', image: 'IMG_20260705_104255.jpg', isAvailable: true, isOffer: true },
+            { id: 'f9', name: 'فطيرة سجق', price: 50, category: 'fatayer', desc: 'سجق متبل طازج', icon: 'fa-bread-slice', image: 'IMG_20260705_100723.jpg', isAvailable: true, isOffer: false },
             { id: 'f10', name: 'فطيرة شيش', price: 50, category: 'fatayer', desc: 'دجاج شيش داخل الفطيرة', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
-            { id: 'f11', name: 'فطيرة مرتديلا', price: 30, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
-            { id: 'f12', name: 'فطيرة سنفورة', price: 40, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
-            { id: 'f13', name: 'فطيرة قشقوان', price: 40, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', image: 'IMG_20260709_095128.jpg', isAvailable: true, isOffer: false },
-            { id: 'f14', name: 'محمرة قشقوان', price: 40, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese', isAvailable: true, isOffer: false },
+            { id: 'f11', name: 'فطيرة مرتديلا', price: 40, category: 'fatayer', desc: 'شرائح المرتديلا اللذيذة', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
+            { id: 'f12', name: 'فطيرة سنفورة', price: 50, category: 'fatayer', desc: 'خلطة السنفورة المميزة', icon: 'fa-bread-slice', isAvailable: true, isOffer: false },
+            { id: 'f13', name: 'فطيرة قشقوان', price: 50, category: 'fatayer', desc: 'جبنة قشقوان كاملة ذائبة', icon: 'fa-cheese', image: 'IMG_20260709_095128.jpg', isAvailable: true, isOffer: false },
+            { id: 'f14', name: 'محمرة قشقوان', price: 50, category: 'fatayer', desc: 'محمرة مغطاة بجبن القشقوان', icon: 'fa-cheese', isAvailable: true, isOffer: false },
             { id: 'f15', name: 'توشكا', price: 70, category: 'fatayer', desc: 'توشكا غنية بالجبن واللحم المتبل', icon: 'fa-cheese', isAvailable: true, isOffer: false },
             { id: 'f16', name: 'شيش قشقوان', price: 70, category: 'fatayer', desc: 'شيش دجاج محمر مع القشقوان', icon: 'fa-cheese', isAvailable: true, isOffer: false },
             { id: 'f17', name: 'مرتديلا قشقوان', price: 70, category: 'fatayer', desc: 'مرتديلا غنية بجبنة القشقوان', icon: 'fa-cheese', isAvailable: true, isOffer: false },
-            { id: 'f18', name: 'زعتر قشقوان', price: 40, category: 'fatayer', desc: 'زعتر فاخر مع جبن قشقوان', icon: 'fa-cheese', isAvailable: true, isOffer: false },
-            { id: 'f19', name: 'زيتون قشقوان', price: 40, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese', isAvailable: true, isOffer: false },
+            { id: 'f18', name: 'زعتر قشقوان', price: 50, category: 'fatayer', desc: 'زعتر فاخر مع جبن قشقوان', icon: 'fa-cheese', isAvailable: true, isOffer: false },
+            { id: 'f19', name: 'زيتون قشقوان', price: 50, category: 'fatayer', desc: 'زيتون أخضر مع القشقوان', icon: 'fa-cheese', isAvailable: true, isOffer: false },
         ];
 
         window.getAlassiMenuData = () => menuData;
@@ -1207,13 +1183,30 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             } catch (e) {}
         }
 
+        function applyRequestedPricesAndRemoveMeat(items) {
+            const requestedNames = {
+                'فطيرة جبنة': 20,
+                'فطيرة محمرة': 20,
+                'مناقيش زعتر': 20
+            };
+            return (Array.isArray(items) ? items : []).filter(item => item && item.category !== 'meat').map(item => {
+                const current = Number(item.price) || 0;
+                if (!item.hasSizes) {
+                    if (Object.prototype.hasOwnProperty.call(requestedNames, item.name)) item.price = requestedNames[item.name];
+                    else if (current === 30) item.price = 40;
+                    else if (current === 40) item.price = 50;
+                }
+                return item;
+            });
+        }
+
         function loadLocalData() {
             // تحميل احتياطي سريع فقط حتى يظهر الموقع فوراً، ثم يتم استبداله ببيانات Supabase.
             try {
                 const savedMenu = localStorage.getItem('asasi_menu_data');
                 if (savedMenu) {
                     const parsed = JSON.parse(savedMenu);
-                    if (Array.isArray(parsed) && parsed.length) menuData = parsed;
+                    if (Array.isArray(parsed) && parsed.length) menuData = applyRequestedPricesAndRemoveMeat(parsed);
                 }
                 const savedSettings = localStorage.getItem('asasi_settings');
                 if (savedSettings) dynamicSettings = { ...defaultSettings, ...JSON.parse(savedSettings) };
@@ -1229,9 +1222,8 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         function normalizeCategory(value) {
             const v = String(value ?? '').trim().toLowerCase();
             if (['pizza','بيتزا','قسم البيتزا','pizzas'].includes(v)) return 'pizza';
-            if (['meat','مشاوي','المشاوي','لحمة','لحم','قسم المشاوي','قسم اللحمة','قسم اللحمة (المشاوي)'].includes(v)) return 'meat';
             if (['fatayer','فطائر','الفطائر','معجنات','قسم الفطائر','قسم الفطائر والمعجنات'].includes(v)) return 'fatayer';
-            return v === 'pizza' || v === 'meat' ? v : 'fatayer';
+            return v === 'pizza' ? v : 'fatayer';
         }
 
         function normalizeCloudItem(row) {
@@ -1247,7 +1239,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 category: (() => {
                     const c = String(cloudColumn(row, ['category','section','type'], 'fatayer')).toLowerCase().trim();
                     if (['pizza','بيتزا','قسم البيتزا'].includes(c)) return 'pizza';
-                    if (['meat','grill','مشاوي','مشاوي','لحمة','قسم اللحمة المشوية'].includes(c)) return 'meat';
                     if (['fatayer','pastry','pastries','فطائر','فطيرة','قسم الفطائر'].includes(c)) return 'fatayer';
                     return c || 'fatayer';
                 })(),
@@ -1404,7 +1395,8 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 if (error) throw error;
                 if (Array.isArray(rows) && rows.length) {
                     const cloudItems = rows.map(normalizeCloudItem).filter(x => x.id && x.name);
-                    if (cloudItems.length) menuData = cloudItems;
+                    const sanitizedCloudItems = applyRequestedPricesAndRemoveMeat(cloudItems);
+                    if (sanitizedCloudItems.length) menuData = sanitizedCloudItems;
                 }
 
                 const { data: settingsRows, error: settingsError } =
@@ -1430,35 +1422,48 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
             let existingRow = null;
             if (oldId) {
-                const { data } = await alassiSupabase.from('menu_items').select('*').eq('id', oldId).maybeSingle();
+                const { data, error } = await alassiSupabase.from('menu_items').select('*').eq('id', oldId).maybeSingle();
+                if (error) throw error;
                 existingRow = data || null;
             }
 
-            const payload = cloudItemPayload(item, existingRow);
-            if (oldId) {
+            // إذا كان الصف موجوداً نحدّثه، وإذا لم يكن موجوداً ننشئه.
+            if (oldId && existingRow) {
+                const payload = cloudItemPayload(item, existingRow);
+                if (!Object.keys(payload).length) throw new Error('تعذر معرفة أعمدة menu_items');
                 const { error } = await alassiSupabase.from('menu_items').update(payload).eq('id', oldId);
                 if (error) throw error;
-            } else {
-                // عند الإضافة نرسل الأعمدة التي يعرفها الجدول من أول صف موجود، مع id إذا كان مدعوماً.
-                const template = menuData.find(x => x.id !== item.id) || null;
-                const templateRow = template ? (await alassiSupabase.from('menu_items').select('*').limit(1)).data?.[0] : null;
-                if (templateRow) {
-                    const p = cloudItemPayload(item, templateRow);
-                    if (Object.prototype.hasOwnProperty.call(templateRow,'id')) p.id = item.id;
-                    const { error } = await alassiSupabase.from('menu_items').insert(p);
-                    if (error) throw error;
-                } else {
-                    // جدول فارغ: نحاول بأسماء الأعمدة القياسية.
-                    const { error } = await alassiSupabase.from('menu_items').insert({
-                        id:item.id, name:item.name, category:item.category, desc:item.desc || '',
-                        image:item.image || '', icon:item.icon || 'fa-utensils',
-                        price:item.price || 0, is_available:item.isAvailable !== false,
-                        is_offer:!!item.isOffer, has_sizes:!!item.hasSizes,
-                        custom_sizes:item.hasSizes ? (item.customSizes || null) : null
-                    });
-                    if (error) throw error;
-                }
+                return;
             }
+
+            // عند الإضافة أو عندما يكون الصف غير موجود، نرسل الأعمدة القياسية.
+            const standardPayload = {
+                id: item.id,
+                name: item.name,
+                category: item.category,
+                desc: item.desc || '',
+                image: item.image || '',
+                icon: item.icon || 'fa-utensils',
+                price: item.price || 0,
+                is_available: item.isAvailable !== false,
+                is_offer: !!item.isOffer,
+                has_sizes: !!item.hasSizes,
+                custom_sizes: item.hasSizes ? (item.customSizes || null) : null
+            };
+
+            // إن كان الجدول يستخدم أسماء أعمدة مختلفة، نستفيد من أول صف موجود كقالب.
+            const { data: templateRows } = await alassiSupabase.from('menu_items').select('*').limit(1);
+            if (templateRows && templateRows[0]) {
+                const p = cloudItemPayload(item, templateRows[0]);
+                if (Object.prototype.hasOwnProperty.call(templateRows[0], 'id')) p.id = item.id;
+                if (!Object.keys(p).length) throw new Error('تعذر معرفة أعمدة menu_items');
+                const { error } = await alassiSupabase.from('menu_items').insert(p);
+                if (error) throw error;
+                return;
+            }
+
+            const { error } = await alassiSupabase.from('menu_items').insert(standardPayload);
+            if (error) throw error;
         }
 
         async function saveSettingsToCloud() {
@@ -1496,6 +1501,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                     renderMenu();
                     renderAdminMenuList();
                     applySettingsToUI();
+                    lastCloudSignature = cloudSignature();
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'restaurant_settings' }, async () => {
                     await loadCloudData(false);
@@ -1511,11 +1517,104 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 });
         }
 
+        async function applyRequestedMenuChangesToCloud() {
+            if (!window.alassiSupabase || menuMigrationDone) return;
+            let cloudChangesSucceeded = true;
+
+            // حذف قسم اللحوم من المصدر السحابي أيضاً، وليس فقط من واجهة الزبون.
+            try {
+                const { data: allRows, error: rowsError } = await alassiSupabase.from('menu_items').select('*');
+                if (rowsError) throw rowsError;
+                const meatIds = (allRows || []).map(normalizeCloudItem).filter(item => item.category === 'meat').map(item => item.id).filter(Boolean);
+                for (const id of meatIds) {
+                    const { error } = await alassiSupabase.from('menu_items').delete().eq('id', id);
+                    if (error) cloudChangesSucceeded = false;
+                }
+            } catch (e) {
+                cloudChangesSucceeded = false;
+                console.warn('لم يتم حذف أصناف اللحوم من السحابة:', e);
+            }
+
+            const requestedNames = {
+                'فطيرة جبنة': 20,
+                'فطيرة محمرة': 20,
+                'مناقيش زعتر': 20
+            };
+
+            const targets = menuData.map(item => {
+                const current = Number(item.price) || 0;
+                let next = current;
+                if (Object.prototype.hasOwnProperty.call(requestedNames, item.name)) {
+                    next = requestedNames[item.name];
+                } else if (current === 30) {
+                    next = 40;
+                } else if (current === 40) {
+                    next = 50;
+                }
+                return { item, next };
+            });
+
+            for (const { item, next } of targets) {
+                if (item.category !== 'meat' && (Number(item.price) || 0) !== next && !item.hasSizes) {
+                    item.price = next;
+                    try { await saveMenuItemToCloud(item, item.id); }
+                    catch (e) {
+                        cloudChangesSucceeded = false;
+                        console.warn('تعذر نشر سعر', item.name, e);
+                    }
+                }
+            }
+
+            menuData = menuData.filter(item => item.category !== 'meat');
+            saveLocalData();
+            menuMigrationDone = cloudChangesSucceeded;
+        }
+
+        let cloudPollBusy = false;
+        let menuMigrationDone = false;
+        let lastCloudSignature = '';
+        function cloudSignature() {
+            try {
+                return JSON.stringify({
+                    menu: menuData.filter(x => x.category !== 'meat').map(x => ({id:x.id,n:x.name,c:x.category,p:x.price,a:x.isAvailable,o:x.isOffer,s:x.customSizes})),
+                    settings: dynamicSettings
+                });
+            } catch (e) { return ''; }
+        }
+
+        async function refreshCloudForVisitors() {
+            if (!window.alassiSupabase || cloudPollBusy) return;
+            cloudPollBusy = true;
+            try {
+                const before = lastCloudSignature || cloudSignature();
+                const ok = await loadCloudData(false);
+                if (ok) {
+                    const after = cloudSignature();
+                    if (after !== before) {
+                        lastCloudSignature = after;
+                        renderMenu();
+                        applySettingsToUI();
+                        if (document.getElementById('adminPanelModal') && !document.getElementById('adminPanelModal').classList.contains('hidden')) renderAdminMenuList();
+                    }
+                }
+            } finally {
+                cloudPollBusy = false;
+            }
+        }
+
         async function bootCloudData() {
             const ok = await loadCloudData(true);
+            await applyRequestedMenuChangesToCloud();
             renderMenu();
             applySettingsToUI();
+            lastCloudSignature = cloudSignature();
             setupSupabaseRealtime();
+
+            // fallback إضافي حتى تعمل المزامنة المباشرة حتى لو لم يكن Realtime مفعلاً في Supabase.
+            setInterval(refreshCloudForVisitors, 5000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') refreshCloudForVisitors();
+            });
             return ok;
         }
         function showToast(message, type = 'success') {
@@ -1642,14 +1741,12 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
         function renderMenu() {
             const pizzaContainer = document.getElementById('pizza-container');
-            const meatContainer = document.getElementById('meat-container');
             const fatayerContainer = document.getElementById('fatayer-container');
             const offersContainer = document.getElementById('offers-container');
 
-            if (!pizzaContainer || !meatContainer || !fatayerContainer) return;
+            if (!pizzaContainer || !fatayerContainer) return;
 
             pizzaContainer.innerHTML = '';
-            meatContainer.innerHTML = '';
             fatayerContainer.innerHTML = '';
             if (offersContainer) offersContainer.innerHTML = '';
 
@@ -1661,7 +1758,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 }
 
                 if (item.category === 'pizza') pizzaContainer.innerHTML += cardHtml;
-                else if (item.category === 'meat') meatContainer.innerHTML += cardHtml;
                 else if (item.category === 'fatayer') fatayerContainer.innerHTML += cardHtml;
             });
         }
@@ -1753,7 +1849,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             }
 
             const imageHtml = item.image 
-                ? `<div onclick="triggerImageZoom('${item.image}')" class="w-12 h-12 rounded-xl overflow-hidden border border-gold/40 shadow-inner shrink-0 cursor-pointer hover:opacity-95 transition transform hover:scale-105" title="انقر لتكبير الصورة"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover ${!isAvailable ? 'grayscale opacity-60' : ''}" onerror="this.src='https://placehold.co/150x150/181311/e6c567?text=مشاوي'"></div>`
+                ? `<div onclick="triggerImageZoom('${item.image}')" class="w-12 h-12 rounded-xl overflow-hidden border border-gold/40 shadow-inner shrink-0 cursor-pointer hover:opacity-95 transition transform hover:scale-105" title="انقر لتكبير الصورة"><img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover ${!isAvailable ? 'grayscale opacity-60' : ''}" onerror="this.src='https://placehold.co/150x150/181311/e6c567?text=العسسي'"></div>`
                 : `<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-950 to-brandCard border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0"><i class="fa-solid ${item.icon || 'fa-fire'} text-xl"></i></div>`;
 
             return `
@@ -1936,33 +2032,23 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
             const secOffers = document.getElementById('sec-offers');
             const secPizza = document.getElementById('sec-pizza');
-            const secMeat = document.getElementById('sec-meat');
             const secFatayer = document.getElementById('sec-fatayer');
 
             if (cat === 'all') {
                 secOffers.classList.add('hidden');
                 secPizza.classList.remove('hidden');
-                secMeat.classList.remove('hidden');
                 secFatayer.classList.remove('hidden');
             } else if (cat === 'offers') {
                 secOffers.classList.remove('hidden');
                 secPizza.classList.add('hidden');
-                secMeat.classList.add('hidden');
                 secFatayer.classList.add('hidden');
             } else if (cat === 'pizza') {
                 secOffers.classList.add('hidden');
                 secPizza.classList.remove('hidden');
-                secMeat.classList.add('hidden');
-                secFatayer.classList.add('hidden');
-            } else if (cat === 'meat') {
-                secOffers.classList.add('hidden');
-                secPizza.classList.add('hidden');
-                secMeat.classList.remove('hidden');
                 secFatayer.classList.add('hidden');
             } else if (cat === 'fatayer') {
                 secOffers.classList.add('hidden');
                 secPizza.classList.add('hidden');
-                secMeat.classList.add('hidden');
                 secFatayer.classList.remove('hidden');
             }
 
@@ -2472,7 +2558,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             }
 
             container.innerHTML = '';
-            menuData.forEach(item => {
+            menuData.filter(item => item.category !== 'meat').forEach(item => {
                 const row = document.createElement('div');
                 row.className = 'bg-black/50 border border-gold/20 p-3 rounded-2xl flex items-center justify-between gap-2 hover:border-gold/50 transition';
                 
@@ -2606,7 +2692,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 return;
             }
 
-            const category = document.getElementById('item-input-category').value;
+            const category = document.getElementById('item-input-category').value === 'fatayer' ? 'fatayer' : 'pizza';
             const desc = document.getElementById('item-input-desc').value.trim();
             const image = document.getElementById('item-input-image').value.trim();
             const icon = document.getElementById('item-input-icon').value.trim() || 'fa-utensils';
