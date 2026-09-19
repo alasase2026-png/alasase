@@ -1491,29 +1491,50 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             }
         }
 
+        // ===== LIVE ONLINE SYNC =====
+        let alassiRealtimeChannel = null;
+        let realtimeRetryTimer = null;
+        let cloudPollTimer = null;
+
         function setupSupabaseRealtime() {
             if (!window.alassiSupabase) return;
 
-            alassiSupabase
-                .channel('alassi-live-menu')
+            // منع إنشاء أكثر من اتصال Realtime لنفس الصفحة.
+            try {
+                if (alassiRealtimeChannel) {
+                    alassiSupabase.removeChannel(alassiRealtimeChannel);
+                    alassiRealtimeChannel = null;
+                }
+            } catch (e) {}
+
+            alassiRealtimeChannel = alassiSupabase
+                .channel('alassi-live-menu-' + Date.now())
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, async () => {
-                    await loadCloudData(false);
+                    await refreshCloudForVisitors();
                     renderMenu();
                     renderAdminMenuList();
                     applySettingsToUI();
-                    lastCloudSignature = cloudSignature();
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'restaurant_settings' }, async () => {
-                    await loadCloudData(false);
+                    await refreshCloudForVisitors();
                     applySettingsToUI();
                     populateAdminInputs();
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'offers' }, async () => {
-                    await loadCloudData(false);
+                    await refreshCloudForVisitors();
                     renderMenu();
                 })
-                .subscribe((status) => {
-                    console.log('Supabase Realtime:', status);
+                .subscribe((status, err) => {
+                    console.log('Supabase Realtime:', status, err || '');
+
+                    // إذا انقطع WebSocket، أعد الاتصال تلقائياً.
+                    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                        if (realtimeRetryTimer) clearTimeout(realtimeRetryTimer);
+                        realtimeRetryTimer = setTimeout(() => {
+                            realtimeRetryTimer = null;
+                            setupSupabaseRealtime();
+                        }, 2000);
+                    }
                 });
         }
 
@@ -1610,10 +1631,15 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             lastCloudSignature = cloudSignature();
             setupSupabaseRealtime();
 
-            // fallback إضافي حتى تعمل المزامنة المباشرة حتى لو لم يكن Realtime مفعلاً في Supabase.
-            setInterval(refreshCloudForVisitors, 5000);
+            // مزامنة احتياطية سريعة: إذا كان Realtime متوقفاً أو حجبه المتصفح،
+            // سيصل آخر تغيير للزبون خلال ثوانٍ قليلة بدون إعادة نشر الموقع.
+            if (cloudPollTimer) clearInterval(cloudPollTimer);
+            cloudPollTimer = setInterval(refreshCloudForVisitors, 2000);
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') refreshCloudForVisitors();
+                if (document.visibilityState === 'visible') {
+                    refreshCloudForVisitors();
+                    setupSupabaseRealtime();
+                }
             });
             return ok;
         }
