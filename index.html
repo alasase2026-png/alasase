@@ -2395,7 +2395,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
             try {
                 await saveSettingsToCloud();
-                await loadCloudDataSecure(false);
+                await window.loadCloudDataSecure(false);
                 saveLocalData();
                 applySettingsToUI();
                 populateAdminInputs();
@@ -2435,7 +2435,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             try {
                 await saveSettingsToCloud();
                 // saveSettingsToCloudSecure verifies the exact row returned by Supabase.
-                await loadCloudDataSecure(false);
+                await window.loadCloudDataSecure(false);
                 applySettingsToUI();
                 populateAdminInputs();
                 showToast('تم حفظ حالة ومواعيد العمل على السحابة ✓');
@@ -2995,6 +2995,10 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         }
     };
 
+    // Expose the secure cloud loader to the main admin script.
+    // The secure layer is wrapped in its own IIFE, so functions declared
+    // inside it are not directly visible to the earlier script.
+    window.loadCloudDataSecure = loadCloudDataSecure;
     window.saveMenuItemToCloud = saveMenuItemToCloudSecure;
     window.saveSettingsToCloud = saveSettingsToCloudSecure;
 
