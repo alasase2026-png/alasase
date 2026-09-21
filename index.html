@@ -1203,7 +1203,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 const savedMenu = localStorage.getItem('asasi_menu_data');
                 if (savedMenu) {
                     const parsed = JSON.parse(savedMenu);
-                    if (Array.isArray(parsed) && parsed.length) menuData = applyRequestedPricesAndRemoveMeat(parsed);
+                    if (Array.isArray(parsed) && parsed.length) menuData = parsed;
                 }
                 const savedSettings = localStorage.getItem('asasi_settings');
                 if (savedSettings) dynamicSettings = { ...defaultSettings, ...JSON.parse(savedSettings) };
@@ -1547,7 +1547,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
         async function bootCloudData() {
             const ok = await loadCloudData(true);
-            await applyRequestedMenuChangesToCloud();
             renderMenu();
             applySettingsToUI();
             lastCloudSignature = cloudSignature();
@@ -2836,23 +2835,37 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         const { data: sessionData } = await alassiSupabase.auth.getSession();
         if (!sessionData?.session) throw new Error('يجب تسجيل الدخول للإدارة أولاً');
 
-        if (oldId) {
-            const { data: existing, error } = await alassiSupabase.from('menu_items').select('*').eq('id', oldId).maybeSingle();
-            if (error) throw error;
-            if (existing) {
-                const payload = itemPayloadForRow(item, existing);
-                const { error: updateError } = await alassiSupabase.from('menu_items').update(payload).eq('id', oldId);
-                if (updateError) throw updateError;
-                return;
+        const targetId = oldId || item.id;
+        const { data: existing, error: readError } = await alassiSupabase
+            .from('menu_items').select('*').eq('id', targetId).maybeSingle();
+        if (readError) throw new Error('تعذر قراءة الصنف من Supabase: ' + readError.message);
+
+        if (existing) {
+            const payload = itemPayloadForRow(item, existing);
+            if (!Object.prototype.hasOwnProperty.call(payload, 'price') && Object.prototype.hasOwnProperty.call(existing, 'price')) payload.price = Number(item.price) || 0;
+            if (!Object.prototype.hasOwnProperty.call(payload, 'is_available') && Object.prototype.hasOwnProperty.call(existing, 'is_available')) payload.is_available = item.isAvailable !== false;
+            if (!Object.keys(payload).length) throw new Error('لم يتم العثور على أعمدة قابلة للتحديث في menu_items');
+
+            const { error: updateError } = await alassiSupabase.from('menu_items').update(payload).eq('id', targetId);
+            if (updateError) throw new Error('Supabase رفض تعديل الصنف: ' + updateError.message);
+
+            // تحقق فعلي من قاعدة البيانات قبل إظهار النجاح أو حفظ نسخة محلية.
+            const { data: verified, error: verifyError } = await alassiSupabase.from('menu_items').select('*').eq('id', targetId).maybeSingle();
+            if (verifyError) throw new Error('تم إرسال التعديل لكن تعذر التحقق منه: ' + verifyError.message);
+            if (!verified) throw new Error('لم تُرجع Supabase الصنف بعد التعديل؛ راجع صلاحيات RLS.');
+            const v = normalizeItemSecure(verified);
+            if (Number(v.price) !== Number(item.price) || v.isAvailable !== (item.isAvailable !== false)) {
+                throw new Error('التعديل لم يُثبت في قاعدة البيانات. غالباً توجد سياسة RLS تمنع الكتابة.');
             }
+            return v;
         }
 
         const standard = { id:item.id, name:item.name, category:item.category, desc:item.desc||'', image:item.image||'', icon:item.icon||'fa-utensils', price:Number(item.price)||0, is_available:item.isAvailable!==false, is_offer:!!item.isOffer, has_sizes:!!item.hasSizes, custom_sizes:item.hasSizes ? (item.customSizes||null) : null };
         const { data: templateRows, error: templateError } = await alassiSupabase.from('menu_items').select('*').limit(1);
-        if (templateError) throw templateError;
+        if (templateError) throw new Error('تعذر قراءة بنية menu_items: ' + templateError.message);
         const payload = templateRows?.[0] ? itemPayloadForRow(item, templateRows[0]) : standard;
         const { error } = await alassiSupabase.from('menu_items').insert(payload);
-        if (error) throw error;
+        if (error) throw new Error('Supabase رفض إضافة الصنف: ' + error.message);
     }
 
     async function saveSettingsToCloudSecure() {
@@ -2862,20 +2875,27 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         let row = cloudSettingsRow;
         if (!row) {
             const { data, error } = await alassiSupabase.from('restaurant_settings').select('*').limit(1);
-            if (error) throw error;
+            if (error) throw new Error('تعذر قراءة إعدادات المطعم: ' + error.message);
             row = data?.[0] || null;
             cloudSettingsRow = row;
         }
-        if (!row) {
-            throw new Error('جدول restaurant_settings لا يحتوي على صف إعدادات. أضف صفاً واحداً من Supabase ثم أعد المحاولة.');
-        }
+        if (!row) throw new Error('جدول restaurant_settings لا يحتوي على صف إعدادات. أضف صفاً واحداً من Supabase ثم أعد المحاولة.');
         const payload = settingsPayloadSecure(dynamicSettings, row);
         if (!Object.keys(payload).length) throw new Error('تعذر مطابقة أعمدة restaurant_settings');
         const query = Object.prototype.hasOwnProperty.call(row,'id')
             ? alassiSupabase.from('restaurant_settings').update(payload).eq('id', row.id)
-            : alassiSupabase.from('restaurant_settings').update(payload).limit(1);
+            : alassiSupabase.from('restaurant_settings').update(payload);
         const { error } = await query;
-        if (error) throw error;
+        if (error) throw new Error('Supabase رفض حفظ الإعدادات: ' + error.message);
+
+        // تحقق من الحفظ السحابي قبل تحديث localStorage.
+        const verifyQuery = Object.prototype.hasOwnProperty.call(row,'id')
+            ? alassiSupabase.from('restaurant_settings').select('*').eq('id', row.id).maybeSingle()
+            : alassiSupabase.from('restaurant_settings').select('*').limit(1).maybeSingle();
+        const { data: verified, error: verifyError } = await verifyQuery;
+        if (verifyError) throw new Error('تعذر التحقق من إعدادات Supabase: ' + verifyError.message);
+        if (!verified) throw new Error('لم يتم العثور على صف الإعدادات بعد الحفظ؛ راجع RLS.');
+        cloudSettingsRow = verified;
     }
 
     async function uploadImageToStorage(file, folder = 'menu') {
