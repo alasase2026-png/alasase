@@ -2992,9 +2992,12 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         try {
             const { data: rows, error } = await alassiSupabase.from('menu_items').select('*');
             if (error) throw error;
-            if (Array.isArray(rows) && rows.length) {
+            if (Array.isArray(rows)) {
+                // السحابة هي المصدر الرئيسي دائماً:
+                // حتى إذا أصبح الجدول فارغاً بسبب حذف آخر صنف من الإدارة،
+                // يجب مسح النسخة المحلية حتى يختفي الصنف عند الزبون أيضاً.
                 const cloudItems = rows.map(normalizeItemSecure).filter(x => x && x.id && x.name);
-                if (cloudItems.length) menuData = cloudItems;
+                menuData = cloudItems;
             }
             const { data: settingsRows, error: settingsError } = await alassiSupabase.from('restaurant_settings').select('*').limit(1);
             if (settingsError) throw settingsError;
@@ -3245,6 +3248,8 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         realtimeChannel = alassiSupabase.channel('alassi-live-menu-secure')
             .on('postgres_changes', {event:'*', schema:'public', table:'menu_items'}, async () => { await loadCloudDataSecure(false); renderMenu(); renderAdminMenuList(); })
             .on('postgres_changes', {event:'*', schema:'public', table:'restaurant_settings'}, async () => { await loadCloudDataSecure(false); applySettingsToUI(); populateAdminInputs(); })
+            // إذا كانت العروض محفوظة في جدول مستقل، نعيد تحميل البيانات أيضاً.
+            .on('postgres_changes', {event:'*', schema:'public', table:'offers'}, async () => { await loadCloudDataSecure(false); renderMenu(); applySettingsToUI(); })
             .subscribe(status => console.log('Supabase Realtime:', status));
     }
 
@@ -3267,8 +3272,10 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         lastCloudSignature = typeof cloudSignature === 'function' ? cloudSignature() : '';
         await setupRealtimeSecure();
         if (!window.__alassiSecurePoll) {
-            window.__alassiSecurePoll = setInterval(refreshSecure, 5000);
+            window.__alassiSecurePoll = setInterval(refreshSecure, 1500);
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshSecure(); });
+            window.addEventListener('pageshow', () => refreshSecure());
+            window.addEventListener('focus', () => refreshSecure());
         }
         return ok;
     };
