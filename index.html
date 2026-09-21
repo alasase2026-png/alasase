@@ -1160,7 +1160,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             loadLocalData();
             renderMenu();
             applySettingsToUI();
-            bootCloudData();
+            await window.bootCloudData();
 
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase();
@@ -1185,21 +1185,9 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             } catch (e) {}
         }
 
+        // Legacy migration disabled: cloud data must never be rewritten on page load.
         function applyRequestedPricesAndRemoveMeat(items) {
-            const requestedNames = {
-                'فطيرة جبنة': 20,
-                'فطيرة محمرة': 20,
-                'مناقيش زعتر': 20
-            };
-            return (Array.isArray(items) ? items : []).filter(item => item && item.category !== 'meat').map(item => {
-                const current = Number(item.price) || 0;
-                if (!item.hasSizes) {
-                    if (Object.prototype.hasOwnProperty.call(requestedNames, item.name)) item.price = requestedNames[item.name];
-                    else if (current === 30) item.price = 40;
-                    else if (current === 40) item.price = 50;
-                }
-                return item;
-            });
+            return Array.isArray(items) ? items : [];
         }
 
         function loadLocalData() {
@@ -1397,8 +1385,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 if (error) throw error;
                 if (Array.isArray(rows) && rows.length) {
                     const cloudItems = rows.map(normalizeCloudItem).filter(x => x.id && x.name);
-                    const sanitizedCloudItems = applyRequestedPricesAndRemoveMeat(cloudItems);
-                    if (sanitizedCloudItems.length) menuData = sanitizedCloudItems;
+                    if (cloudItems.length) menuData = cloudItems;
                 }
 
                 const { data: settingsRows, error: settingsError } =
@@ -2394,7 +2381,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             };
 
             try {
-                await saveSettingsToCloud();
+                await window.saveSettingsToCloud();
                 await window.loadCloudDataSecure(false);
                 saveLocalData();
                 applySettingsToUI();
@@ -2417,7 +2404,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
             sessionStorage.removeItem('announcementSeen');
             try {
-                await saveSettingsToCloud();
+                await window.saveSettingsToCloud();
                 saveLocalData();
                 applySettingsToUI();
                 showToast('تم نشر الإعلان للزبائن مباشرة ✓');
@@ -2433,7 +2420,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             const previous = { ...dynamicSettings };
             dynamicSettings = { ...dynamicSettings, statusMode: nextStatusMode, workingHoursText: nextHours };
             try {
-                await saveSettingsToCloud();
+                await window.saveSettingsToCloud();
                 // saveSettingsToCloudSecure verifies the exact row returned by Supabase.
                 await window.loadCloudDataSecure(false);
                 applySettingsToUI();
@@ -2508,7 +2495,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             item.isAvailable = !previous;
 
             try {
-                await saveMenuItemToCloud(item, item.id);
+                await window.saveMenuItemToCloud(item, item.id);
                 saveLocalData();
                 renderMenu();
                 renderAdminMenuList();
@@ -2628,7 +2615,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             const existingIdx = menuData.findIndex(i => i.id === itemId);
 
             try {
-                await saveMenuItemToCloud(newItem, existingIdx >= 0 ? itemId : null);
+                await window.saveMenuItemToCloud(newItem, existingIdx >= 0 ? itemId : null);
 
                 if (existingIdx >= 0) menuData[existingIdx] = newItem;
                 else menuData.push(newItem);
@@ -2644,7 +2631,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             }
         }
 
-        async function deleteMenuItem(id) {
+        async function deleteMenuItemLegacy(id) {
             if (!confirm('هل أنت تأكد من إزالة هذه الوجبة؟')) return;
 
             try {
@@ -2809,7 +2796,10 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         }
         if (!direct) {
             const key = ['settings','data','config','value'].find(k => Object.prototype.hasOwnProperty.call(row,k));
-            if (key) payload[key] = settings;
+            if (key) {
+                const currentValue = row[key];
+                payload[key] = (typeof currentValue === 'string') ? JSON.stringify(settings) : settings;
+            }
         }
         return payload;
     }
@@ -2864,8 +2854,19 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             if (verifyError) throw new Error('تم إرسال التعديل لكن تعذر التحقق منه: ' + verifyError.message);
             if (!verified) throw new Error('لم تُرجع Supabase الصنف بعد التعديل؛ راجع صلاحيات RLS.');
             const v = normalizeItemSecure(verified);
-            if (Number(v.price) !== Number(item.price) || v.isAvailable !== (item.isAvailable !== false)) {
-                throw new Error('التعديل لم يُثبت في قاعدة البيانات. غالباً توجد سياسة RLS تمنع الكتابة.');
+            const availabilityMatches = v.isAvailable === (item.isAvailable !== false);
+            let pricesMatch = true;
+            if (item.hasSizes) {
+                for (const key of ['small','medium','large']) {
+                    const expected = Number(item.customSizes?.[key]?.price || 0);
+                    const actual = Number(v.customSizes?.[key]?.price || 0);
+                    if (expected !== actual) { pricesMatch = false; break; }
+                }
+            } else {
+                pricesMatch = Number(v.price) === Number(item.price);
+            }
+            if (!pricesMatch || !availabilityMatches) {
+                throw new Error('التعديل لم يُثبت في قاعدة البيانات. غالباً توجد سياسة RLS أو مشكلة في أعمدة الأسعار.');
             }
             return v;
         }
