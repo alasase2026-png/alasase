@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta id="alassi-live-build" name="alassi-live-build" content="2026-09-21-realtime-hours-fix-1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="site-page-title">العسسي - ملحمة ومعجنات</title>
     <!-- Tailwind CSS CDN -->
@@ -1509,13 +1510,16 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
             alassiRealtimeChannel = alassiSupabase
                 .channel('alassi-live-menu-' + Date.now())
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, async () => {
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, async (payload) => {
+                    console.log('Realtime menu_items change:', payload?.eventType || 'change');
+                    // اجلب النسخة الحالية من Supabase فوراً ثم أعد رسم الواجهة.
                     await refreshCloudForVisitors();
                     renderMenu();
                     renderAdminMenuList();
                     applySettingsToUI();
                 })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'restaurant_settings' }, async () => {
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'restaurant_settings' }, async (payload) => {
+                    console.log('Realtime restaurant_settings change:', payload?.eventType || 'change');
                     await refreshCloudForVisitors();
                     applySettingsToUI();
                     populateAdminInputs();
@@ -1634,7 +1638,9 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             // مزامنة احتياطية سريعة: إذا كان Realtime متوقفاً أو حجبه المتصفح،
             // سيصل آخر تغيير للزبون خلال ثوانٍ قليلة بدون إعادة نشر الموقع.
             if (cloudPollTimer) clearInterval(cloudPollTimer);
-            cloudPollTimer = setInterval(refreshCloudForVisitors, 2000);
+            cloudPollTimer = setInterval(() => {
+                if (document.visibilityState === 'visible') refreshCloudForVisitors();
+            }, 2000);
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     refreshCloudForVisitors();
@@ -1725,6 +1731,51 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             sessionStorage.setItem('announcementSeen', 'true');
         }
 
+        // يحوّل الأرقام العربية/الفارسية إلى أرقام إنجليزية حتى نستطيع قراءة أوقات الدوام.
+        function normalizeTimeDigits(value) {
+            return String(value ?? '')
+                .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+                .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+        }
+
+        // يقرأ صيغاً مثل: "من 8 صباحاً إلى 11 مساءً" أو "8:30 ص - 23:00 م".
+        // إذا تعذر تحليل النص نرجع إلى 07:00 - 22:00 كقيمة افتراضية آمنة.
+        function parseWorkingHours(text) {
+            const raw = normalizeTimeDigits(text).trim().toLowerCase();
+            const fallback = { openingTime: 7 * 60, closingTime: 22 * 60 };
+            if (!raw) return fallback;
+
+            const numbers = [...raw.matchAll(/(\d{1,2})(?:\s*[:.](\d{1,2}))?/g)].map(m => ({
+                hour: Number(m[1]),
+                minute: m[2] ? Number(m[2]) : 0,
+                index: m.index ?? 0
+            }));
+            if (numbers.length < 2) return fallback;
+
+            const first = numbers[0];
+            const second = numbers[1];
+            const around = (n) => raw.slice(Math.max(0, n.index - 12), Math.min(raw.length, n.index + 18));
+
+            const isPM = s => /(مساء|م\b|pm)/i.test(s);
+            const isAM = s => /(صباح|ص\b|am)/i.test(s);
+            const convert = (n, context) => {
+                let h = n.hour;
+                if (h > 23 || n.minute > 59) return null;
+                if (isPM(context) && h < 12) h += 12;
+                if (isAM(context) && h === 12) h = 0;
+                return h * 60 + n.minute;
+            };
+
+            let opening = convert(first, around(first));
+            let closing = convert(second, around(second));
+            if (opening == null || closing == null) return fallback;
+
+            // إذا كتب المستخدم 10 إلى 2 مساءً، نفهم 2 مساءً = 14:00.
+            if (closing <= opening && closing < 12 * 60 && /(مساء|م\b|pm)/i.test(around(second))) closing += 12 * 60;
+            if (closing === opening) return fallback;
+            return { openingTime: opening, closingTime: closing };
+        }
+
         function checkStoreStatus() {
             const statusElement = document.getElementById('store-status-badge');
             if (!statusElement) return;
@@ -1735,7 +1786,8 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 statusElement.className = 'store-status open';
                 statusElement.innerHTML = '<i class="fa-solid fa-circle-check ml-1"></i> مفتوح الآن - نستقبل طلباتكم';
                 return;
-            } else if (mode === 'force_closed') {
+            }
+            if (mode === 'force_closed') {
                 statusElement.className = 'store-status closed';
                 statusElement.innerHTML = '<i class="fa-solid fa-circle-xmark ml-1"></i> مغلق حالياً - نراكم قريباً';
                 return;
@@ -1743,10 +1795,14 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
             const now = new Date();
             const currentTime = now.getHours() * 60 + now.getMinutes();
-            const openingTime = 7 * 60;
-            const closingTime = 22 * 60;
+            const { openingTime, closingTime } = parseWorkingHours(dynamicSettings.workingHoursText);
 
-            if (currentTime >= openingTime && currentTime < closingTime) {
+            // يدعم أيضاً دواماً يمتد بعد منتصف الليل.
+            const isOpen = openingTime < closingTime
+                ? currentTime >= openingTime && currentTime < closingTime
+                : currentTime >= openingTime || currentTime < closingTime;
+
+            if (isOpen) {
                 statusElement.className = 'store-status open';
                 statusElement.innerHTML = '<i class="fa-solid fa-circle-check ml-1"></i> مفتوح الآن - نستقبل طلباتكم';
             } else {
