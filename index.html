@@ -678,9 +678,11 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 <i class="fa-solid fa-user-shield"></i>
             </div>
             <h3 class="text-xl font-black text-gold mb-1">دخول الإدارة</h3>
-            <p class="text-xs text-gray-400 mb-4">أدخل كلمة السر للتحكم المباشر والمفصل بالمنيو والمطعم</p>
+            <p class="text-xs text-gray-400 mb-4">دخول آمن عبر حساب Supabase للإدارة والتحكم المباشر بالمنيو والمطعم</p>
             <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <input type="password" id="adminPasswordInput" placeholder="كلمة المرور" required
+                <input type="email" id="adminEmailInput" placeholder="البريد الإلكتروني للإدارة" autocomplete="username" required
+                    class="w-full bg-black/70 border border-gold/40 rounded-xl p-3 text-center text-sm text-white focus:outline-none focus:border-gold">
+                <input type="password" id="adminPasswordInput" placeholder="كلمة المرور" autocomplete="current-password" required
                     class="w-full bg-black/70 border border-gold/40 rounded-xl p-3 text-center text-sm text-gold tracking-widest focus:outline-none focus:border-gold">
                 <button type="submit" class="w-full bg-gold hover:bg-goldHover text-brandDark font-black py-3 rounded-xl text-sm shadow-lg transition">
                     دخول اللوحة
@@ -1009,16 +1011,12 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
                 <!-- TAB 5: Password Change -->
                 <div id="admin-tab-security" class="admin-tab-content hidden space-y-4">
-                    <h3 class="text-sm font-black text-gold border-b border-gold/20 pb-2">تغيير كلمة السر للإدارة</h3>
+                    <h3 class="text-sm font-black text-gold border-b border-gold/20 pb-2">تغيير كلمة مرور حساب الإدارة</h3>
                     
                     <div class="bg-black/50 p-4 rounded-2xl border border-gold/30 space-y-3">
                         <div>
-                            <label class="text-xs text-gray-300 font-bold block mb-1">كلمة المرور الحالية:</label>
-                            <input type="password" id="adm-currPass" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white" placeholder="أدخل كلمة السر الحالية">
-                        </div>
-                        <div>
                             <label class="text-xs text-gray-300 font-bold block mb-1">كلمة المرور الجديدة:</label>
-                            <input type="password" id="adm-newPass" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-gold font-bold" placeholder="أدخل كلمة السر الجديدة">
+                            <input type="password" id="adm-newPass" minlength="8" autocomplete="new-password" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-gold font-bold" placeholder="أدخل كلمة المرور الجديدة (8 أحرف على الأقل)">
                         </div>
                         <div>
                             <label class="text-xs text-gray-300 font-bold block mb-1">تأكيد كلمة المرور الجديدة:</label>
@@ -1114,7 +1112,6 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             announcementMessage: "أهلاً وسهلاً بكم! يسعدنا تقديم أشهى المأكولات الطازجة يومياً.",
             statusMode: "auto",
             workingHoursText: "من 7 صباحاً إلى 10 مساءً",
-            adminPassword: "Yaser1738"
         };
 
         let dynamicSettings = { ...defaultSettings };
@@ -1517,62 +1514,8 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 });
         }
 
-        async function applyRequestedMenuChangesToCloud() {
-            if (!window.alassiSupabase || menuMigrationDone) return;
-            let cloudChangesSucceeded = true;
+        // Automatic cloud migrations were removed: database changes must be explicit and admin-initiated.
 
-            // حذف قسم اللحوم من المصدر السحابي أيضاً، وليس فقط من واجهة الزبون.
-            try {
-                const { data: allRows, error: rowsError } = await alassiSupabase.from('menu_items').select('*');
-                if (rowsError) throw rowsError;
-                const meatIds = (allRows || []).map(normalizeCloudItem).filter(item => item.category === 'meat').map(item => item.id).filter(Boolean);
-                for (const id of meatIds) {
-                    const { error } = await alassiSupabase.from('menu_items').delete().eq('id', id);
-                    if (error) cloudChangesSucceeded = false;
-                }
-            } catch (e) {
-                cloudChangesSucceeded = false;
-                console.warn('لم يتم حذف أصناف اللحوم من السحابة:', e);
-            }
-
-            const requestedNames = {
-                'فطيرة جبنة': 20,
-                'فطيرة محمرة': 20,
-                'مناقيش زعتر': 20
-            };
-
-            const targets = menuData.map(item => {
-                const current = Number(item.price) || 0;
-                let next = current;
-                if (Object.prototype.hasOwnProperty.call(requestedNames, item.name)) {
-                    next = requestedNames[item.name];
-                } else if (current === 30) {
-                    next = 40;
-                } else if (current === 40) {
-                    next = 50;
-                }
-                return { item, next };
-            });
-
-            for (const { item, next } of targets) {
-                if (item.category !== 'meat' && (Number(item.price) || 0) !== next && !item.hasSizes) {
-                    item.price = next;
-                    try { await saveMenuItemToCloud(item, item.id); }
-                    catch (e) {
-                        cloudChangesSucceeded = false;
-                        console.warn('تعذر نشر سعر', item.name, e);
-                    }
-                }
-            }
-
-            menuData = menuData.filter(item => item.category !== 'meat');
-            saveLocalData();
-            menuMigrationDone = cloudChangesSucceeded;
-        }
-
-        let cloudPollBusy = false;
-        let menuMigrationDone = false;
-        let lastCloudSignature = '';
         function cloudSignature() {
             try {
                 return JSON.stringify({
@@ -2333,15 +2276,8 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
         // ===== ADMIN CONTROL PANEL LOGIC =====
         function handleFileUpload(event, targetInputId) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById(targetInputId).value = e.target.result;
-                showToast('تمت معالجة الصورة بنجاح!');
-            };
-            reader.readAsDataURL(file);
+            // Replaced by the secure Supabase Storage uploader below.
+            if (window.handleFileUpload !== arguments.callee) return window.handleFileUpload(event, targetInputId);
         }
 
         function openAdminAuthModal() {
@@ -2361,17 +2297,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
         function handleAdminLogin(e) {
             e.preventDefault();
-            const pass = document.getElementById('adminPasswordInput').value;
-            const validPass = dynamicSettings.adminPassword || "Yaser1738";
-
-            if (pass === validPass) {
-                closeAdminAuthModal();
-                document.getElementById('adminPasswordInput').value = '';
-                openAdminPanel();
-                showToast('مرحباً بك في لوحة تحكم الإدارة!');
-            } else {
-                showToast('كلمة المرور غير صحيحة!', 'error');
-            }
+            showToast('استخدم تسجيل الدخول الآمن عبر Supabase.','error');
         }
 
         function openAdminPanel() {
@@ -2510,41 +2436,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         }
 
         async function changeAdminPassword() {
-            const curr = document.getElementById('adm-currPass').value;
-            const newP = document.getElementById('adm-newPass').value;
-            const conf = document.getElementById('adm-confirmPass').value;
-
-            const validPass = dynamicSettings.adminPassword || "Yaser1738";
-
-            if (curr !== validPass) {
-                showToast('كلمة السر الحالية غير صحيحة!', 'error');
-                return;
-            }
-
-            if (!newP || newP.length < 4) {
-                showToast('كلمة السر الجديدة قصيرة جداً!', 'error');
-                return;
-            }
-
-            if (newP !== conf) {
-                showToast('كلمتا السر غير متطابقتين!', 'error');
-                return;
-            }
-
-            dynamicSettings.adminPassword = newP;
-            try {
-                await saveSettingsToCloud();
-                saveLocalData();
-            } catch (e) {
-                showToast('تعذر حفظ كلمة السر على السحابة', 'error');
-                return;
-            }
-
-            document.getElementById('adm-currPass').value = '';
-            document.getElementById('adm-newPass').value = '';
-            document.getElementById('adm-confirmPass').value = '';
-
-            showToast('تمت تغيير كلمة السر بنجاح!');
+            showToast('تغيير كلمة المرور يتم من خلال حساب Supabase.','error');
         }
 
         // MENU ITEMS ADMIN ACTIONS
@@ -2799,6 +2691,330 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
   }
   document.addEventListener('DOMContentLoaded',()=>{addTools();setTimeout(()=>{restoreCartSafe();wrapExistingFunctions()},500)});
   window.addEventListener('beforeunload',saveCartSafe);
+})();
+
+</script>
+
+<!-- Secure online-editing layer: Supabase Auth + Storage + Realtime -->
+<script id="alassi-secure-online-layer">
+(function () {
+    'use strict';
+
+    const STORAGE_BUCKET = 'menu-images';
+    const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+    let realtimeChannel = null;
+    let cloudPollBusySecure = false;
+
+    function supabaseReady() {
+        return !!(window.alassiSupabase && window.supabase);
+    }
+
+    function requireSupabase() {
+        if (!supabaseReady()) throw new Error('Supabase غير متاح');
+    }
+
+    function isValidImageUrl(value) {
+        if (!value) return false;
+        return /^(https?:\/\/|data:image\/|blob:)/i.test(String(value));
+    }
+
+    function normalizeItemSecure(row) {
+        if (!row) return null;
+        const pick = (names, fallback = undefined) => {
+            for (const n of names) if (Object.prototype.hasOwnProperty.call(row, n) && row[n] !== null && row[n] !== undefined) return row[n];
+            return fallback;
+        };
+        let sizes = pick(['custom_sizes','customSizes','sizes'], null);
+        if (typeof sizes === 'string') { try { sizes = JSON.parse(sizes); } catch (_) {} }
+        const hasSizes = !!pick(['has_sizes','hasSizes'], !!sizes);
+        return {
+            id: String(pick(['id'], '')),
+            name: String(pick(['name','title'], '')),
+            category: String(pick(['category','type'], 'pizza')),
+            desc: String(pick(['desc','description','item_desc'], '')),
+            image: String(pick(['image','image_url','imageUrl'], '')),
+            icon: String(pick(['icon','icon_name'], 'fa-utensils')),
+            price: Number(pick(['price','unit_price'], 0)) || 0,
+            isAvailable: pick(['is_available','isAvailable','available'], true) !== false,
+            isOffer: !!pick(['is_offer','isOffer','offer'], false),
+            hasSizes,
+            customSizes: hasSizes ? (sizes || null) : null
+        };
+    }
+
+    function itemPayloadForRow(item, row) {
+        const payload = {};
+        const set = (names, value) => {
+            for (const n of names) {
+                if (Object.prototype.hasOwnProperty.call(row, n)) { payload[n] = value; return; }
+            }
+        };
+        set(['id'], item.id);
+        set(['name','title'], item.name);
+        set(['category','type'], item.category);
+        set(['desc','description','item_desc'], item.desc || '');
+        set(['image','image_url','imageUrl'], item.image || '');
+        set(['icon','icon_name'], item.icon || 'fa-utensils');
+        set(['price','unit_price'], Number(item.price) || 0);
+        set(['is_available','isAvailable','available'], item.isAvailable !== false);
+        set(['is_offer','isOffer','offer'], !!item.isOffer);
+        set(['has_sizes','hasSizes'], !!item.hasSizes);
+        set(['custom_sizes','customSizes','sizes'], item.hasSizes ? (item.customSizes || null) : null);
+        return payload;
+    }
+
+    function settingsFromRowSecure(row) {
+        if (!row) return null;
+        let source = { ...row };
+        const key = ['settings','data','config','value'].find(k => Object.prototype.hasOwnProperty.call(row, k));
+        if (key && row[key] && typeof row[key] === 'string') { try { source = { ...source, ...JSON.parse(row[key]) }; } catch (_) {} }
+        else if (key && row[key] && typeof row[key] === 'object') source = { ...source, ...row[key] };
+        const aliases = {
+            restaurantName:['restaurantName','restaurant_name','name','title'], restaurantSubtitle:['restaurantSubtitle','restaurant_subtitle','subtitle'],
+            logoUrl:['logoUrl','logo_url','logo'], phone:['phone','phone_number'], whatsapp:['whatsapp','whatsapp_number'],
+            manager1:['manager1','manager_1'], manager2:['manager2','manager_2'], shamcashCode:['shamcashCode','shamcash_code'],
+            shamcashQr:['shamcashQr','shamcash_qr','shamcash_qr_url'], deliveryNote:['deliveryNote','delivery_note'],
+            facebookUrl:['facebookUrl','facebook_url'], instagramUrl:['instagramUrl','instagram_url'], whatsappChannelUrl:['whatsappChannelUrl','whatsapp_channel_url'], mapsUrl:['mapsUrl','maps_url'],
+            announcementActive:['announcementActive','announcement_active'], announcementType:['announcementType','announcement_type'], announcementTitle:['announcementTitle','announcement_title'], announcementMessage:['announcementMessage','announcement_message'],
+            statusMode:['statusMode','status_mode'], workingHoursText:['workingHoursText','working_hours_text']
+        };
+        const out = {};
+        for (const [keyName, names] of Object.entries(aliases)) {
+            for (const n of names) if (Object.prototype.hasOwnProperty.call(source,n) && source[n] !== null && source[n] !== undefined) { out[keyName] = source[n]; break; }
+        }
+        return Object.keys(out).length ? out : null;
+    }
+
+    function settingsPayloadSecure(settings, row) {
+        const payload = {};
+        const aliases = {
+            restaurantName:['restaurantName','restaurant_name','name','title'], restaurantSubtitle:['restaurantSubtitle','restaurant_subtitle','subtitle'],
+            logoUrl:['logoUrl','logo_url','logo'], phone:['phone','phone_number'], whatsapp:['whatsapp','whatsapp_number'], manager1:['manager1','manager_1'], manager2:['manager2','manager_2'],
+            shamcashCode:['shamcashCode','shamcash_code'], shamcashQr:['shamcashQr','shamcash_qr','shamcash_qr_url'], deliveryNote:['deliveryNote','delivery_note'],
+            facebookUrl:['facebookUrl','facebook_url'], instagramUrl:['instagramUrl','instagram_url'], whatsappChannelUrl:['whatsappChannelUrl','whatsapp_channel_url'], mapsUrl:['mapsUrl','maps_url'],
+            announcementActive:['announcementActive','announcement_active'], announcementType:['announcementType','announcement_type'], announcementTitle:['announcementTitle','announcement_title'], announcementMessage:['announcementMessage','announcement_message'], statusMode:['statusMode','status_mode'], workingHoursText:['workingHoursText','working_hours_text']
+        };
+        let direct = false;
+        for (const [keyName, names] of Object.entries(aliases)) {
+            for (const n of names) if (Object.prototype.hasOwnProperty.call(row,n)) { payload[n] = settings[keyName]; direct = true; break; }
+        }
+        if (!direct) {
+            const key = ['settings','data','config','value'].find(k => Object.prototype.hasOwnProperty.call(row,k));
+            if (key) payload[key] = settings;
+        }
+        return payload;
+    }
+
+    async function loadCloudDataSecure(showError = false) {
+        requireSupabase();
+        try {
+            const { data: rows, error } = await alassiSupabase.from('menu_items').select('*');
+            if (error) throw error;
+            if (Array.isArray(rows) && rows.length) {
+                const cloudItems = rows.map(normalizeItemSecure).filter(x => x && x.id && x.name);
+                if (cloudItems.length) menuData = cloudItems;
+            }
+            const { data: settingsRows, error: settingsError } = await alassiSupabase.from('restaurant_settings').select('*').limit(1);
+            if (settingsError) throw settingsError;
+            if (settingsRows && settingsRows[0]) {
+                cloudSettingsRow = settingsRows[0];
+                const cloudSettings = settingsFromRowSecure(settingsRows[0]);
+                if (cloudSettings) dynamicSettings = { ...defaultSettings, ...dynamicSettings, ...cloudSettings };
+            }
+            cloudSyncReady = true;
+            saveLocalData();
+            return true;
+        } catch (e) {
+            console.warn('Supabase load failed:', e);
+            if (showError) showToast('تعذر الاتصال بالسحابة؛ تم استخدام آخر نسخة محلية', 'error');
+            return false;
+        }
+    }
+
+    async function saveMenuItemToCloudSecure(item, oldId = null) {
+        requireSupabase();
+        const { data: sessionData } = await alassiSupabase.auth.getSession();
+        if (!sessionData?.session) throw new Error('يجب تسجيل الدخول للإدارة أولاً');
+
+        if (oldId) {
+            const { data: existing, error } = await alassiSupabase.from('menu_items').select('*').eq('id', oldId).maybeSingle();
+            if (error) throw error;
+            if (existing) {
+                const payload = itemPayloadForRow(item, existing);
+                const { error: updateError } = await alassiSupabase.from('menu_items').update(payload).eq('id', oldId);
+                if (updateError) throw updateError;
+                return;
+            }
+        }
+
+        const standard = { id:item.id, name:item.name, category:item.category, desc:item.desc||'', image:item.image||'', icon:item.icon||'fa-utensils', price:Number(item.price)||0, is_available:item.isAvailable!==false, is_offer:!!item.isOffer, has_sizes:!!item.hasSizes, custom_sizes:item.hasSizes ? (item.customSizes||null) : null };
+        const { data: templateRows, error: templateError } = await alassiSupabase.from('menu_items').select('*').limit(1);
+        if (templateError) throw templateError;
+        const payload = templateRows?.[0] ? itemPayloadForRow(item, templateRows[0]) : standard;
+        const { error } = await alassiSupabase.from('menu_items').insert(payload);
+        if (error) throw error;
+    }
+
+    async function saveSettingsToCloudSecure() {
+        requireSupabase();
+        const { data: sessionData } = await alassiSupabase.auth.getSession();
+        if (!sessionData?.session) throw new Error('يجب تسجيل الدخول للإدارة أولاً');
+        let row = cloudSettingsRow;
+        if (!row) {
+            const { data, error } = await alassiSupabase.from('restaurant_settings').select('*').limit(1);
+            if (error) throw error;
+            row = data?.[0] || null;
+            cloudSettingsRow = row;
+        }
+        if (!row) {
+            throw new Error('جدول restaurant_settings لا يحتوي على صف إعدادات. أضف صفاً واحداً من Supabase ثم أعد المحاولة.');
+        }
+        const payload = settingsPayloadSecure(dynamicSettings, row);
+        if (!Object.keys(payload).length) throw new Error('تعذر مطابقة أعمدة restaurant_settings');
+        const query = Object.prototype.hasOwnProperty.call(row,'id')
+            ? alassiSupabase.from('restaurant_settings').update(payload).eq('id', row.id)
+            : alassiSupabase.from('restaurant_settings').update(payload).limit(1);
+        const { error } = await query;
+        if (error) throw error;
+    }
+
+    async function uploadImageToStorage(file, folder = 'menu') {
+        requireSupabase();
+        if (!(file instanceof File)) throw new Error('ملف الصورة غير صالح');
+        if (file.size > IMAGE_MAX_BYTES) throw new Error('حجم الصورة أكبر من 5MB');
+        if (!file.type.startsWith('image/')) throw new Error('الملف المختار ليس صورة');
+        const { data: sessionData } = await alassiSupabase.auth.getSession();
+        if (!sessionData?.session) throw new Error('سجّل الدخول للإدارة قبل رفع الصور');
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g,'') || 'jpg';
+        const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+        const { error: uploadError } = await alassiSupabase.storage.from(STORAGE_BUCKET).upload(path, file, { upsert:false, cacheControl:'31536000', contentType:file.type });
+        if (uploadError) throw new Error('فشل رفع الصورة إلى Storage: ' + uploadError.message);
+        const { data } = alassiSupabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+        if (!data?.publicUrl) throw new Error('تعذر إنشاء رابط الصورة');
+        return data.publicUrl;
+    }
+
+    window.handleFileUpload = async function(event, targetInputId) {
+        const file = event?.target?.files?.[0];
+        if (!file) return;
+        try {
+            const url = await uploadImageToStorage(file, targetInputId === 'item-input-image' ? 'menu' : 'settings');
+            const input = document.getElementById(targetInputId);
+            if (input) input.value = url;
+            showToast('تم رفع الصورة إلى السحابة ✓');
+        } catch (e) {
+            console.error(e);
+            showToast(e.message || 'تعذر رفع الصورة', 'error');
+            if (event.target) event.target.value = '';
+        }
+    };
+
+    window.handleAdminLogin = async function(e) {
+        e.preventDefault();
+        requireSupabase();
+        const email = document.getElementById('adminEmailInput')?.value.trim();
+        const password = document.getElementById('adminPasswordInput')?.value || '';
+        if (!email || !password) return showToast('أدخل البريد الإلكتروني وكلمة المرور', 'error');
+        const button = e.submitter;
+        if (button) button.disabled = true;
+        try {
+            const { error } = await alassiSupabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            localStorage.setItem('alassi_admin_email', email);
+            closeAdminAuthModal();
+            document.getElementById('adminPasswordInput').value = '';
+            await loadCloudDataSecure(false);
+            openAdminPanel();
+            showToast('تم تسجيل الدخول بأمان ✓');
+        } catch (err) {
+            console.error(err);
+            showToast('فشل تسجيل الدخول: ' + (err.message || 'تحقق من بيانات الحساب'), 'error');
+        } finally { if (button) button.disabled = false; }
+    };
+
+    window.changeAdminPassword = async function() {
+        const newP = document.getElementById('adm-newPass')?.value || '';
+        const conf = document.getElementById('adm-confirmPass')?.value || '';
+        if (newP.length < 8) return showToast('كلمة المرور يجب أن تكون 8 أحرف على الأقل', 'error');
+        if (newP !== conf) return showToast('كلمتا المرور غير متطابقتين', 'error');
+        try {
+            const { data } = await alassiSupabase.auth.getSession();
+            if (!data?.session) throw new Error('انتهت جلسة الإدارة؛ سجّل الدخول من جديد');
+            const { error } = await alassiSupabase.auth.updateUser({ password:newP });
+            if (error) throw error;
+            document.getElementById('adm-newPass').value = '';
+            document.getElementById('adm-confirmPass').value = '';
+            showToast('تم تحديث كلمة مرور حساب الإدارة ✓');
+        } catch (e) { console.error(e); showToast(e.message || 'تعذر تغيير كلمة المرور', 'error'); }
+    };
+
+    window.saveMenuItemToCloud = saveMenuItemToCloudSecure;
+    window.saveSettingsToCloud = saveSettingsToCloudSecure;
+
+    window.deleteMenuItem = async function(id) {
+        if (!confirm('هل أنت متأكد من إزالة هذه الوجبة؟')) return;
+        try {
+            const { data } = await alassiSupabase.auth.getSession();
+            if (!data?.session) throw new Error('يجب تسجيل الدخول للإدارة أولاً');
+            const { error } = await alassiSupabase.from('menu_items').delete().eq('id', id);
+            if (error) throw error;
+            menuData = menuData.filter(i => i.id !== id);
+            saveLocalData(); renderMenu(); renderAdminMenuList();
+            showToast('تم حذف الوجبة ونشر الحذف للزبائن مباشرة ✓');
+        } catch (e) { console.error(e); showToast('تعذر حذف الوجبة: ' + (e.message || 'خطأ'), 'error'); }
+    };
+
+    async function setupRealtimeSecure() {
+        if (!supabaseReady()) return;
+        if (realtimeChannel) { try { await alassiSupabase.removeChannel(realtimeChannel); } catch (_) {} }
+        realtimeChannel = alassiSupabase.channel('alassi-live-menu-secure')
+            .on('postgres_changes', {event:'*', schema:'public', table:'menu_items'}, async () => { await loadCloudDataSecure(false); renderMenu(); renderAdminMenuList(); })
+            .on('postgres_changes', {event:'*', schema:'public', table:'restaurant_settings'}, async () => { await loadCloudDataSecure(false); applySettingsToUI(); populateAdminInputs(); })
+            .subscribe(status => console.log('Supabase Realtime:', status));
+    }
+
+    async function refreshSecure() {
+        if (cloudPollBusySecure || document.hidden) return;
+        cloudPollBusySecure = true;
+        try {
+            const before = typeof cloudSignature === 'function' ? cloudSignature() : '';
+            const ok = await loadCloudDataSecure(false);
+            if (ok) {
+                const after = typeof cloudSignature === 'function' ? cloudSignature() : '';
+                if (after !== before) { renderMenu(); applySettingsToUI(); if (!document.getElementById('adminPanelModal')?.classList.contains('hidden')) renderAdminMenuList(); }
+            }
+        } finally { cloudPollBusySecure = false; }
+    }
+
+    window.bootCloudData = async function() {
+        const ok = await loadCloudDataSecure(true);
+        renderMenu(); applySettingsToUI();
+        lastCloudSignature = typeof cloudSignature === 'function' ? cloudSignature() : '';
+        await setupRealtimeSecure();
+        if (!window.__alassiSecurePoll) {
+            window.__alassiSecurePoll = setInterval(refreshSecure, 5000);
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshSecure(); });
+        }
+        return ok;
+    };
+
+    // Never execute the old destructive migration on page load.
+    window.applyRequestedMenuChangesToCloud = async function() { return true; };
+
+    // Logout helper for the admin panel and for future use.
+    window.alassiAdminLogout = async function() {
+        try { await alassiSupabase.auth.signOut(); } catch (_) {}
+        closeAdminPanel();
+        showToast('تم تسجيل الخروج من الإدارة');
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const emailInput = document.getElementById('adminEmailInput');
+        if (emailInput) emailInput.value = localStorage.getItem('alassi_admin_email') || '';
+        // The legacy password field in settings is intentionally not used anymore.
+        const legacy = document.getElementById('adm-currPass');
+        if (legacy) legacy.closest('div')?.remove();
+    });
 })();
 </script>
 
