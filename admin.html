@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>لوحة التحكم الإدارية - العسسي</title>
+
+<!-- Tailwind CSS CDN -->
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- FontAwesome Icons -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Arabic Font (Cairo) -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+​<script>
+
+tailwind.config = {
+
+theme: {
+
+extend: {
+
+colors: {
+
+gold: '#e6c567',
+
+goldHover: '#f3d57d',
+
+brandDark: '#0d0a09',
+
+brandCard: '#181311',
+
+brandRed: '#7f1d1d',
+
+},
+
+fontFamily: {
+
+cairo: ['Cairo', 'sans-serif'],
+
+}
+
+}
+
+}
+
+}
+
+</script>
+
+<style>
+
+body {
+
+font-family: 'Cairo', sans-serif;
+
+background-color: #0d0a09;
+
+color: #f3f4f6;
+
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+
+::-webkit-scrollbar-track { background: #0d0a09; }
+
+::-webkit-scrollbar-thumb { background: #3a322d; border-radius: 4px; }
+
+::-webkit-scrollbar-thumb:hover { background: #e6c567; }
+
+</style>
+
+</head>
+
+<body class="min-h-screen flex flex-col justify-between">
+
+​<!-- Header Bar -->
+
+<header class="bg-brandCard border-b border-gold/30 p-4 shadow-xl">
+
+<div class="max-w-6xl mx-auto flex items-center justify-between">
+
+<div class="flex items-center gap-3">
+
+<div class="w-10 h-10 rounded-xl bg-gold text-brandDark flex items-center justify-center font-black">
+
+<i class="fa-solid fa-user-shield text-lg"></i>
+
+</div>
+
+<div>
+
+<h1 class="text-base font-black text-gold">لوحة تحكم إدارة مطعم العسسي</h1>
+
+<span id="loginStatusTag" class="text-[10px] text-gray-400 font-bold">يرجى تسجيل الدخول للتحكم</span>
+
+</div>
+
+</div>
+
+<div class="flex items-center gap-2">
+
+<a href="index.html" class="bg-black/60 hover:bg-black text-gold text-xs px-3.5 py-2 rounded-xl border border-gold/30 font-bold transition flex items-center gap-1.5">
+
+<i class="fa-solid fa-store"></i>
+
+<span>صفحة المنيو</span>
+
+</a>
+
+<button id="logoutBtn" onclick="handleAdminLogout()" class="hidden bg-red-950 hover:bg-red-900 text-red-300 text-xs px-3.5 py-2 rounded-xl border border-red-500/30 font-bold transition">
+
+<i class="fa-solid fa-right-from-bracket ml-1"></i> خروج
+
+</button>
+
+</div>
+
+</div>
+
+</header>
+
+​<!-- MAIN CONTAINER -->
+
+<main class="max-w-6xl mx-auto p-4 flex-grow w-full">
+
+​<!-- LOGIN FORM SECTION -->
+
+<div id="loginView" class="max-w-md mx-auto my-12 bg-brandCard border-2 border-gold/40 rounded-3xl p-6 text-center shadow-2xl">
+
+<div class="w-16 h-16 rounded-full bg-gold/10 border border-gold/30 text-gold flex items-center justify-center mx-auto mb-4 text-2xl">
+
+<i class="fa-solid fa-lock"></i>
+
+</div>
+
+<h2 class="text-xl font-black text-gold mb-1">دخول اللوحة الإدارية</h2>
+
+<p class="text-xs text-gray-400 mb-6">أدخل بريد وتفاصيل حساب الإدارة للوصول للتحكم الكامل</p>
+
+​<form onsubmit="handleAdminLogin(event)" class="space-y-4">
+
+<input type="email" id="adminEmailInput" placeholder="البريد الإلكتروني للإدارة" required
+
+class="w-full bg-black/70 border border-gold/40 rounded-xl p-3 text-center text-sm text-white focus:outline-none focus:border-gold">
+
+<input type="password" id="adminPasswordInput" placeholder="كلمة المرور" required
+
+class="w-full bg-black/70 border border-gold/40 rounded-xl p-3 text-center text-sm text-gold tracking-widest focus:outline-none focus:border-gold">
+
+<button type="submit" class="w-full bg-gold hover:bg-goldHover text-brandDark font-black py-3 rounded-xl text-sm shadow-lg transition">
+
+تسجيل الدخول
+
+</button>
+
+</form>
+
+</div>
+
+​<!-- DASHBOARD SECTION (Hidden until login) -->
+
+<div id="dashboardView" class="hidden bg-brandCard border border-gold/30 rounded-3xl overflow-hidden shadow-2xl">
+
+<!-- Tabs Bar -->
+
+<div class="flex border-b border-gold/20 bg-black/60 overflow-x-auto no-scrollbar">
+
+<button onclick="switchAdminTab('menu')" id="tab-btn-menu" class="px-5 py-3.5 text-xs font-bold text-gold border-b-2 border-gold whitespace-nowrap">
+
+<i class="fa-solid fa-utensils ml-1"></i> إدارة الوجبات
+
+</button>
+
+<button onclick="switchAdminTab('general')" id="tab-btn-general" class="px-5 py-3.5 text-xs font-bold text-gray-400 hover:text-gold border-b-2 border-transparent whitespace-nowrap">
+
+<i class="fa-solid fa-store ml-1"></i> إعدادات المطعم
+
+</button>
+
+<button onclick="switchAdminTab('announcement')" id="tab-btn-announcement" class="px-5 py-3.5 text-xs font-bold text-gray-400 hover:text-gold border-b-2 border-transparent whitespace-nowrap">
+
+<i class="fa-solid fa-bullhorn ml-1"></i> الإشعارات والعروض
+
+</button>
+
+<button onclick="switchAdminTab('status')" id="tab-btn-status" class="px-5 py-3.5 text-xs font-bold text-gray-400 hover:text-gold border-b-2 border-transparent whitespace-nowrap">
+
+<i class="fa-solid fa-clock ml-1"></i> حالة العمل والدوام
+
+</button>
+
+<button onclick="switchAdminTab('security')" id="tab-btn-security" class="px-5 py-3.5 text-xs font-bold text-gray-400 hover:text-gold border-b-2 border-transparent whitespace-nowrap">
+
+<i class="fa-solid fa-key ml-1"></i> الأمان وكلمة السر
+
+</button>
+
+</div>
+
+​<!-- Tab Contents -->
+
+<div class="p-6">
+
+​<!-- TAB 1: MENU ITEMS -->
+
+<div id="admin-tab-menu" class="space-y-6">
+
+<div class="flex items-center justify-between border-b border-gold/20 pb-3">
+
+<h3 class="text-sm font-black text-gold">قائمة الوجبات والتوفر الحالي</h3>
+
+<button onclick="openMealForm()" class="bg-gold hover:bg-goldHover text-brandDark font-black py-2.5 px-4 rounded-xl text-xs shadow transition flex items-center gap-1.5">
+
+<i class="fa-solid fa-plus"></i>
+
+<span>إضافة وجبة جديدة</span>
+
+</button>
+
+</div>
+
+​<!-- Add/Edit Meal Form -->
+
+<div id="meal-form-box" class="hidden bg-black/70 p-4 rounded-2xl border-2 border-gold/50 space-y-3">
+
+<h4 id="meal-form-title" class="text-xs font-black text-gold uppercase border-b border-gold/20 pb-1">إضافة وجبة جديدة</h4>
+
+<input type="hidden" id="edit-item-id">
+
+​<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">اسم الوجبة:</label>
+
+<input type="text" id="item-input-name" class="w-full bg-black border border-gold/30 rounded-xl p-2.5 text-xs text-white" placeholder="مثال: بيتزا مارغريتا">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">القسم / التصنيف:</label>
+
+<select id="item-input-category" class="w-full bg-black border border-gold/30 rounded-xl p-2.5 text-xs text-gold">
+
+<option value="pizza">قسم البيتزا</option>
+
+<option value="fatayer">قسم الفطائر والمعجنات</option>
+
+</select>
+
+</div>
+
+</div>
+
+​<div>
+
+<label class="text-xs text-gray-300 block mb-1">وصف الوجبة / المكونات:</label>
+
+<input type="text" id="item-input-desc" class="w-full bg-black border border-gold/30 rounded-xl p-2.5 text-xs text-white" placeholder="وصف قصير للوجبة...">
+
+</div>
+
+​<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">صورة الوجبة (اسم الملف أو رابط):</label>
+
+<input type="text" id="item-input-image" class="w-full bg-black border border-gray-700 rounded-xl p-2.5 text-xs text-gray-300 font-mono" placeholder="IMG_2026.jpg">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">السعر (بالليرة جديد):</label>
+
+<input type="number" id="item-input-price" class="w-full bg-black border border-gold/30 rounded-xl p-2.5 text-xs text-gold font-bold" placeholder="مثال: 50">
+
+</div>
+
+</div>
+
+​<div class="flex items-center gap-4 bg-black/40 p-3 rounded-xl border border-gold/20">
+
+<label class="flex items-center gap-2 cursor-pointer">
+
+<input type="checkbox" id="item-input-isAvailable" checked class="w-4 h-4 accent-emerald-500 rounded">
+
+<span class="text-xs font-bold text-emerald-400">الوجبة متوفرة حالياً</span>
+
+</label>
+
+<label class="flex items-center gap-2 cursor-pointer">
+
+<input type="checkbox" id="item-input-isOffer" class="w-4 h-4 accent-amber-500 rounded">
+
+<span class="text-xs font-bold text-amber-400">إضافة لقسم العروض المميزة 🔥</span>
+
+</label>
+
+</div>
+
+​<div class="flex items-center gap-2 pt-2">
+
+<button onclick="saveMenuItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-5 rounded-xl text-xs shadow">
+
+<i class="fa-solid fa-check ml-1"></i> حفظ الوجبة
+
+</button>
+
+<button onclick="hideMealForm()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-2.5 px-4 rounded-xl text-xs">
+
+إلغاء
+
+</button>
+
+</div>
+
+</div>
+
+​<!-- Items List Table -->
+
+<div id="admin-menu-list" class="space-y-2"></div>
+
+</div>
+
+​<!-- TAB 2: GENERAL SETTINGS -->
+
+<div id="admin-tab-general" class="hidden space-y-4">
+
+<h3 class="text-sm font-black text-gold border-b border-gold/20 pb-2">إعدادات وبيانات المطعم</h3>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">اسم المطعم الرئيسي:</label>
+
+<input type="text" id="adm-restaurantName" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-gold font-bold">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">الوصف الفرعي:</label>
+
+<input type="text" id="adm-restaurantSubtitle" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">رقم الهاتف:</label>
+
+<input type="text" id="adm-phone" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white font-mono" dir="ltr">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">رقم الواتساب (بدون +):</label>
+
+<input type="text" id="adm-whatsapp" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white font-mono" dir="ltr">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">اسم مدير الفران:</label>
+
+<input type="text" id="adm-manager1" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">اسم مدير الحام:</label>
+
+<input type="text" id="adm-manager2" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">رمز حساب شام كاش:</label>
+
+<input type="text" id="adm-shamcashCode" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-gold font-mono" dir="ltr">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">ملاحظة التوصيل:</label>
+
+<input type="text" id="adm-deliveryNote" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white">
+
+</div>
+
+</div>
+
+​<button onclick="saveGeneralSettings()" class="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-6 rounded-xl text-xs shadow-lg transition">
+
+<i class="fa-solid fa-floppy-disk ml-1"></i> حفظ كافة الإعدادات
+
+</button>
+
+</div>
+
+​<!-- TAB 3: ANNOUNCEMENTS -->
+
+<div id="admin-tab-announcement" class="hidden space-y-4">
+
+<h3 class="text-sm font-black text-gold border-b border-gold/20 pb-2">إدارة الإشعارات والعروض</h3>
+
+<div class="bg-black/50 p-4 rounded-2xl border border-gold/30 space-y-3">
+
+<label class="flex items-center gap-3 cursor-pointer">
+
+<input type="checkbox" id="adm-announcementActive" class="w-5 h-5 accent-gold rounded">
+
+<span class="text-sm font-black text-gold">تفعيل إشعار العروض للزبائن</span>
+
+</label>
+
+</div>
+
+​<div>
+
+<label class="text-xs text-gray-300 block mb-1">نوع العرض:</label>
+
+<select id="adm-announcementType" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-gold">
+
+<option value="bar">شريط إعلان علوي فقط</option>
+
+<option value="popup">نافذة منبثقة فقط</option>
+
+<option value="both">شريط علوي + نافذة منبثقة معاً</option>
+
+</select>
+
+</div>
+
+​<div>
+
+<label class="text-xs text-gray-300 block mb-1">عنوان الإعلان:</label>
+
+<input type="text" id="adm-announcementTitle" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white">
+
+</div>
+
+​<div>
+
+<label class="text-xs text-gray-300 block mb-1">نص الإعلان:</label>
+
+<textarea id="adm-announcementMessage" rows="3" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white"></textarea>
+
+</div>
+
+​<button onclick="saveAnnouncementSettings()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-6 rounded-xl text-xs shadow-lg transition">
+
+<i class="fa-solid fa-bullhorn ml-1"></i> نشر الإعلان فوراً
+
+</button>
+
+</div>
+
+​<!-- TAB 4: STORE STATUS -->
+
+<div id="admin-tab-status" class="hidden space-y-4">
+
+<h3 class="text-sm font-black text-gold border-b border-gold/20 pb-2">حالة المطعم وساعات الدوام</h3>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-2">وضع حالة العمل الآن:</label>
+
+<select id="adm-statusMode" class="w-full bg-black/60 border border-gold/30 rounded-xl p-3 text-xs text-gold font-bold">
+
+<option value="auto">⏱️ آلي بحسب الساعات التلقائية (7 ص - 10 م)</option>
+
+<option value="force_open">🟢 مفتوح الآن (إجبار إظهار المحل مفتوح)</option>
+
+<option value="force_closed">🔴 مغلق حالياً (إجبار إظهار المحل مغلق)</option>
+
+</select>
+
+</div>
+
+​<div>
+
+<label class="text-xs text-gray-300 block mb-1">ساعات العمل المعلنة:</label>
+
+<input type="text" id="adm-workingHoursText" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white" placeholder="من 7 صباحاً إلى 10 مساءً">
+
+</div>
+
+​<button onclick="saveStatusSettings()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-6 rounded-xl text-xs shadow-lg transition">
+
+<i class="fa-solid fa-floppy-disk ml-1"></i> حفظ حالة ومواعيد العمل
+
+</button>
+
+</div>
+
+​<!-- TAB 5: SECURITY -->
+
+<div id="admin-tab-security" class="hidden space-y-4">
+
+<h3 class="text-sm font-black text-gold border-b border-gold/20 pb-2">تغيير كلمة المرور</h3>
+
+<div class="bg-black/50 p-4 rounded-2xl border border-gold/30 space-y-3">
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">كلمة المرور الجديدة:</label>
+
+<input type="password" id="adm-newPass" minlength="6" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-gold font-bold">
+
+</div>
+
+<div>
+
+<label class="text-xs text-gray-300 block mb-1">تأكيد كلمة المرور الجديدة:</label>
+
+<input type="password" id="adm-confirmPass" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-gold font-bold">
+
+</div>
+
+</div>
+
+​<button onclick="changeAdminPassword()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-6 rounded-xl text-xs shadow-lg transition">
+
+<i class="fa-solid fa-key ml-1"></i> تحديث كلمة المرور
+
+</button>
+
+</div>
+
+​</div>
+
+</div>
+
+​</main>
+
+​<!-- Footer -->
+
+<footer class="text-center py-4 border-t border-gold/20 text-xs text-gray-500 bg-brandCard/60">
+
+لوحة التحكم الإدارية - مطعم ومعجنات العسسي
+
+</footer>
+
+​<!-- Supabase JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL = 'https://zkijtzwoccmxepxfkbiu.supabase.co';
+
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpraWp0endvY2NteGVweGZrYml1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1OTg4MzIsImV4cCI6MjEwNTE3NDgzMn0.7IgDCNqBQccKD-pSL8SSG3ibMSsqgvDXzh3DGzWarYM';
+
+const { createClient } = supabase;
+
+const alassiSupabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+​let menuItemsData = [];
+
+let settingsData = {};
+
+​document.addEventListener('DOMContentLoaded', async () => {
+
+const { data: { user } } = await alassiSupabase.auth.getUser();
+
+if (user) {
+
+showDashboard();
+
+}
+
+});
+
+​async function handleAdminLogin(e) {
+
+e.preventDefault();
+
+const email = document.getElementById('adminEmailInput').value;
+
+const password = document.getElementById('adminPasswordInput').value;
+
+​const { data, error } = await alassiSupabase.auth.signInWithPassword({ email, password });
+
+​if (error) {
+
+alert('خطأ في تسجيل الدخول: ' + error.message);
+
+} else {
+
+showDashboard();
+
+}
+
+}
+
+​async function handleAdminLogout() {
+
+await alassiSupabase.auth.signOut();
+
+document.getElementById('dashboardView').classList.add('hidden');
+
+document.getElementById('loginView').classList.remove('hidden');
+
+document.getElementById('logoutBtn').classList.add('hidden');
+
+document.getElementById('loginStatusTag').innerText = "يرجى تسجيل الدخول للتحكم";
+
+}
+
+​async function showDashboard() {
+
+document.getElementById('loginView').classList.add('hidden');
+
+document.getElementById('dashboardView').classList.remove('hidden');
+
+document.getElementById('logoutBtn').classList.remove('hidden');
+
+document.getElementById('loginStatusTag').innerText = "تم تسجيل الدخول بنجاح 🟢";
+
+​await loadAdminData();
+
+}
+
+​async function loadAdminData() {
+
+// Load Menu Items
+
+const { data: items } = await alassiSupabase.from('menu_items').select('*');
+
+if (items) menuItemsData = items;
+
+renderAdminMenuList();
+
+​// Load Settings
+
+const { data: sets } = await alassiSupabase.from('settings').select('*').limit(1);
+
+if (sets && sets.length > 0) {
+
+settingsData = sets[0];
+
+populateSettingsForm();
+
+}
+
+}
+
+​function renderAdminMenuList() {
+
+const container = document.getElementById('admin-menu-list');
+
+container.innerHTML = '';
+
+​menuItemsData.forEach(item => {
+
+const row = document.createElement('div');
+
+row.className = "bg-black/50 border border-gold/20 p-3 rounded-xl flex items-center justify-between gap-3 text-xs";
+
+row.innerHTML = <div class="flex items-center gap-3"> <span class="w-8 h-8 rounded-lg bg-gold/10 text-gold flex items-center justify-center font-bold"> <i class="fa-solid ${item.category === 'pizza' ? 'fa-pizza-slice' : 'fa-bread-slice'}"></i> </span> <div> <p class="font-bold text-white">${item.name || item.item_name}</p> <p class="text-[10px] text-gray-400">${item.price || 0} ل.س - ${item.is_available ? '🟢 متوفر' : '🔴 غير متوفر'}</p> </div> </div> <div class="flex items-center gap-2"> <button onclick="editMenuItem('${item.id}')" class="bg-gold text-brandDark font-bold px-3 py-1.5 rounded-lg"> <i class="fa-solid fa-pen"></i> تعديل </button> <button onclick="deleteMenuItem('${item.id}')" class="bg-red-900/60 text-red-300 font-bold px-3 py-1.5 rounded-lg border border-red-500/30"> <i class="fa-solid fa-trash"></i> </button> </div>;
+
+container.appendChild(row);
+
+});
+
+}
+
+​function openMealForm() {
+
+document.getElementById('edit-item-id').value = '';
+
+document.getElementById('item-input-name').value = '';
+
+document.getElementById('item-input-desc').value = '';
+
+document.getElementById('item-input-price').value = '';
+
+document.getElementById('item-input-image').value = '';
+
+document.getElementById('item-input-isAvailable').checked = true;
+
+document.getElementById('item-input-isOffer').checked = false;
+
+document.getElementById('meal-form-title').innerText = "إضافة وجبة جديدة";
+
+document.getElementById('meal-form-box').classList.remove('hidden');
+
+}
+
+​function hideMealForm() {
+
+document.getElementById('meal-form-box').classList.add('hidden');
+
+}
+
+​function editMenuItem(id) {
+
+const item = menuItemsData.find(i => String(i.id) === String(id));
+
+if (!item) return;
+
+​document.getElementById('edit-item-id').value = item.id;
+
+document.getElementById('item-input-name').value = item.name || item.item_name || '';
+
+document.getElementById('item-input-category').value = item.category || 'pizza';
+
+document.getElementById('item-input-desc').value = item.desc || item.description || '';
+
+document.getElementById('item-input-price').value = item.price || 0;
+
+document.getElementById('item-input-image').value = item.image || item.image_url || '';
+
+document.getElementById('item-input-isAvailable').checked = item.is_available !== false;
+
+document.getElementById('item-input-isOffer').checked = item.is_offer === true;
+
+​document.getElementById('meal-form-title').innerText = "تعديل الوجبة";
+
+document.getElementById('meal-form-box').classList.remove('hidden');
+
+}
+
+​async function saveMenuItem() {
+
+const editId = document.getElementById('edit-item-id').value;
+
+const payload = {
+
+name: document.getElementById('item-input-name').value,
+
+category: document.getElementById('item-input-category').value,
+
+desc: document.getElementById('item-input-desc').value,
+
+price: Number(document.getElementById('item-input-price').value) || 0,
+
+image: document.getElementById('item-input-image').value,
+
+is_available: document.getElementById('item-input-isAvailable').checked,
+
+is_offer: document.getElementById('item-input-isOffer').checked
+
+};
+
+​if (editId) {
+
+await alassiSupabase.from('menu_items').update(payload).eq('id', editId);
+
+} else {
+
+await alassiSupabase.from('menu_items').insert([payload]);
+
+}
+
+​hideMealForm();
+
+await loadAdminData();
+
+alert('تم حفظ البيانات بنجاح!');
+
+}
+
+​async function deleteMenuItem(id) {
+
+if (confirm('هل أنت تأكد من حذف هذه الوجبة؟')) {
+
+await alassiSupabase.from('menu_items').delete().eq('id', id);
+
+await loadAdminData();
+
+}
+
+}
+
+​function populateSettingsForm() {
+
+document.getElementById('adm-restaurantName').value = settingsData.restaurantName || "العسسي";
+
+document.getElementById('adm-restaurantSubtitle').value = settingsData.restaurantSubtitle || "";
+
+document.getElementById('adm-phone').value = settingsData.phone || "";
+
+document.getElementById('adm-whatsapp').value = settingsData.whatsapp || "";
+
+document.getElementById('adm-manager1').value = settingsData.manager1 || "";
+
+document.getElementById('adm-manager2').value = settingsData.manager2 || "";
+
+document.getElementById('adm-shamcashCode').value = settingsData.shamcashCode || "";
+
+document.getElementById('adm-deliveryNote').value = settingsData.deliveryNote || "";
+
+document.getElementById('adm-announcementActive').checked = settingsData.announcementActive === true;
+
+document.getElementById('adm-announcementType').value = settingsData.announcementType || "both";
+
+document.getElementById('adm-announcementTitle').value = settingsData.announcementTitle || "";
+
+document.getElementById('adm-announcementMessage').value = settingsData.announcementMessage || "";
+
+document.getElementById('adm-statusMode').value = settingsData.statusMode || "auto";
+
+document.getElementById('adm-workingHoursText').value = settingsData.workingHoursText || "";
+
+}
+
+​async function saveGeneralSettings() {
+
+const payload = {
+
+restaurantName: document.getElementById('adm-restaurantName').value,
+
+restaurantSubtitle: document.getElementById('adm-restaurantSubtitle').value,
+
+phone: document.getElementById('adm-phone').value,
+
+whatsapp: document.getElementById('adm-whatsapp').value,
+
+manager1: document.getElementById('adm-manager1').value,
+
+manager2: document.getElementById('adm-manager2').value,
+
+shamcashCode: document.getElementById('adm-shamcashCode').value,
+
+deliveryNote: document.getElementById('adm-deliveryNote').value
+
+};
+
+​if (settingsData.id) {
+
+await alassiSupabase.from('settings').update(payload).eq('id', settingsData.id);
+
+} else {
+
+await alassiSupabase.from('settings').insert([payload]);
+
+}
+
+alert('تم حفظ إعدادات المطعم بنجاح!');
+
+}
+
+​async function saveAnnouncementSettings() {
+
+const payload = {
+
+announcementActive: document.getElementById('adm-announcementActive').checked,
+
+announcementType: document.getElementById('adm-announcementType').value,
+
+announcementTitle: document.getElementById('adm-announcementTitle').value,
+
+announcementMessage: document.getElementById('adm-announcementMessage').value
+
+};
+
+​if (settingsData.id) {
+
+await alassiSupabase.from('settings').update(payload).eq('id', settingsData.id);
+
+} else {
+
+await alassiSupabase.from('settings').insert([payload]);
+
+}
+
+alert('تم نشر وتفعيل الإعلانات بنجاح!');
+
+}
+
+​async function saveStatusSettings() {
+
+const payload = {
+
+statusMode: document.getElementById('adm-statusMode').value,
+
+workingHoursText: document.getElementById('adm-workingHoursText').value
+
+};
+
+​if (settingsData.id) {
+
+await alassiSupabase.from('settings').update(payload).eq('id', settingsData.id);
+
+} else {
+
+await alassiSupabase.from('settings').insert([payload]);
+
+}
+
+alert('تم تحديث حالة الدوام والمحل بنجاح!');
+
+}
+
+​async function changeAdminPassword() {
+
+const newPass = document.getElementById('adm-newPass').value;
+
+const confirmPass = document.getElementById('adm-confirmPass').value;
+
+​if (newPass.length < 6) {
+
+alert('كلمة المرور يجب أن لا تقل عن 6 أحرف');
+
+return;
+
+}
+
+if (newPass !== confirmPass) {
+
+alert('كلمتا المرور غير متطابقتين!');
+
+return;
+
+}
+
+​const { error } = await alassiSupabase.auth.updateUser({ password: newPass });
+
+if (error) {
+
+alert('خطأ أثناء التحديث: ' + error.message);
+
+} else {
+
+alert('تم تغيير كلمة المرور بنجاح!');
+
+}
+
+}
+
+​function switchAdminTab(tabName) {
+
+['menu', 'general', 'announcement', 'status', 'security'].forEach(t => {
+
+document.getElementById(admin-tab-${t}).classList.add('hidden');
+
+document.getElementById(tab-btn-${t}).className = "px-5 py-3.5 text-xs font-bold text-gray-400 hover:text-gold border-b-2 border-transparent whitespace-nowrap";
+
+});
+
+​document.getElementById(admin-tab-${tabName}).classList.remove('hidden');
+
+document.getElementById(tab-btn-${tabName}).className = "px-5 py-3.5 text-xs font-bold text-gold border-b-2 border-gold whitespace-nowrap";
+
+}
+
+</script>
+
+</body>
+
+</html>
+
