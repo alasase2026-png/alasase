@@ -1012,7 +1012,12 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
                 <!-- TAB 5: Password Change -->
                 <div id="admin-tab-security" class="admin-tab-content hidden space-y-4">
                     <h3 class="text-sm font-black text-gold border-b border-gold/20 pb-2">تغيير كلمة مرور حساب الإدارة</h3>
-                    
+                    <div class="bg-black/50 p-4 rounded-2xl border border-gold/30 space-y-3">
+                        <div>
+                            <label class="text-xs text-gray-300 font-bold block mb-1">كلمة المرور الحالية:</label>
+                            <input type="password" id="adm-currentPass" autocomplete="current-password" class="w-full bg-black/60 border border-gold/30 rounded-xl p-2.5 text-xs text-white font-bold" placeholder="أدخل كلمة المرور الحالية للتأكيد">
+                        </div>
+                    </div>
                     <div class="bg-black/50 p-4 rounded-2xl border border-gold/30 space-y-3">
                         <div>
                             <label class="text-xs text-gray-300 font-bold block mb-1">كلمة المرور الجديدة:</label>
@@ -2390,8 +2395,10 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
 
             try {
                 await saveSettingsToCloud();
+                await loadCloudDataSecure(false);
                 saveLocalData();
                 applySettingsToUI();
+                populateAdminInputs();
                 showToast('تم حفظ الإعدادات ونشرها للزبائن مباشرة ✓');
             } catch (e) {
                 console.error(e);
@@ -2421,22 +2428,25 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         }
 
         async function saveStatusSettings() {
-            dynamicSettings.statusMode = document.getElementById('adm-statusMode').value;
-            dynamicSettings.workingHoursText = document.getElementById('adm-workingHoursText').value.trim();
+            const nextStatusMode = document.getElementById('adm-statusMode').value;
+            const nextHours = document.getElementById('adm-workingHoursText').value.trim();
+            const previous = { ...dynamicSettings };
+            dynamicSettings = { ...dynamicSettings, statusMode: nextStatusMode, workingHoursText: nextHours };
             try {
                 await saveSettingsToCloud();
-                saveLocalData();
+                // saveSettingsToCloudSecure verifies the exact row returned by Supabase.
+                await loadCloudDataSecure(false);
                 applySettingsToUI();
-                showToast('تم تحديث الدوام ونشره مباشرة ✓');
+                populateAdminInputs();
+                showToast('تم حفظ حالة ومواعيد العمل على السحابة ✓');
             } catch (e) {
+                dynamicSettings = previous;
+                applySettingsToUI();
                 console.error(e);
-                showToast('تعذر حفظ الدوام على السحابة', 'error');
+                showToast('تعذر حفظ الدوام على السحابة: ' + (e.message || 'خطأ غير معروف'), 'error');
             }
         }
-
-        async function changeAdminPassword() {
-            showToast('تغيير كلمة المرور يتم من خلال حساب Supabase.','error');
-        }
+        async function changeAdminPassword() { return window.changeAdminPassword(); }
 
         // MENU ITEMS ADMIN ACTIONS
         function renderAdminMenuList() {
@@ -2872,6 +2882,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
         requireSupabase();
         const { data: sessionData } = await alassiSupabase.auth.getSession();
         if (!sessionData?.session) throw new Error('يجب تسجيل الدخول للإدارة أولاً');
+
         let row = cloudSettingsRow;
         if (!row) {
             const { data, error } = await alassiSupabase.from('restaurant_settings').select('*').limit(1);
@@ -2879,23 +2890,25 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
             row = data?.[0] || null;
             cloudSettingsRow = row;
         }
-        if (!row) throw new Error('جدول restaurant_settings لا يحتوي على صف إعدادات. أضف صفاً واحداً من Supabase ثم أعد المحاولة.');
-        const payload = settingsPayloadSecure(dynamicSettings, row);
-        if (!Object.keys(payload).length) throw new Error('تعذر مطابقة أعمدة restaurant_settings');
-        const query = Object.prototype.hasOwnProperty.call(row,'id')
-            ? alassiSupabase.from('restaurant_settings').update(payload).eq('id', row.id)
-            : alassiSupabase.from('restaurant_settings').update(payload);
-        const { error } = await query;
-        if (error) throw new Error('Supabase رفض حفظ الإعدادات: ' + error.message);
+        if (!row) throw new Error('جدول restaurant_settings لا يحتوي على صف إعدادات.');
 
-        // تحقق من الحفظ السحابي قبل تحديث localStorage.
-        const verifyQuery = Object.prototype.hasOwnProperty.call(row,'id')
-            ? alassiSupabase.from('restaurant_settings').select('*').eq('id', row.id).maybeSingle()
-            : alassiSupabase.from('restaurant_settings').select('*').limit(1).maybeSingle();
-        const { data: verified, error: verifyError } = await verifyQuery;
-        if (verifyError) throw new Error('تعذر التحقق من إعدادات Supabase: ' + verifyError.message);
-        if (!verified) throw new Error('لم يتم العثور على صف الإعدادات بعد الحفظ؛ راجع RLS.');
-        cloudSettingsRow = verified;
+        const payload = settingsPayloadSecure(dynamicSettings, row);
+        if (!Object.keys(payload).length) throw new Error('تعذر مطابقة أعمدة restaurant_settings. تحقق من أسماء الأعمدة أو وجود عمود settings/data/value.');
+
+        const query = Object.prototype.hasOwnProperty.call(row, 'id')
+            ? alassiSupabase.from('restaurant_settings').update(payload).eq('id', row.id).select('*').maybeSingle()
+            : alassiSupabase.from('restaurant_settings').update(payload).select('*').maybeSingle();
+        const { data: updated, error } = await query;
+        if (error) throw new Error('Supabase رفض حفظ الإعدادات: ' + error.message);
+        if (!updated) throw new Error('Supabase لم يُرجع صفاً محدثاً. غالباً توجد مشكلة RLS أو أن صف الإعدادات غير قابل للتحديث.');
+
+        cloudSettingsRow = updated;
+        const verified = settingsFromRowSecure(updated) || {};
+        const keysToVerify = ['manager1','manager2','statusMode','workingHoursText','restaurantName','phone','whatsapp','announcementActive','announcementTitle','announcementMessage'];
+        const mismatches = keysToVerify.filter(k => Object.prototype.hasOwnProperty.call(dynamicSettings, k) && Object.prototype.hasOwnProperty.call(verified, k) && String(verified[k] ?? '') !== String(dynamicSettings[k] ?? ''));
+        if (mismatches.length) throw new Error('تم رفض بعض إعدادات المطعم أو لم تُثبت: ' + mismatches.join(', '));
+        dynamicSettings = { ...defaultSettings, ...dynamicSettings, ...verified };
+        return updated;
     }
 
     async function uploadImageToStorage(file, folder = 'menu') {
@@ -2953,19 +2966,33 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}
     };
 
     window.changeAdminPassword = async function() {
+        requireSupabase();
+        const current = document.getElementById('adm-currentPass')?.value || '';
         const newP = document.getElementById('adm-newPass')?.value || '';
         const conf = document.getElementById('adm-confirmPass')?.value || '';
-        if (newP.length < 8) return showToast('كلمة المرور يجب أن تكون 8 أحرف على الأقل', 'error');
-        if (newP !== conf) return showToast('كلمتا المرور غير متطابقتين', 'error');
+        if (!current) return showToast('أدخل كلمة المرور الحالية أولاً', 'error');
+        if (newP.length < 8) return showToast('كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل', 'error');
+        if (newP !== conf) return showToast('كلمتا المرور الجديدة غير متطابقتين', 'error');
         try {
-            const { data } = await alassiSupabase.auth.getSession();
-            if (!data?.session) throw new Error('انتهت جلسة الإدارة؛ سجّل الدخول من جديد');
-            const { error } = await alassiSupabase.auth.updateUser({ password:newP });
-            if (error) throw error;
+            const { data: sessionData } = await alassiSupabase.auth.getSession();
+            const email = sessionData?.session?.user?.email;
+            if (!email) throw new Error('لا توجد جلسة إدارة صالحة؛ سجّل الدخول من جديد');
+
+            // إعادة التحقق من كلمة المرور الحالية قبل تغييرها.
+            const { error: reauthError } = await alassiSupabase.auth.signInWithPassword({ email, password: current });
+            if (reauthError) throw new Error('كلمة المرور الحالية غير صحيحة');
+
+            const { error } = await alassiSupabase.auth.updateUser({ password: newP });
+            if (error) throw new Error('تعذر تغيير كلمة المرور: ' + error.message);
+
+            document.getElementById('adm-currentPass').value = '';
             document.getElementById('adm-newPass').value = '';
             document.getElementById('adm-confirmPass').value = '';
-            showToast('تم تحديث كلمة مرور حساب الإدارة ✓');
-        } catch (e) { console.error(e); showToast(e.message || 'تعذر تغيير كلمة المرور', 'error'); }
+            showToast('تم تغيير كلمة مرور الإدارة بنجاح ✓');
+        } catch (e) {
+            console.error(e);
+            showToast(e.message || 'تعذر تغيير كلمة المرور', 'error');
+        }
     };
 
     window.saveMenuItemToCloud = saveMenuItemToCloudSecure;
